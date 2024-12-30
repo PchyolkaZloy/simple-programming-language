@@ -1,19 +1,19 @@
-#include "SimpleLanguageLexer.h"
-#include "SimpleLanguageParser.h"
+#include "SmplangLexer.h"
+#include "SmplangParser.h"
 #include <antlr4-runtime.h>
 #include <iostream>
 
 // Для тестов
 int main() {
-    std::string input = "print \"Hello, World!\";";
+    std::string input = "print(10);";
 
     antlr4::ANTLRInputStream inputStream(input);
-    SimpleLanguageLexer lexer(&inputStream);
+    SmplangLexer lexer(&inputStream);
 
     antlr4::CommonTokenStream tokens(&lexer);
-    SimpleLanguageParser parser(&tokens);
+    SmplangParser parser(&tokens);
 
-    SimpleLanguageParser::ProgramContext *tree = parser.program();
+    SmplangParser::ProgramContext *tree = parser.program();
 
     std::cout << tree->toStringTree(&parser) << std::endl;
 

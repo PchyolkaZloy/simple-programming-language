@@ -1,5 +1,5 @@
 
-// Generated from grammar/SimpleLanguage.g4 by ANTLR 4.13.2
+// Generated from grammar/Smplang.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -9,15 +9,20 @@
 
 
 
-class  SimpleLanguageLexer : public antlr4::Lexer {
+class  SmplangLexer : public antlr4::Lexer {
 public:
   enum {
-    T__0 = 1, T__1 = 2, STRING = 3, WS = 4
+    T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, FUNC = 5, VOID = 6, RETURN = 7, 
+    PRINT = 8, FOR = 9, WHILE = 10, IF = 11, ELSE = 12, STRUCT = 13, BOOL = 14, 
+    INT = 15, DOUBLE = 16, CHAR = 17, ID = 18, BINOP = 19, UNAROP = 20, 
+    COMPOP = 21, LOGICOP = 22, ASSIGN = 23, LPAREN = 24, RPAREN = 25, LBRACE = 26, 
+    RBRACE = 27, LBRACK = 28, RBRACK = 29, SEMI = 30, COMMA = 31, DOT = 32, 
+    WS = 33, COMMENT = 34
   };
 
-  explicit SimpleLanguageLexer(antlr4::CharStream *input);
+  explicit SmplangLexer(antlr4::CharStream *input);
 
-  ~SimpleLanguageLexer() override;
+  ~SmplangLexer() override;
 
 
   std::string getGrammarFileName() const override;

@@ -8,17 +8,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(antlr4-runtime REQUIRED)
 
 set(SOURCES
-        src/SimpleLanguageLexer.cpp
-        src/SimpleLanguageParser.cpp
-        src/SimpleLanguageBaseVisitor.cpp
-        src/SimpleLanguageVisitor.cpp
+        src/SmplangLexer.cpp
+        src/SmplangParser.cpp
+        src/SmplangBaseVisitor.cpp
+        src/SmplangVisitor.cpp
 )
 
 set(HEADERS
-        include/SimpleLanguageLexer.h
-        include/SimpleLanguageParser.h
-        include/SimpleLanguageBaseVisitor.h
-        include/SimpleLanguageVisitor.h
+        include/SmplangLexer.h
+        include/SmplangParser.h
+        include/SmplangBaseVisitor.h
+        include/SmplangVisitor.h
 )
 
 # Создаем статическую библиотеку
@@ -32,5 +32,5 @@ target_include_directories(Parser PUBLIC include)
 target_include_directories(Parser PUBLIC /usr/include/antlr4-runtime)  # Добавляем путь к ANTLR4
 
 # main.cpp для тестирования
-add_executable(SimpleLanguageParserTest main.cpp)
-target_link_libraries(SimpleLanguageParserTest Parser)
+add_executable(SmplangParserTest main.cpp)
+target_link_libraries(SmplangParserTest Parser)
