@@ -12,6 +12,8 @@ set(SOURCES
         src/SmplangParser.cpp
         src/SmplangBaseVisitor.cpp
         src/SmplangVisitor.cpp
+        src/SmplangBaseListener.cpp
+        src/SmplangListener.cpp
 )
 
 set(HEADERS
@@ -19,6 +21,8 @@ set(HEADERS
         include/SmplangParser.h
         include/SmplangBaseVisitor.h
         include/SmplangVisitor.h
+        include/SmplangBaseListener.h
+        include/SmplangListener.h
 )
 
 # Создаем статическую библиотеку
