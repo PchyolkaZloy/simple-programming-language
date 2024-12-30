@@ -29,11 +29,11 @@ void example_2() {
         gc.showObjects();
     }
     gc.collect();
-    std::cout << a.object().get<LeafObject<int>>("one").object().value() << " "
-        << a.object().get<LeafObject<bool>>("two").object().value() << " ";
-    std::cout << a.object().get<Array<LeafObject<char>>>("name").object().get(0).value()
-        << a.object().get<Array<LeafObject<char>>>("name").object().get(1).value()
-        << a.object().get<Array<LeafObject<char>>>("name").object().get(2).value() << std::endl;
+    std::cout << a.object().get<LeafObject<int>>("one").object().get() << " "
+        << a.object().get<LeafObject<bool>>("two").object().get() << " ";
+    std::cout << a.object().get<Array<LeafObject<char>>>("name").object().get(0).get()
+        << a.object().get<Array<LeafObject<char>>>("name").object().get(1).get()
+        << a.object().get<Array<LeafObject<char>>>("name").object().get(2).get() << std::endl;
 
     gc.showObjects();
 }
@@ -44,12 +44,22 @@ void example_3() {
     GarbageCollector gc;
 
     auto a = gc.createArray<LeafObject<int>>(5);
-    for (int i = 0; i < 5; i++)
-        a.object().set(i, gc.createLeafObject(i + 1));
+    {
+        auto i = gc.createLeafObject(0);
+        while (i.object().get() < a.object().size()) {
+            a.object().set(i.object().get(), gc.createLeafObject(i.object().get() + 1));
+            i.object().set(i.object().get() + 1);
+        }
+    }
     gc.showObjects();
 
-    for (int i = 0; i < 5; i++)
-        std::cout << a.object().get(i).value() << ", ";
+    {
+        auto i = gc.createLeafObject(0);
+        while (i.object().get() < a.object().size()) {
+            std::cout << a.object().get(i.object().get()).get() << ", ";
+            i.object().set(i.object().get() + 1);
+        }
+    }
     std::cout << std::endl;
     // 1, 2, 3, 4, 5
 
@@ -68,12 +78,22 @@ void example_4() {
     std::string hello = "Hello, world!";
 
     auto a = gc.createArray<LeafObject<char>>(hello.length());
-    for (int i = 0; i < hello.length(); i++)
-        a.object().set(i, gc.createLeafObject(hello[i]));
+    {
+        auto i = gc.createLeafObject(0);
+        while (i.object().get() < hello.length()) {
+            a.object().set(i.object().get(), gc.createLeafObject(hello[i.object().get()]));
+            i.object().set(i.object().get() + 1);
+        }
+    }
     gc.showObjects();
 
-    for (int i = 0; i < a.object().size(); i++)
-        std::cout << a.object().get(i).value();
+    {
+        auto i = gc.createLeafObject(0);
+        while (i.object().get() < a.object().size()) {
+            std::cout << a.object().get(i.object().get()).get();
+            i.object().set(i.object().get() + 1);
+        }
+    }
     std::cout << std::endl;
     // Hello, world!
 }
@@ -92,17 +112,40 @@ void example_5() {
     // don't change anything, memory leak
 }
 
+void example_6() {
+    GarbageCollector gc;
+
+    auto arr = gc.createArray<LeafObject<int>>(2);
+    {
+        auto one = gc.createLeafObject(1);
+        auto two = gc.createLeafObject(2);
+        gc.showObjects();
+        arr.object().set(0, one);
+        arr.object().set(1, two);
+        gc.showObjects();
+    }
+    gc.showObjects();
+    {
+        arr.object().set(0, gc.createLeafObject(3));
+    }
+    gc.showObjects();
+    gc.collect();
+    gc.showObjects();
+}
+
 int main() {
-    std::cout << "Example 1:";
+    std::cout << "Example 1:\n";
     example_1();
-    std::cout << "Example 2:";
+    std::cout << "Example 2:\n";
     example_2();
-    std::cout << "Example 3:";
+    std::cout << "Example 3:\n";
     example_3();
-    std::cout << "Example 4:";
+    std::cout << "Example 4:\n";
     example_4();
-    std::cout << "Example 5:";
+    std::cout << "Example 5:\n";
     example_5();
+    std::cout << "Example 6:\n";
+    example_6();
 
     return 0;
 }

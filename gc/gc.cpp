@@ -1,6 +1,5 @@
 #include <iostream>
 #include <list>
-#include <utility>
 #include <vector>
 #include <unordered_map>
 
@@ -55,7 +54,7 @@ public:
     }
 
     template<typename U>
-    Ref(const Ref<U>& other) : _object(dynamic_cast<T*>(other.get())) {
+    Ref(const Ref<U>& other) : _object(reinterpret_cast<T*>(&other.object())) {
         if (_object)
             _object->increment();
     }
@@ -76,10 +75,6 @@ public:
     T& object() const {
         return *_object;
     }
-
-    T* get() const {
-        return _object;
-    }
 private:
     T* _object;
 };
@@ -89,10 +84,18 @@ class LeafObject : public BaseObject {
 public:
     LeafObject(const T& value = NULL) : _value(value) { }
 
-    LeafObject(LeafObject<T>& obj) : _value(obj.value()) { }
+    LeafObject(LeafObject<T>& obj) : _value(obj.get()) { }
 
-    T value() {
+    ~LeafObject() {
+        decrement();
+    }
+
+    T get() {
         return _value;
+    }
+
+    void set(T value) {
+        _value = value;
     }
 private:
     T _value;
@@ -103,11 +106,13 @@ class Array : public BaseObject {
 public:
     Array(size_t size)
         : _size(size)
-        , _fields(size) {}
+        , _fields(size)
+        , _is_present(size, false) {}
 
     ~Array() {
         for (size_t i = 0; i < _size; i++)
-            _fields[i].object().decrement();
+            if (_is_present[i])
+                _fields[i].object().decrement();
     }
 
     T get(size_t index) {
@@ -115,10 +120,11 @@ public:
     }
 
     void set(size_t index, Ref<T> ref) {
-        if (_fields[index].get() != nullptr)
+        if (_is_present[index])
             _fields[index].object().decrement();
 
         _fields[index] = ref;
+        _is_present[index] = true;
     }
 
     size_t size() {
@@ -136,13 +142,14 @@ public:
 private:
     size_t _size;
     std::vector<Ref<T>> _fields;
+    std::vector<bool> _is_present;
 };
 
 class Struct : public BaseObject {
 public:
     Struct(const std::vector<std::string>& names) {
         for (const std::string& name : names) {
-            _data[name] = nullptr;
+            _data[name] = Ref<LeafObject<int>>();
             _is_present[name] = false;
         }
     }
@@ -154,15 +161,16 @@ public:
     }
 
     void set(const std::string& name, const Ref<BaseObject>& value) {
-        if (_data[name].get() != nullptr)
+        if (_is_present[name])
             _data[name].object().decrement();
 
         _data[name] = value;
+        _is_present[name] = true;
     }
 
     template<typename T>
     Ref<T> get(const std::string& name) {
-        return Ref<T>(reinterpret_cast<T*>(_data[name].get()));
+        return *reinterpret_cast<Ref<T>*>(&_data[name]);
     }
 private:
     std::unordered_map<std::string, bool> _is_present;
@@ -172,6 +180,11 @@ private:
 class GarbageCollector {
 public:
     GarbageCollector() : _objects() {}
+
+    ~GarbageCollector() {
+        for (BaseObject* obj : _objects)
+            delete obj;
+    }
 
     template<typename T>
     Ref<LeafObject<T>> createLeafObject(const T& value) {
