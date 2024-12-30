@@ -1,4 +1,11 @@
+### build
+Скачивайте архив https://www.antlr.org/download/antlr4-cpp-runtime-4.13.2-source.zip
+Распакуйте его в `parser/antlr4-runtime`
+
+
+
 ### Подключение в вашем модуле
+
 
 ```cmake
 # Подключаем парсер

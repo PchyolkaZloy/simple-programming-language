@@ -4,32 +4,21 @@ project(Parser)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(antlr4-runtime REQUIRED)
 
-set(SOURCES
-        src/SmplangLexer.cpp
-        src/SmplangParser.cpp
-        src/SmplangBaseVisitor.cpp
-        src/SmplangVisitor.cpp
-        src/SmplangBaseListener.cpp
-        src/SmplangListener.cpp
-)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
-set(HEADERS
-        include/SmplangLexer.h
-        include/SmplangParser.h
-        include/SmplangBaseVisitor.h
-        include/SmplangVisitor.h
-        include/SmplangBaseListener.h
-        include/SmplangListener.h
-)
+# Автоматически добавляем все .cpp файлы из папки src/
+file(GLOB PARSER_SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
-# Создаем статическую библиотеку
-add_library(Parser STATIC ${SOURCES} ${HEADERS})
+# Создаем библиотеку
+add_library(Parser ${PARSER_SOURCES})
 
-target_link_libraries(Parser ${CMAKE_SOURCE_DIR}/libs/libantlr4-runtime.a)  # Указываем, где искать заголовочные файлы
+# Подключаем antlr4-runtime через Conan
+target_link_libraries(Parser antlr4_static)
 
+# Указываем, где искать заголовочные файлы
 target_include_directories(Parser PUBLIC include)
-target_include_directories(Parser PUBLIC ${CMAKE_SOURCE_DIR}/include/antlr4-runtime)
 
 # main.cpp для тестирования
 add_executable(ParserTest main.cpp)

@@ -4,18 +4,16 @@ project(OtherProject)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Подключаем parser библиотеку
-add_library(Parser STATIC IMPORTED)
-set_target_properties(Parser PROPERTIES
-        IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../parser/libs/libParser.a
-)
-
-add_executable(OtherProject main.cpp)
-
-target_link_libraries(OtherProject Parser)
-target_link_libraries(OtherProject Parser ${CMAKE_SOURCE_DIR}/../parser/libs/libantlr4-runtime.a)
+find_package(antlr4-runtime REQUIRED)
 
 # Указываем, где искать заголовочные файлы
 include_directories(${CMAKE_SOURCE_DIR}/../parser/include)
-include_directories(${CMAKE_SOURCE_DIR}/../parser/include/antlr4-runtime)
 
+# Автоматически добавляем все .cpp файлы из папки src/ парсера
+file(GLOB PARSER_SOURCES ${CMAKE_SOURCE_DIR}/../parser/src/*.cpp)
+
+# Создаем исполняемый файл
+add_executable(OtherProject main.cpp ${PARSER_SOURCES})
+
+# Подключаем antlr4-runtime
+target_link_libraries(OtherProject antlr4_static)
