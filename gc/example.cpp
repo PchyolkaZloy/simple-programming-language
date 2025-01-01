@@ -3,7 +3,7 @@
 
 void example_1() {
     // Base example
-    GarbageCollector gc;
+    gc::GarbageCollector gc;
 
     auto a = gc.createLeafObject<int>(1);
     auto b = a;
@@ -13,14 +13,13 @@ void example_1() {
 
 void example_2() {
     // Struct example
-
-    GarbageCollector gc;
+    gc::GarbageCollector gc;
 
     auto a = gc.createStruct({"one", "two", "name"});
     a.object().set("one", gc.createLeafObject(1));
     a.object().set("two", gc.createLeafObject(true));
     {
-        auto arr = gc.createArray<LeafObject<char>>(3);
+        auto arr = gc.createArray<gc::LeafObject<char>>(3);
         arr.object().set(0, gc.createLeafObject('d'));
         arr.object().set(1, gc.createLeafObject('b'));
         arr.object().set(2, gc.createLeafObject('c'));
@@ -29,21 +28,20 @@ void example_2() {
         gc.showObjects();
     }
     gc.collect();
-    std::cout << a.object().get<LeafObject<int>>("one").object().get() << " "
-        << a.object().get<LeafObject<bool>>("two").object().get() << " ";
-    std::cout << a.object().get<Array<LeafObject<char>>>("name").object().get(0).get()
-        << a.object().get<Array<LeafObject<char>>>("name").object().get(1).get()
-        << a.object().get<Array<LeafObject<char>>>("name").object().get(2).get() << std::endl;
+    std::cout << a.object().get<gc::LeafObject<int>>("one").object().get() << " "
+        << a.object().get<gc::LeafObject<bool>>("two").object().get() << " ";
+    std::cout << a.object().get<gc::Array<gc::LeafObject<char>>>("name").object().get(0).get()
+        << a.object().get<gc::Array<gc::LeafObject<char>>>("name").object().get(1).get()
+        << a.object().get<gc::Array<gc::LeafObject<char>>>("name").object().get(2).get() << std::endl;
 
     gc.showObjects();
 }
 
 void example_3() {
     // Array example
+    gc::GarbageCollector gc;
 
-    GarbageCollector gc;
-
-    auto a = gc.createArray<LeafObject<int>>(5);
+    auto a = gc.createArray<gc::LeafObject<int>>(5);
     {
         auto i = gc.createLeafObject(0);
         while (i.object().get() < a.object().size()) {
@@ -72,12 +70,11 @@ void example_3() {
 
 void example_4() {
     // String example
-
-    GarbageCollector gc;
+    gc::GarbageCollector gc;
 
     std::string hello = "Hello, world!";
 
-    auto a = gc.createArray<LeafObject<char>>(hello.length());
+    auto a = gc.createArray<gc::LeafObject<char>>(hello.length());
     {
         auto i = gc.createLeafObject(0);
         while (i.object().get() < hello.length()) {
@@ -99,7 +96,7 @@ void example_4() {
 }
 
 void example_5() {
-    GarbageCollector gc;
+    gc::GarbageCollector gc;
 
     {
         auto first = gc.createStruct({"next"});
@@ -113,9 +110,9 @@ void example_5() {
 }
 
 void example_6() {
-    GarbageCollector gc;
+    gc::GarbageCollector gc;
 
-    auto arr = gc.createArray<LeafObject<int>>(2);
+    auto arr = gc.createArray<gc::LeafObject<int>>(2);
     {
         auto one = gc.createLeafObject(1);
         auto two = gc.createLeafObject(2);

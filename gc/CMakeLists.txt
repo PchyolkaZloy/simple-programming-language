@@ -1,1 +1,2 @@
-add_library(gc gc.cpp example.cpp)
+add_library(gc gc.cpp example.cpp
+        gc.h)
