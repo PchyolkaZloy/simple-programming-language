@@ -21,7 +21,7 @@ public:
    */
     virtual std::any visitProgram(SmplangParser::ProgramContext *context) = 0;
 
-    virtual std::any visitFunction(SmplangParser::FunctionContext *context) = 0;
+    virtual std::any visitFunctionDecl(SmplangParser::FunctionDeclContext *context) = 0;
 
     virtual std::any visitReturnType(SmplangParser::ReturnTypeContext *context) = 0;
 
@@ -51,7 +51,9 @@ public:
 
     virtual std::any visitWhileStatement(SmplangParser::WhileStatementContext *context) = 0;
 
-    virtual std::any visitForStatement(SmplangParser::ForStatementContext *context) = 0;
+    virtual std::any visitBreakStatement(SmplangParser::BreakStatementContext *context) = 0;
+
+    virtual std::any visitContinueStatement(SmplangParser::ContinueStatementContext *context) = 0;
 
     virtual std::any visitReturnStatement(SmplangParser::ReturnStatementContext *context) = 0;
 
