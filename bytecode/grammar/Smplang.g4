@@ -1,9 +1,9 @@
 grammar Smplang;
 
 // Parser
-program: (function | structDecl | statement)*;
+program: (functionDecl | structDecl | statement)* EOF;
 
-function: FUNC returnType ID LPAREN parameterList? RPAREN block;
+functionDecl: FUNC returnType ID LPAREN parameterList? RPAREN block;
 returnType: type | VOID;
 parameterList: parameter (COMMA parameter)*;
 parameter: type ID;
@@ -17,48 +17,55 @@ structType: ID;
 
 block: LBRACE statement* RBRACE;
 
-statement: varDecl SEMI
-          | assignment SEMI
-          | returnStatement SEMI
-          | printStatement SEMI
-          | expression SEMI
-          | ifStatement
-          | whileStatement
-          | forStatement
-          | block;
+statement:
+    varDecl SEMI
+    | assignment SEMI
+    | returnStatement SEMI
+    | printStatement SEMI
+    | expression SEMI
+    | ifStatement
+    | whileStatement
+    | breakStatement SEMI
+    | continueStatement SEMI
+    | block;
 
 varDecl: type ID (ASSIGN expression)?;
 assignment: assignable ASSIGN expression;
 
 ifStatement: IF LPAREN expression RPAREN statement (ELSE statement)?;
 whileStatement: WHILE LPAREN expression RPAREN statement;
-forStatement: FOR LPAREN varDecl SEMI expression SEMI assignment RPAREN statement;
+
+breakStatement: BREAK;
+continueStatement: CONTINUE;
 
 returnStatement: RETURN expression?;
 printStatement: PRINT LPAREN expression RPAREN;
 
 expression:
-      primaryExpression
-    | LPAREN expression RPAREN
-    | expression LBRACK expression RBRACK
-    | UNAROP expression
-    | expression BINOP expression
+      LPAREN expression RPAREN
+    | NEG expression
+    | NOT expression
+    | expression AND expression
+    | expression OR expression
+    | expression MULT expression
+    | expression ADD expression
     | expression COMPOP expression
-    | expression LOGICOP expression
+    | primaryExpression
+    | expression LBRACK expression RBRACK
     ;
 
 primaryExpression:
-                   ID
-                 | fieldAccess
-                 | arrayAccess
-                 | functionCall
-                 | INT
-                 | DOUBLE
-                 | CHAR
-                 | BOOL
-                 | LPAREN expression RPAREN
-                 | arrayInit
-                 | structInit;
+      ID
+    | fieldAccess
+    | arrayAccess
+    | functionCall
+    | INT
+    | DOUBLE
+    | CHAR
+    | BOOL
+    | LPAREN expression RPAREN
+    | arrayInit
+    | structInit;
 
 arrayInit: LBRACE (expression (COMMA expression)*)? RBRACE;
 structInit: ID LPAREN argumentList? RPAREN;
@@ -79,6 +86,8 @@ WHILE: 'while';
 IF: 'if';
 ELSE: 'else';
 STRUCT: 'struct';
+BREAK: 'break';
+CONTINUE: 'continue';
 
 BOOL: 'true' | 'false';
 INT: [0-9]+;
@@ -86,10 +95,13 @@ DOUBLE: [0-9]+ DOT [0-9]*;
 CHAR: '\'' . '\'';
 ID: [a-zA-Z_][a-zA-Z_0-9]*;
 
-BINOP: '+' | '-' | '/' | '*';
-UNAROP: '!' | '-';
+NEG: '--';
+MULT: '*' | '/';
+ADD: '+' | '-';
 COMPOP: '==' | '!=' | '<' | '>' | '<=' | '>=';
-LOGICOP: '&&' | '||';
+NOT: '!';
+AND: '&&';
+OR: '||';
 ASSIGN: '=';
 LPAREN: '(';
 RPAREN: ')';

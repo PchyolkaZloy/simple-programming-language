@@ -53,123 +53,130 @@ void smplangParserInitialize() {
 #endif
   auto staticData = std::make_unique<SmplangParserStaticData>(
     std::vector<std::string>{
-      "program", "function", "returnType", "parameterList", "parameter", 
+      "program", "functionDecl", "returnType", "parameterList", "parameter", 
       "structDecl", "fieldDecl", "type", "primitiveType", "structType", 
       "block", "statement", "varDecl", "assignment", "ifStatement", "whileStatement", 
-      "forStatement", "returnStatement", "printStatement", "expression", 
-      "primaryExpression", "arrayInit", "structInit", "argumentList", "fieldAccess", 
-      "arrayAccess", "functionCall", "assignable"
+      "breakStatement", "continueStatement", "returnStatement", "printStatement", 
+      "expression", "primaryExpression", "arrayInit", "structInit", "argumentList", 
+      "fieldAccess", "arrayAccess", "functionCall", "assignable"
     },
     std::vector<std::string>{
       "", "'int'", "'double'", "'char'", "'bool'", "'func'", "'void'", "'return'", 
-      "'print'", "'for'", "'while'", "'if'", "'else'", "'struct'", "", "", 
-      "", "", "", "", "", "", "", "'='", "'('", "')'", "'{'", "'}'", "'['", 
-      "']'", "';'", "','", "'.'"
+      "'print'", "'for'", "'while'", "'if'", "'else'", "'struct'", "'break'", 
+      "'continue'", "", "", "", "", "", "'--'", "", "", "", "'!'", "'&&'", 
+      "'||'", "'='", "'('", "')'", "'{'", "'}'", "'['", "']'", "';'", "','", 
+      "'.'"
     },
     std::vector<std::string>{
       "", "", "", "", "", "FUNC", "VOID", "RETURN", "PRINT", "FOR", "WHILE", 
-      "IF", "ELSE", "STRUCT", "BOOL", "INT", "DOUBLE", "CHAR", "ID", "BINOP", 
-      "UNAROP", "COMPOP", "LOGICOP", "ASSIGN", "LPAREN", "RPAREN", "LBRACE", 
-      "RBRACE", "LBRACK", "RBRACK", "SEMI", "COMMA", "DOT", "WS", "COMMENT"
+      "IF", "ELSE", "STRUCT", "BREAK", "CONTINUE", "BOOL", "INT", "DOUBLE", 
+      "CHAR", "ID", "NEG", "MULT", "ADD", "COMPOP", "NOT", "AND", "OR", 
+      "ASSIGN", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", 
+      "SEMI", "COMMA", "DOT", "WS", "COMMENT"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,34,294,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,39,305,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,
   	14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,
-  	21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,2,27,7,27,1,0,1,
-  	0,1,0,5,0,60,8,0,10,0,12,0,63,9,0,1,1,1,1,1,1,1,1,1,1,3,1,70,8,1,1,1,
-  	1,1,1,1,1,2,1,2,3,2,77,8,2,1,3,1,3,1,3,5,3,82,8,3,10,3,12,3,85,9,3,1,
-  	4,1,4,1,4,1,5,1,5,1,5,1,5,4,5,94,8,5,11,5,12,5,95,1,5,1,5,1,5,1,6,1,6,
-  	1,6,1,6,1,7,1,7,1,7,3,7,108,8,7,1,7,1,7,1,7,1,7,5,7,114,8,7,10,7,12,7,
-  	117,9,7,1,8,1,8,1,9,1,9,1,10,1,10,5,10,125,8,10,10,10,12,10,128,9,10,
-  	1,10,1,10,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,
-  	1,11,1,11,1,11,1,11,1,11,1,11,1,11,3,11,151,8,11,1,12,1,12,1,12,1,12,
-  	3,12,157,8,12,1,13,1,13,1,13,1,13,1,14,1,14,1,14,1,14,1,14,1,14,1,14,
-  	3,14,170,8,14,1,15,1,15,1,15,1,15,1,15,1,15,1,16,1,16,1,16,1,16,1,16,
-  	1,16,1,16,1,16,1,16,1,16,1,17,1,17,3,17,190,8,17,1,18,1,18,1,18,1,18,
-  	1,18,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,3,19,205,8,19,1,19,1,19,
-  	1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,5,19,221,
-  	8,19,10,19,12,19,224,9,19,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,
-  	1,20,1,20,1,20,1,20,1,20,3,20,240,8,20,1,21,1,21,1,21,1,21,5,21,246,8,
-  	21,10,21,12,21,249,9,21,3,21,251,8,21,1,21,1,21,1,22,1,22,1,22,3,22,258,
-  	8,22,1,22,1,22,1,23,1,23,1,23,5,23,265,8,23,10,23,12,23,268,9,23,1,24,
-  	1,24,1,24,4,24,273,8,24,11,24,12,24,274,1,25,1,25,1,25,1,25,1,25,1,26,
-  	1,26,1,26,3,26,285,8,26,1,26,1,26,1,27,1,27,1,27,3,27,292,8,27,1,27,0,
-  	2,14,38,28,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,
-  	42,44,46,48,50,52,54,0,1,1,0,1,4,310,0,61,1,0,0,0,2,64,1,0,0,0,4,76,1,
-  	0,0,0,6,78,1,0,0,0,8,86,1,0,0,0,10,89,1,0,0,0,12,100,1,0,0,0,14,107,1,
-  	0,0,0,16,118,1,0,0,0,18,120,1,0,0,0,20,122,1,0,0,0,22,150,1,0,0,0,24,
-  	152,1,0,0,0,26,158,1,0,0,0,28,162,1,0,0,0,30,171,1,0,0,0,32,177,1,0,0,
-  	0,34,187,1,0,0,0,36,191,1,0,0,0,38,204,1,0,0,0,40,239,1,0,0,0,42,241,
-  	1,0,0,0,44,254,1,0,0,0,46,261,1,0,0,0,48,269,1,0,0,0,50,276,1,0,0,0,52,
-  	281,1,0,0,0,54,291,1,0,0,0,56,60,3,2,1,0,57,60,3,10,5,0,58,60,3,22,11,
-  	0,59,56,1,0,0,0,59,57,1,0,0,0,59,58,1,0,0,0,60,63,1,0,0,0,61,59,1,0,0,
-  	0,61,62,1,0,0,0,62,1,1,0,0,0,63,61,1,0,0,0,64,65,5,5,0,0,65,66,3,4,2,
-  	0,66,67,5,18,0,0,67,69,5,24,0,0,68,70,3,6,3,0,69,68,1,0,0,0,69,70,1,0,
-  	0,0,70,71,1,0,0,0,71,72,5,25,0,0,72,73,3,20,10,0,73,3,1,0,0,0,74,77,3,
-  	14,7,0,75,77,5,6,0,0,76,74,1,0,0,0,76,75,1,0,0,0,77,5,1,0,0,0,78,83,3,
-  	8,4,0,79,80,5,31,0,0,80,82,3,8,4,0,81,79,1,0,0,0,82,85,1,0,0,0,83,81,
-  	1,0,0,0,83,84,1,0,0,0,84,7,1,0,0,0,85,83,1,0,0,0,86,87,3,14,7,0,87,88,
-  	5,18,0,0,88,9,1,0,0,0,89,90,5,13,0,0,90,91,3,18,9,0,91,93,5,26,0,0,92,
-  	94,3,12,6,0,93,92,1,0,0,0,94,95,1,0,0,0,95,93,1,0,0,0,95,96,1,0,0,0,96,
-  	97,1,0,0,0,97,98,5,27,0,0,98,99,5,30,0,0,99,11,1,0,0,0,100,101,3,14,7,
-  	0,101,102,5,18,0,0,102,103,5,30,0,0,103,13,1,0,0,0,104,105,6,7,-1,0,105,
-  	108,3,16,8,0,106,108,3,18,9,0,107,104,1,0,0,0,107,106,1,0,0,0,108,115,
-  	1,0,0,0,109,110,10,2,0,0,110,111,5,28,0,0,111,112,5,15,0,0,112,114,5,
-  	29,0,0,113,109,1,0,0,0,114,117,1,0,0,0,115,113,1,0,0,0,115,116,1,0,0,
-  	0,116,15,1,0,0,0,117,115,1,0,0,0,118,119,7,0,0,0,119,17,1,0,0,0,120,121,
-  	5,18,0,0,121,19,1,0,0,0,122,126,5,26,0,0,123,125,3,22,11,0,124,123,1,
-  	0,0,0,125,128,1,0,0,0,126,124,1,0,0,0,126,127,1,0,0,0,127,129,1,0,0,0,
-  	128,126,1,0,0,0,129,130,5,27,0,0,130,21,1,0,0,0,131,132,3,24,12,0,132,
-  	133,5,30,0,0,133,151,1,0,0,0,134,135,3,26,13,0,135,136,5,30,0,0,136,151,
-  	1,0,0,0,137,138,3,34,17,0,138,139,5,30,0,0,139,151,1,0,0,0,140,141,3,
-  	36,18,0,141,142,5,30,0,0,142,151,1,0,0,0,143,144,3,38,19,0,144,145,5,
-  	30,0,0,145,151,1,0,0,0,146,151,3,28,14,0,147,151,3,30,15,0,148,151,3,
-  	32,16,0,149,151,3,20,10,0,150,131,1,0,0,0,150,134,1,0,0,0,150,137,1,0,
-  	0,0,150,140,1,0,0,0,150,143,1,0,0,0,150,146,1,0,0,0,150,147,1,0,0,0,150,
-  	148,1,0,0,0,150,149,1,0,0,0,151,23,1,0,0,0,152,153,3,14,7,0,153,156,5,
-  	18,0,0,154,155,5,23,0,0,155,157,3,38,19,0,156,154,1,0,0,0,156,157,1,0,
-  	0,0,157,25,1,0,0,0,158,159,3,54,27,0,159,160,5,23,0,0,160,161,3,38,19,
-  	0,161,27,1,0,0,0,162,163,5,11,0,0,163,164,5,24,0,0,164,165,3,38,19,0,
-  	165,166,5,25,0,0,166,169,3,22,11,0,167,168,5,12,0,0,168,170,3,22,11,0,
-  	169,167,1,0,0,0,169,170,1,0,0,0,170,29,1,0,0,0,171,172,5,10,0,0,172,173,
-  	5,24,0,0,173,174,3,38,19,0,174,175,5,25,0,0,175,176,3,22,11,0,176,31,
-  	1,0,0,0,177,178,5,9,0,0,178,179,5,24,0,0,179,180,3,24,12,0,180,181,5,
-  	30,0,0,181,182,3,38,19,0,182,183,5,30,0,0,183,184,3,26,13,0,184,185,5,
-  	25,0,0,185,186,3,22,11,0,186,33,1,0,0,0,187,189,5,7,0,0,188,190,3,38,
-  	19,0,189,188,1,0,0,0,189,190,1,0,0,0,190,35,1,0,0,0,191,192,5,8,0,0,192,
-  	193,5,24,0,0,193,194,3,38,19,0,194,195,5,25,0,0,195,37,1,0,0,0,196,197,
-  	6,19,-1,0,197,205,3,40,20,0,198,199,5,24,0,0,199,200,3,38,19,0,200,201,
-  	5,25,0,0,201,205,1,0,0,0,202,203,5,20,0,0,203,205,3,38,19,4,204,196,1,
-  	0,0,0,204,198,1,0,0,0,204,202,1,0,0,0,205,222,1,0,0,0,206,207,10,3,0,
-  	0,207,208,5,19,0,0,208,221,3,38,19,4,209,210,10,2,0,0,210,211,5,21,0,
-  	0,211,221,3,38,19,3,212,213,10,1,0,0,213,214,5,22,0,0,214,221,3,38,19,
-  	2,215,216,10,5,0,0,216,217,5,28,0,0,217,218,3,38,19,0,218,219,5,29,0,
-  	0,219,221,1,0,0,0,220,206,1,0,0,0,220,209,1,0,0,0,220,212,1,0,0,0,220,
-  	215,1,0,0,0,221,224,1,0,0,0,222,220,1,0,0,0,222,223,1,0,0,0,223,39,1,
-  	0,0,0,224,222,1,0,0,0,225,240,5,18,0,0,226,240,3,48,24,0,227,240,3,50,
-  	25,0,228,240,3,52,26,0,229,240,5,15,0,0,230,240,5,16,0,0,231,240,5,17,
-  	0,0,232,240,5,14,0,0,233,234,5,24,0,0,234,235,3,38,19,0,235,236,5,25,
-  	0,0,236,240,1,0,0,0,237,240,3,42,21,0,238,240,3,44,22,0,239,225,1,0,0,
-  	0,239,226,1,0,0,0,239,227,1,0,0,0,239,228,1,0,0,0,239,229,1,0,0,0,239,
-  	230,1,0,0,0,239,231,1,0,0,0,239,232,1,0,0,0,239,233,1,0,0,0,239,237,1,
-  	0,0,0,239,238,1,0,0,0,240,41,1,0,0,0,241,250,5,26,0,0,242,247,3,38,19,
-  	0,243,244,5,31,0,0,244,246,3,38,19,0,245,243,1,0,0,0,246,249,1,0,0,0,
-  	247,245,1,0,0,0,247,248,1,0,0,0,248,251,1,0,0,0,249,247,1,0,0,0,250,242,
-  	1,0,0,0,250,251,1,0,0,0,251,252,1,0,0,0,252,253,5,27,0,0,253,43,1,0,0,
-  	0,254,255,5,18,0,0,255,257,5,24,0,0,256,258,3,46,23,0,257,256,1,0,0,0,
-  	257,258,1,0,0,0,258,259,1,0,0,0,259,260,5,25,0,0,260,45,1,0,0,0,261,266,
-  	3,38,19,0,262,263,5,31,0,0,263,265,3,38,19,0,264,262,1,0,0,0,265,268,
-  	1,0,0,0,266,264,1,0,0,0,266,267,1,0,0,0,267,47,1,0,0,0,268,266,1,0,0,
-  	0,269,272,5,18,0,0,270,271,5,32,0,0,271,273,5,18,0,0,272,270,1,0,0,0,
-  	273,274,1,0,0,0,274,272,1,0,0,0,274,275,1,0,0,0,275,49,1,0,0,0,276,277,
-  	5,18,0,0,277,278,5,28,0,0,278,279,3,38,19,0,279,280,5,29,0,0,280,51,1,
-  	0,0,0,281,282,5,18,0,0,282,284,5,24,0,0,283,285,3,46,23,0,284,283,1,0,
-  	0,0,284,285,1,0,0,0,285,286,1,0,0,0,286,287,5,25,0,0,287,53,1,0,0,0,288,
-  	292,5,18,0,0,289,292,3,48,24,0,290,292,3,50,25,0,291,288,1,0,0,0,291,
-  	289,1,0,0,0,291,290,1,0,0,0,292,55,1,0,0,0,24,59,61,69,76,83,95,107,115,
-  	126,150,156,169,189,204,220,222,239,247,250,257,266,274,284,291
+  	21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,2,27,7,27,2,28,7,
+  	28,1,0,1,0,1,0,5,0,62,8,0,10,0,12,0,65,9,0,1,0,1,0,1,1,1,1,1,1,1,1,1,
+  	1,3,1,74,8,1,1,1,1,1,1,1,1,2,1,2,3,2,81,8,2,1,3,1,3,1,3,5,3,86,8,3,10,
+  	3,12,3,89,9,3,1,4,1,4,1,4,1,5,1,5,1,5,1,5,4,5,98,8,5,11,5,12,5,99,1,5,
+  	1,5,1,5,1,6,1,6,1,6,1,6,1,7,1,7,1,7,3,7,112,8,7,1,7,1,7,1,7,1,7,5,7,118,
+  	8,7,10,7,12,7,121,9,7,1,8,1,8,1,9,1,9,1,10,1,10,5,10,129,8,10,10,10,12,
+  	10,132,9,10,1,10,1,10,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,
+  	11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,
+  	11,3,11,160,8,11,1,12,1,12,1,12,1,12,3,12,166,8,12,1,13,1,13,1,13,1,13,
+  	1,14,1,14,1,14,1,14,1,14,1,14,1,14,3,14,179,8,14,1,15,1,15,1,15,1,15,
+  	1,15,1,15,1,16,1,16,1,17,1,17,1,18,1,18,3,18,193,8,18,1,19,1,19,1,19,
+  	1,19,1,19,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,3,20,210,
+  	8,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,
+  	1,20,1,20,1,20,1,20,1,20,1,20,1,20,5,20,232,8,20,10,20,12,20,235,9,20,
+  	1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,1,21,
+  	3,21,251,8,21,1,22,1,22,1,22,1,22,5,22,257,8,22,10,22,12,22,260,9,22,
+  	3,22,262,8,22,1,22,1,22,1,23,1,23,1,23,3,23,269,8,23,1,23,1,23,1,24,1,
+  	24,1,24,5,24,276,8,24,10,24,12,24,279,9,24,1,25,1,25,1,25,4,25,284,8,
+  	25,11,25,12,25,285,1,26,1,26,1,26,1,26,1,26,1,27,1,27,1,27,3,27,296,8,
+  	27,1,27,1,27,1,28,1,28,1,28,3,28,303,8,28,1,28,0,2,14,40,29,0,2,4,6,8,
+  	10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,
+  	56,0,1,1,0,1,4,324,0,63,1,0,0,0,2,68,1,0,0,0,4,80,1,0,0,0,6,82,1,0,0,
+  	0,8,90,1,0,0,0,10,93,1,0,0,0,12,104,1,0,0,0,14,111,1,0,0,0,16,122,1,0,
+  	0,0,18,124,1,0,0,0,20,126,1,0,0,0,22,159,1,0,0,0,24,161,1,0,0,0,26,167,
+  	1,0,0,0,28,171,1,0,0,0,30,180,1,0,0,0,32,186,1,0,0,0,34,188,1,0,0,0,36,
+  	190,1,0,0,0,38,194,1,0,0,0,40,209,1,0,0,0,42,250,1,0,0,0,44,252,1,0,0,
+  	0,46,265,1,0,0,0,48,272,1,0,0,0,50,280,1,0,0,0,52,287,1,0,0,0,54,292,
+  	1,0,0,0,56,302,1,0,0,0,58,62,3,2,1,0,59,62,3,10,5,0,60,62,3,22,11,0,61,
+  	58,1,0,0,0,61,59,1,0,0,0,61,60,1,0,0,0,62,65,1,0,0,0,63,61,1,0,0,0,63,
+  	64,1,0,0,0,64,66,1,0,0,0,65,63,1,0,0,0,66,67,5,0,0,1,67,1,1,0,0,0,68,
+  	69,5,5,0,0,69,70,3,4,2,0,70,71,5,20,0,0,71,73,5,29,0,0,72,74,3,6,3,0,
+  	73,72,1,0,0,0,73,74,1,0,0,0,74,75,1,0,0,0,75,76,5,30,0,0,76,77,3,20,10,
+  	0,77,3,1,0,0,0,78,81,3,14,7,0,79,81,5,6,0,0,80,78,1,0,0,0,80,79,1,0,0,
+  	0,81,5,1,0,0,0,82,87,3,8,4,0,83,84,5,36,0,0,84,86,3,8,4,0,85,83,1,0,0,
+  	0,86,89,1,0,0,0,87,85,1,0,0,0,87,88,1,0,0,0,88,7,1,0,0,0,89,87,1,0,0,
+  	0,90,91,3,14,7,0,91,92,5,20,0,0,92,9,1,0,0,0,93,94,5,13,0,0,94,95,3,18,
+  	9,0,95,97,5,31,0,0,96,98,3,12,6,0,97,96,1,0,0,0,98,99,1,0,0,0,99,97,1,
+  	0,0,0,99,100,1,0,0,0,100,101,1,0,0,0,101,102,5,32,0,0,102,103,5,35,0,
+  	0,103,11,1,0,0,0,104,105,3,14,7,0,105,106,5,20,0,0,106,107,5,35,0,0,107,
+  	13,1,0,0,0,108,109,6,7,-1,0,109,112,3,16,8,0,110,112,3,18,9,0,111,108,
+  	1,0,0,0,111,110,1,0,0,0,112,119,1,0,0,0,113,114,10,2,0,0,114,115,5,33,
+  	0,0,115,116,5,17,0,0,116,118,5,34,0,0,117,113,1,0,0,0,118,121,1,0,0,0,
+  	119,117,1,0,0,0,119,120,1,0,0,0,120,15,1,0,0,0,121,119,1,0,0,0,122,123,
+  	7,0,0,0,123,17,1,0,0,0,124,125,5,20,0,0,125,19,1,0,0,0,126,130,5,31,0,
+  	0,127,129,3,22,11,0,128,127,1,0,0,0,129,132,1,0,0,0,130,128,1,0,0,0,130,
+  	131,1,0,0,0,131,133,1,0,0,0,132,130,1,0,0,0,133,134,5,32,0,0,134,21,1,
+  	0,0,0,135,136,3,24,12,0,136,137,5,35,0,0,137,160,1,0,0,0,138,139,3,26,
+  	13,0,139,140,5,35,0,0,140,160,1,0,0,0,141,142,3,36,18,0,142,143,5,35,
+  	0,0,143,160,1,0,0,0,144,145,3,38,19,0,145,146,5,35,0,0,146,160,1,0,0,
+  	0,147,148,3,40,20,0,148,149,5,35,0,0,149,160,1,0,0,0,150,160,3,28,14,
+  	0,151,160,3,30,15,0,152,153,3,32,16,0,153,154,5,35,0,0,154,160,1,0,0,
+  	0,155,156,3,34,17,0,156,157,5,35,0,0,157,160,1,0,0,0,158,160,3,20,10,
+  	0,159,135,1,0,0,0,159,138,1,0,0,0,159,141,1,0,0,0,159,144,1,0,0,0,159,
+  	147,1,0,0,0,159,150,1,0,0,0,159,151,1,0,0,0,159,152,1,0,0,0,159,155,1,
+  	0,0,0,159,158,1,0,0,0,160,23,1,0,0,0,161,162,3,14,7,0,162,165,5,20,0,
+  	0,163,164,5,28,0,0,164,166,3,40,20,0,165,163,1,0,0,0,165,166,1,0,0,0,
+  	166,25,1,0,0,0,167,168,3,56,28,0,168,169,5,28,0,0,169,170,3,40,20,0,170,
+  	27,1,0,0,0,171,172,5,11,0,0,172,173,5,29,0,0,173,174,3,40,20,0,174,175,
+  	5,30,0,0,175,178,3,22,11,0,176,177,5,12,0,0,177,179,3,22,11,0,178,176,
+  	1,0,0,0,178,179,1,0,0,0,179,29,1,0,0,0,180,181,5,10,0,0,181,182,5,29,
+  	0,0,182,183,3,40,20,0,183,184,5,30,0,0,184,185,3,22,11,0,185,31,1,0,0,
+  	0,186,187,5,14,0,0,187,33,1,0,0,0,188,189,5,15,0,0,189,35,1,0,0,0,190,
+  	192,5,7,0,0,191,193,3,40,20,0,192,191,1,0,0,0,192,193,1,0,0,0,193,37,
+  	1,0,0,0,194,195,5,8,0,0,195,196,5,29,0,0,196,197,3,40,20,0,197,198,5,
+  	30,0,0,198,39,1,0,0,0,199,200,6,20,-1,0,200,201,5,29,0,0,201,202,3,40,
+  	20,0,202,203,5,30,0,0,203,210,1,0,0,0,204,205,5,21,0,0,205,210,3,40,20,
+  	9,206,207,5,25,0,0,207,210,3,40,20,8,208,210,3,42,21,0,209,199,1,0,0,
+  	0,209,204,1,0,0,0,209,206,1,0,0,0,209,208,1,0,0,0,210,233,1,0,0,0,211,
+  	212,10,7,0,0,212,213,5,26,0,0,213,232,3,40,20,8,214,215,10,6,0,0,215,
+  	216,5,27,0,0,216,232,3,40,20,7,217,218,10,5,0,0,218,219,5,22,0,0,219,
+  	232,3,40,20,6,220,221,10,4,0,0,221,222,5,23,0,0,222,232,3,40,20,5,223,
+  	224,10,3,0,0,224,225,5,24,0,0,225,232,3,40,20,4,226,227,10,1,0,0,227,
+  	228,5,33,0,0,228,229,3,40,20,0,229,230,5,34,0,0,230,232,1,0,0,0,231,211,
+  	1,0,0,0,231,214,1,0,0,0,231,217,1,0,0,0,231,220,1,0,0,0,231,223,1,0,0,
+  	0,231,226,1,0,0,0,232,235,1,0,0,0,233,231,1,0,0,0,233,234,1,0,0,0,234,
+  	41,1,0,0,0,235,233,1,0,0,0,236,251,5,20,0,0,237,251,3,50,25,0,238,251,
+  	3,52,26,0,239,251,3,54,27,0,240,251,5,17,0,0,241,251,5,18,0,0,242,251,
+  	5,19,0,0,243,251,5,16,0,0,244,245,5,29,0,0,245,246,3,40,20,0,246,247,
+  	5,30,0,0,247,251,1,0,0,0,248,251,3,44,22,0,249,251,3,46,23,0,250,236,
+  	1,0,0,0,250,237,1,0,0,0,250,238,1,0,0,0,250,239,1,0,0,0,250,240,1,0,0,
+  	0,250,241,1,0,0,0,250,242,1,0,0,0,250,243,1,0,0,0,250,244,1,0,0,0,250,
+  	248,1,0,0,0,250,249,1,0,0,0,251,43,1,0,0,0,252,261,5,31,0,0,253,258,3,
+  	40,20,0,254,255,5,36,0,0,255,257,3,40,20,0,256,254,1,0,0,0,257,260,1,
+  	0,0,0,258,256,1,0,0,0,258,259,1,0,0,0,259,262,1,0,0,0,260,258,1,0,0,0,
+  	261,253,1,0,0,0,261,262,1,0,0,0,262,263,1,0,0,0,263,264,5,32,0,0,264,
+  	45,1,0,0,0,265,266,5,20,0,0,266,268,5,29,0,0,267,269,3,48,24,0,268,267,
+  	1,0,0,0,268,269,1,0,0,0,269,270,1,0,0,0,270,271,5,30,0,0,271,47,1,0,0,
+  	0,272,277,3,40,20,0,273,274,5,36,0,0,274,276,3,40,20,0,275,273,1,0,0,
+  	0,276,279,1,0,0,0,277,275,1,0,0,0,277,278,1,0,0,0,278,49,1,0,0,0,279,
+  	277,1,0,0,0,280,283,5,20,0,0,281,282,5,37,0,0,282,284,5,20,0,0,283,281,
+  	1,0,0,0,284,285,1,0,0,0,285,283,1,0,0,0,285,286,1,0,0,0,286,51,1,0,0,
+  	0,287,288,5,20,0,0,288,289,5,33,0,0,289,290,3,40,20,0,290,291,5,34,0,
+  	0,291,53,1,0,0,0,292,293,5,20,0,0,293,295,5,29,0,0,294,296,3,48,24,0,
+  	295,294,1,0,0,0,295,296,1,0,0,0,296,297,1,0,0,0,297,298,5,30,0,0,298,
+  	55,1,0,0,0,299,303,5,20,0,0,300,303,3,50,25,0,301,303,3,52,26,0,302,299,
+  	1,0,0,0,302,300,1,0,0,0,302,301,1,0,0,0,303,57,1,0,0,0,24,61,63,73,80,
+  	87,99,111,119,130,159,165,178,192,209,231,233,250,258,261,268,277,285,
+  	295,302
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -224,12 +231,16 @@ SmplangParser::ProgramContext::ProgramContext(ParserRuleContext *parent, size_t 
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<SmplangParser::FunctionContext *> SmplangParser::ProgramContext::function() {
-  return getRuleContexts<SmplangParser::FunctionContext>();
+tree::TerminalNode* SmplangParser::ProgramContext::EOF() {
+  return getToken(SmplangParser::EOF, 0);
 }
 
-SmplangParser::FunctionContext* SmplangParser::ProgramContext::function(size_t i) {
-  return getRuleContext<SmplangParser::FunctionContext>(i);
+std::vector<SmplangParser::FunctionDeclContext *> SmplangParser::ProgramContext::functionDecl() {
+  return getRuleContexts<SmplangParser::FunctionDeclContext>();
+}
+
+SmplangParser::FunctionDeclContext* SmplangParser::ProgramContext::functionDecl(size_t i) {
+  return getRuleContext<SmplangParser::FunctionDeclContext>(i);
 }
 
 std::vector<SmplangParser::StructDeclContext *> SmplangParser::ProgramContext::structDecl() {
@@ -287,22 +298,22 @@ SmplangParser::ProgramContext* SmplangParser::program() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(61);
+    setState(63);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 85454782) != 0)) {
-      setState(59);
+      ((1ULL << _la) & 2722098622) != 0)) {
+      setState(61);
       _errHandler->sync(this);
       switch (_input->LA(1)) {
         case SmplangParser::FUNC: {
-          setState(56);
-          function();
+          setState(58);
+          functionDecl();
           break;
         }
 
         case SmplangParser::STRUCT: {
-          setState(57);
+          setState(59);
           structDecl();
           break;
         }
@@ -313,18 +324,20 @@ SmplangParser::ProgramContext* SmplangParser::program() {
         case SmplangParser::T__3:
         case SmplangParser::RETURN:
         case SmplangParser::PRINT:
-        case SmplangParser::FOR:
         case SmplangParser::WHILE:
         case SmplangParser::IF:
+        case SmplangParser::BREAK:
+        case SmplangParser::CONTINUE:
         case SmplangParser::BOOL:
         case SmplangParser::INT:
         case SmplangParser::DOUBLE:
         case SmplangParser::CHAR:
         case SmplangParser::ID:
-        case SmplangParser::UNAROP:
+        case SmplangParser::NEG:
+        case SmplangParser::NOT:
         case SmplangParser::LPAREN:
         case SmplangParser::LBRACE: {
-          setState(58);
+          setState(60);
           statement();
           break;
         }
@@ -332,10 +345,12 @@ SmplangParser::ProgramContext* SmplangParser::program() {
       default:
         throw NoViableAltException(this);
       }
-      setState(63);
+      setState(65);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
+    setState(66);
+    match(SmplangParser::EOF);
    
   }
   catch (RecognitionException &e) {
@@ -347,68 +362,68 @@ SmplangParser::ProgramContext* SmplangParser::program() {
   return _localctx;
 }
 
-//----------------- FunctionContext ------------------------------------------------------------------
+//----------------- FunctionDeclContext ------------------------------------------------------------------
 
-SmplangParser::FunctionContext::FunctionContext(ParserRuleContext *parent, size_t invokingState)
+SmplangParser::FunctionDeclContext::FunctionDeclContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* SmplangParser::FunctionContext::FUNC() {
+tree::TerminalNode* SmplangParser::FunctionDeclContext::FUNC() {
   return getToken(SmplangParser::FUNC, 0);
 }
 
-SmplangParser::ReturnTypeContext* SmplangParser::FunctionContext::returnType() {
+SmplangParser::ReturnTypeContext* SmplangParser::FunctionDeclContext::returnType() {
   return getRuleContext<SmplangParser::ReturnTypeContext>(0);
 }
 
-tree::TerminalNode* SmplangParser::FunctionContext::ID() {
+tree::TerminalNode* SmplangParser::FunctionDeclContext::ID() {
   return getToken(SmplangParser::ID, 0);
 }
 
-tree::TerminalNode* SmplangParser::FunctionContext::LPAREN() {
+tree::TerminalNode* SmplangParser::FunctionDeclContext::LPAREN() {
   return getToken(SmplangParser::LPAREN, 0);
 }
 
-tree::TerminalNode* SmplangParser::FunctionContext::RPAREN() {
+tree::TerminalNode* SmplangParser::FunctionDeclContext::RPAREN() {
   return getToken(SmplangParser::RPAREN, 0);
 }
 
-SmplangParser::BlockContext* SmplangParser::FunctionContext::block() {
+SmplangParser::BlockContext* SmplangParser::FunctionDeclContext::block() {
   return getRuleContext<SmplangParser::BlockContext>(0);
 }
 
-SmplangParser::ParameterListContext* SmplangParser::FunctionContext::parameterList() {
+SmplangParser::ParameterListContext* SmplangParser::FunctionDeclContext::parameterList() {
   return getRuleContext<SmplangParser::ParameterListContext>(0);
 }
 
 
-size_t SmplangParser::FunctionContext::getRuleIndex() const {
-  return SmplangParser::RuleFunction;
+size_t SmplangParser::FunctionDeclContext::getRuleIndex() const {
+  return SmplangParser::RuleFunctionDecl;
 }
 
-void SmplangParser::FunctionContext::enterRule(tree::ParseTreeListener *listener) {
+void SmplangParser::FunctionDeclContext::enterRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<SmplangListener *>(listener);
   if (parserListener != nullptr)
-    parserListener->enterFunction(this);
+    parserListener->enterFunctionDecl(this);
 }
 
-void SmplangParser::FunctionContext::exitRule(tree::ParseTreeListener *listener) {
+void SmplangParser::FunctionDeclContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<SmplangListener *>(listener);
   if (parserListener != nullptr)
-    parserListener->exitFunction(this);
+    parserListener->exitFunctionDecl(this);
 }
 
 
-std::any SmplangParser::FunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any SmplangParser::FunctionDeclContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<SmplangVisitor*>(visitor))
-    return parserVisitor->visitFunction(this);
+    return parserVisitor->visitFunctionDecl(this);
   else
     return visitor->visitChildren(this);
 }
 
-SmplangParser::FunctionContext* SmplangParser::function() {
-  FunctionContext *_localctx = _tracker.createInstance<FunctionContext>(_ctx, getState());
-  enterRule(_localctx, 2, SmplangParser::RuleFunction);
+SmplangParser::FunctionDeclContext* SmplangParser::functionDecl() {
+  FunctionDeclContext *_localctx = _tracker.createInstance<FunctionDeclContext>(_ctx, getState());
+  enterRule(_localctx, 2, SmplangParser::RuleFunctionDecl);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -420,26 +435,26 @@ SmplangParser::FunctionContext* SmplangParser::function() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(64);
+    setState(68);
     match(SmplangParser::FUNC);
-    setState(65);
-    returnType();
-    setState(66);
-    match(SmplangParser::ID);
-    setState(67);
-    match(SmplangParser::LPAREN);
     setState(69);
+    returnType();
+    setState(70);
+    match(SmplangParser::ID);
+    setState(71);
+    match(SmplangParser::LPAREN);
+    setState(73);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 262174) != 0)) {
-      setState(68);
+      ((1ULL << _la) & 1048606) != 0)) {
+      setState(72);
       parameterList();
     }
-    setState(71);
+    setState(75);
     match(SmplangParser::RPAREN);
-    setState(72);
+    setState(76);
     block();
    
   }
@@ -503,7 +518,7 @@ SmplangParser::ReturnTypeContext* SmplangParser::returnType() {
     exitRule();
   });
   try {
-    setState(76);
+    setState(80);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case SmplangParser::T__0:
@@ -512,14 +527,14 @@ SmplangParser::ReturnTypeContext* SmplangParser::returnType() {
       case SmplangParser::T__3:
       case SmplangParser::ID: {
         enterOuterAlt(_localctx, 1);
-        setState(74);
+        setState(78);
         type(0);
         break;
       }
 
       case SmplangParser::VOID: {
         enterOuterAlt(_localctx, 2);
-        setState(75);
+        setState(79);
         match(SmplangParser::VOID);
         break;
       }
@@ -599,17 +614,17 @@ SmplangParser::ParameterListContext* SmplangParser::parameterList() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(78);
+    setState(82);
     parameter();
-    setState(83);
+    setState(87);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == SmplangParser::COMMA) {
-      setState(79);
+      setState(83);
       match(SmplangParser::COMMA);
-      setState(80);
+      setState(84);
       parameter();
-      setState(85);
+      setState(89);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -676,9 +691,9 @@ SmplangParser::ParameterContext* SmplangParser::parameter() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(86);
+    setState(90);
     type(0);
-    setState(87);
+    setState(91);
     match(SmplangParser::ID);
    
   }
@@ -764,26 +779,26 @@ SmplangParser::StructDeclContext* SmplangParser::structDecl() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(89);
+    setState(93);
     match(SmplangParser::STRUCT);
-    setState(90);
+    setState(94);
     structType();
-    setState(91);
+    setState(95);
     match(SmplangParser::LBRACE);
-    setState(93); 
+    setState(97); 
     _errHandler->sync(this);
     _la = _input->LA(1);
     do {
-      setState(92);
+      setState(96);
       fieldDecl();
-      setState(95); 
+      setState(99); 
       _errHandler->sync(this);
       _la = _input->LA(1);
     } while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 262174) != 0));
-    setState(97);
+      ((1ULL << _la) & 1048606) != 0));
+    setState(101);
     match(SmplangParser::RBRACE);
-    setState(98);
+    setState(102);
     match(SmplangParser::SEMI);
    
   }
@@ -852,11 +867,11 @@ SmplangParser::FieldDeclContext* SmplangParser::fieldDecl() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(100);
+    setState(104);
     type(0);
-    setState(101);
+    setState(105);
     match(SmplangParser::ID);
-    setState(102);
+    setState(106);
     match(SmplangParser::SEMI);
    
   }
@@ -950,20 +965,20 @@ SmplangParser::TypeContext* SmplangParser::type(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(107);
+    setState(111);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case SmplangParser::T__0:
       case SmplangParser::T__1:
       case SmplangParser::T__2:
       case SmplangParser::T__3: {
-        setState(105);
+        setState(109);
         primitiveType();
         break;
       }
 
       case SmplangParser::ID: {
-        setState(106);
+        setState(110);
         structType();
         break;
       }
@@ -972,7 +987,7 @@ SmplangParser::TypeContext* SmplangParser::type(int precedence) {
       throw NoViableAltException(this);
     }
     _ctx->stop = _input->LT(-1);
-    setState(115);
+    setState(119);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 7, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -982,17 +997,17 @@ SmplangParser::TypeContext* SmplangParser::type(int precedence) {
         previousContext = _localctx;
         _localctx = _tracker.createInstance<TypeContext>(parentContext, parentState);
         pushNewRecursionContext(_localctx, startState, RuleType);
-        setState(109);
+        setState(113);
 
         if (!(precpred(_ctx, 2))) throw FailedPredicateException(this, "precpred(_ctx, 2)");
-        setState(110);
+        setState(114);
         match(SmplangParser::LBRACK);
-        setState(111);
+        setState(115);
         match(SmplangParser::INT);
-        setState(112);
+        setState(116);
         match(SmplangParser::RBRACK); 
       }
-      setState(117);
+      setState(121);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 7, _ctx);
     }
@@ -1050,7 +1065,7 @@ SmplangParser::PrimitiveTypeContext* SmplangParser::primitiveType() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(118);
+    setState(122);
     _la = _input->LA(1);
     if (!((((_la & ~ 0x3fULL) == 0) &&
       ((1ULL << _la) & 30) != 0))) {
@@ -1119,7 +1134,7 @@ SmplangParser::StructTypeContext* SmplangParser::structType() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(120);
+    setState(124);
     match(SmplangParser::ID);
    
   }
@@ -1193,20 +1208,20 @@ SmplangParser::BlockContext* SmplangParser::block() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(122);
-    match(SmplangParser::LBRACE);
     setState(126);
+    match(SmplangParser::LBRACE);
+    setState(130);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 85446558) != 0)) {
-      setState(123);
+      ((1ULL << _la) & 2722090398) != 0)) {
+      setState(127);
       statement();
-      setState(128);
+      setState(132);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(129);
+    setState(133);
     match(SmplangParser::RBRACE);
    
   }
@@ -1257,8 +1272,12 @@ SmplangParser::WhileStatementContext* SmplangParser::StatementContext::whileStat
   return getRuleContext<SmplangParser::WhileStatementContext>(0);
 }
 
-SmplangParser::ForStatementContext* SmplangParser::StatementContext::forStatement() {
-  return getRuleContext<SmplangParser::ForStatementContext>(0);
+SmplangParser::BreakStatementContext* SmplangParser::StatementContext::breakStatement() {
+  return getRuleContext<SmplangParser::BreakStatementContext>(0);
+}
+
+SmplangParser::ContinueStatementContext* SmplangParser::StatementContext::continueStatement() {
+  return getRuleContext<SmplangParser::ContinueStatementContext>(0);
 }
 
 SmplangParser::BlockContext* SmplangParser::StatementContext::block() {
@@ -1302,78 +1321,89 @@ SmplangParser::StatementContext* SmplangParser::statement() {
     exitRule();
   });
   try {
-    setState(150);
+    setState(159);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 9, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(131);
+      setState(135);
       varDecl();
-      setState(132);
+      setState(136);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(134);
+      setState(138);
       assignment();
-      setState(135);
+      setState(139);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(137);
+      setState(141);
       returnStatement();
-      setState(138);
+      setState(142);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 4: {
       enterOuterAlt(_localctx, 4);
-      setState(140);
+      setState(144);
       printStatement();
-      setState(141);
+      setState(145);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 5: {
       enterOuterAlt(_localctx, 5);
-      setState(143);
+      setState(147);
       expression(0);
-      setState(144);
+      setState(148);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 6: {
       enterOuterAlt(_localctx, 6);
-      setState(146);
+      setState(150);
       ifStatement();
       break;
     }
 
     case 7: {
       enterOuterAlt(_localctx, 7);
-      setState(147);
+      setState(151);
       whileStatement();
       break;
     }
 
     case 8: {
       enterOuterAlt(_localctx, 8);
-      setState(148);
-      forStatement();
+      setState(152);
+      breakStatement();
+      setState(153);
+      match(SmplangParser::SEMI);
       break;
     }
 
     case 9: {
       enterOuterAlt(_localctx, 9);
-      setState(149);
+      setState(155);
+      continueStatement();
+      setState(156);
+      match(SmplangParser::SEMI);
+      break;
+    }
+
+    case 10: {
+      enterOuterAlt(_localctx, 10);
+      setState(158);
       block();
       break;
     }
@@ -1453,18 +1483,18 @@ SmplangParser::VarDeclContext* SmplangParser::varDecl() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(152);
+    setState(161);
     type(0);
-    setState(153);
+    setState(162);
     match(SmplangParser::ID);
-    setState(156);
+    setState(165);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == SmplangParser::ASSIGN) {
-      setState(154);
+      setState(163);
       match(SmplangParser::ASSIGN);
-      setState(155);
+      setState(164);
       expression(0);
     }
    
@@ -1534,11 +1564,11 @@ SmplangParser::AssignmentContext* SmplangParser::assignment() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(158);
+    setState(167);
     assignable();
-    setState(159);
+    setState(168);
     match(SmplangParser::ASSIGN);
-    setState(160);
+    setState(169);
     expression(0);
    
   }
@@ -1623,24 +1653,24 @@ SmplangParser::IfStatementContext* SmplangParser::ifStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(162);
+    setState(171);
     match(SmplangParser::IF);
-    setState(163);
+    setState(172);
     match(SmplangParser::LPAREN);
-    setState(164);
+    setState(173);
     expression(0);
-    setState(165);
+    setState(174);
     match(SmplangParser::RPAREN);
-    setState(166);
+    setState(175);
     statement();
-    setState(169);
+    setState(178);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 11, _ctx)) {
     case 1: {
-      setState(167);
+      setState(176);
       match(SmplangParser::ELSE);
-      setState(168);
+      setState(177);
       statement();
       break;
     }
@@ -1723,15 +1753,15 @@ SmplangParser::WhileStatementContext* SmplangParser::whileStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(171);
+    setState(180);
     match(SmplangParser::WHILE);
-    setState(172);
+    setState(181);
     match(SmplangParser::LPAREN);
-    setState(173);
+    setState(182);
     expression(0);
-    setState(174);
+    setState(183);
     match(SmplangParser::RPAREN);
-    setState(175);
+    setState(184);
     statement();
    
   }
@@ -1744,76 +1774,44 @@ SmplangParser::WhileStatementContext* SmplangParser::whileStatement() {
   return _localctx;
 }
 
-//----------------- ForStatementContext ------------------------------------------------------------------
+//----------------- BreakStatementContext ------------------------------------------------------------------
 
-SmplangParser::ForStatementContext::ForStatementContext(ParserRuleContext *parent, size_t invokingState)
+SmplangParser::BreakStatementContext::BreakStatementContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* SmplangParser::ForStatementContext::FOR() {
-  return getToken(SmplangParser::FOR, 0);
-}
-
-tree::TerminalNode* SmplangParser::ForStatementContext::LPAREN() {
-  return getToken(SmplangParser::LPAREN, 0);
-}
-
-SmplangParser::VarDeclContext* SmplangParser::ForStatementContext::varDecl() {
-  return getRuleContext<SmplangParser::VarDeclContext>(0);
-}
-
-std::vector<tree::TerminalNode *> SmplangParser::ForStatementContext::SEMI() {
-  return getTokens(SmplangParser::SEMI);
-}
-
-tree::TerminalNode* SmplangParser::ForStatementContext::SEMI(size_t i) {
-  return getToken(SmplangParser::SEMI, i);
-}
-
-SmplangParser::ExpressionContext* SmplangParser::ForStatementContext::expression() {
-  return getRuleContext<SmplangParser::ExpressionContext>(0);
-}
-
-SmplangParser::AssignmentContext* SmplangParser::ForStatementContext::assignment() {
-  return getRuleContext<SmplangParser::AssignmentContext>(0);
-}
-
-tree::TerminalNode* SmplangParser::ForStatementContext::RPAREN() {
-  return getToken(SmplangParser::RPAREN, 0);
-}
-
-SmplangParser::StatementContext* SmplangParser::ForStatementContext::statement() {
-  return getRuleContext<SmplangParser::StatementContext>(0);
+tree::TerminalNode* SmplangParser::BreakStatementContext::BREAK() {
+  return getToken(SmplangParser::BREAK, 0);
 }
 
 
-size_t SmplangParser::ForStatementContext::getRuleIndex() const {
-  return SmplangParser::RuleForStatement;
+size_t SmplangParser::BreakStatementContext::getRuleIndex() const {
+  return SmplangParser::RuleBreakStatement;
 }
 
-void SmplangParser::ForStatementContext::enterRule(tree::ParseTreeListener *listener) {
+void SmplangParser::BreakStatementContext::enterRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<SmplangListener *>(listener);
   if (parserListener != nullptr)
-    parserListener->enterForStatement(this);
+    parserListener->enterBreakStatement(this);
 }
 
-void SmplangParser::ForStatementContext::exitRule(tree::ParseTreeListener *listener) {
+void SmplangParser::BreakStatementContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<SmplangListener *>(listener);
   if (parserListener != nullptr)
-    parserListener->exitForStatement(this);
+    parserListener->exitBreakStatement(this);
 }
 
 
-std::any SmplangParser::ForStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any SmplangParser::BreakStatementContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<SmplangVisitor*>(visitor))
-    return parserVisitor->visitForStatement(this);
+    return parserVisitor->visitBreakStatement(this);
   else
     return visitor->visitChildren(this);
 }
 
-SmplangParser::ForStatementContext* SmplangParser::forStatement() {
-  ForStatementContext *_localctx = _tracker.createInstance<ForStatementContext>(_ctx, getState());
-  enterRule(_localctx, 32, SmplangParser::RuleForStatement);
+SmplangParser::BreakStatementContext* SmplangParser::breakStatement() {
+  BreakStatementContext *_localctx = _tracker.createInstance<BreakStatementContext>(_ctx, getState());
+  enterRule(_localctx, 32, SmplangParser::RuleBreakStatement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1824,24 +1822,69 @@ SmplangParser::ForStatementContext* SmplangParser::forStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(177);
-    match(SmplangParser::FOR);
-    setState(178);
-    match(SmplangParser::LPAREN);
-    setState(179);
-    varDecl();
-    setState(180);
-    match(SmplangParser::SEMI);
-    setState(181);
-    expression(0);
-    setState(182);
-    match(SmplangParser::SEMI);
-    setState(183);
-    assignment();
-    setState(184);
-    match(SmplangParser::RPAREN);
-    setState(185);
-    statement();
+    setState(186);
+    match(SmplangParser::BREAK);
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- ContinueStatementContext ------------------------------------------------------------------
+
+SmplangParser::ContinueStatementContext::ContinueStatementContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+tree::TerminalNode* SmplangParser::ContinueStatementContext::CONTINUE() {
+  return getToken(SmplangParser::CONTINUE, 0);
+}
+
+
+size_t SmplangParser::ContinueStatementContext::getRuleIndex() const {
+  return SmplangParser::RuleContinueStatement;
+}
+
+void SmplangParser::ContinueStatementContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<SmplangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterContinueStatement(this);
+}
+
+void SmplangParser::ContinueStatementContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<SmplangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitContinueStatement(this);
+}
+
+
+std::any SmplangParser::ContinueStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<SmplangVisitor*>(visitor))
+    return parserVisitor->visitContinueStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+SmplangParser::ContinueStatementContext* SmplangParser::continueStatement() {
+  ContinueStatementContext *_localctx = _tracker.createInstance<ContinueStatementContext>(_ctx, getState());
+  enterRule(_localctx, 34, SmplangParser::RuleContinueStatement);
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    enterOuterAlt(_localctx, 1);
+    setState(188);
+    match(SmplangParser::CONTINUE);
    
   }
   catch (RecognitionException &e) {
@@ -1894,7 +1937,7 @@ std::any SmplangParser::ReturnStatementContext::accept(tree::ParseTreeVisitor *v
 
 SmplangParser::ReturnStatementContext* SmplangParser::returnStatement() {
   ReturnStatementContext *_localctx = _tracker.createInstance<ReturnStatementContext>(_ctx, getState());
-  enterRule(_localctx, 34, SmplangParser::RuleReturnStatement);
+  enterRule(_localctx, 36, SmplangParser::RuleReturnStatement);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1906,15 +1949,15 @@ SmplangParser::ReturnStatementContext* SmplangParser::returnStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(187);
+    setState(190);
     match(SmplangParser::RETURN);
-    setState(189);
+    setState(192);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 85442560) != 0)) {
-      setState(188);
+      ((1ULL << _la) & 2722037760) != 0)) {
+      setState(191);
       expression(0);
     }
    
@@ -1977,7 +2020,7 @@ std::any SmplangParser::PrintStatementContext::accept(tree::ParseTreeVisitor *vi
 
 SmplangParser::PrintStatementContext* SmplangParser::printStatement() {
   PrintStatementContext *_localctx = _tracker.createInstance<PrintStatementContext>(_ctx, getState());
-  enterRule(_localctx, 36, SmplangParser::RulePrintStatement);
+  enterRule(_localctx, 38, SmplangParser::RulePrintStatement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1988,13 +2031,13 @@ SmplangParser::PrintStatementContext* SmplangParser::printStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(191);
-    match(SmplangParser::PRINT);
-    setState(192);
-    match(SmplangParser::LPAREN);
-    setState(193);
-    expression(0);
     setState(194);
+    match(SmplangParser::PRINT);
+    setState(195);
+    match(SmplangParser::LPAREN);
+    setState(196);
+    expression(0);
+    setState(197);
     match(SmplangParser::RPAREN);
    
   }
@@ -2013,10 +2056,6 @@ SmplangParser::ExpressionContext::ExpressionContext(ParserRuleContext *parent, s
   : ParserRuleContext(parent, invokingState) {
 }
 
-SmplangParser::PrimaryExpressionContext* SmplangParser::ExpressionContext::primaryExpression() {
-  return getRuleContext<SmplangParser::PrimaryExpressionContext>(0);
-}
-
 tree::TerminalNode* SmplangParser::ExpressionContext::LPAREN() {
   return getToken(SmplangParser::LPAREN, 0);
 }
@@ -2033,20 +2072,36 @@ tree::TerminalNode* SmplangParser::ExpressionContext::RPAREN() {
   return getToken(SmplangParser::RPAREN, 0);
 }
 
-tree::TerminalNode* SmplangParser::ExpressionContext::UNAROP() {
-  return getToken(SmplangParser::UNAROP, 0);
+tree::TerminalNode* SmplangParser::ExpressionContext::NEG() {
+  return getToken(SmplangParser::NEG, 0);
 }
 
-tree::TerminalNode* SmplangParser::ExpressionContext::BINOP() {
-  return getToken(SmplangParser::BINOP, 0);
+tree::TerminalNode* SmplangParser::ExpressionContext::NOT() {
+  return getToken(SmplangParser::NOT, 0);
+}
+
+SmplangParser::PrimaryExpressionContext* SmplangParser::ExpressionContext::primaryExpression() {
+  return getRuleContext<SmplangParser::PrimaryExpressionContext>(0);
+}
+
+tree::TerminalNode* SmplangParser::ExpressionContext::AND() {
+  return getToken(SmplangParser::AND, 0);
+}
+
+tree::TerminalNode* SmplangParser::ExpressionContext::OR() {
+  return getToken(SmplangParser::OR, 0);
+}
+
+tree::TerminalNode* SmplangParser::ExpressionContext::MULT() {
+  return getToken(SmplangParser::MULT, 0);
+}
+
+tree::TerminalNode* SmplangParser::ExpressionContext::ADD() {
+  return getToken(SmplangParser::ADD, 0);
 }
 
 tree::TerminalNode* SmplangParser::ExpressionContext::COMPOP() {
   return getToken(SmplangParser::COMPOP, 0);
-}
-
-tree::TerminalNode* SmplangParser::ExpressionContext::LOGICOP() {
-  return getToken(SmplangParser::LOGICOP, 0);
 }
 
 tree::TerminalNode* SmplangParser::ExpressionContext::LBRACK() {
@@ -2093,8 +2148,8 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
   SmplangParser::ExpressionContext *_localctx = _tracker.createInstance<ExpressionContext>(_ctx, parentState);
   SmplangParser::ExpressionContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
-  size_t startState = 38;
-  enterRecursionRule(_localctx, 38, SmplangParser::RuleExpression, precedence);
+  size_t startState = 40;
+  enterRecursionRule(_localctx, 40, SmplangParser::RuleExpression, precedence);
 
     
 
@@ -2108,30 +2163,38 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(204);
+    setState(209);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 13, _ctx)) {
     case 1: {
-      setState(197);
-      primaryExpression();
-      break;
-    }
-
-    case 2: {
-      setState(198);
-      match(SmplangParser::LPAREN);
-      setState(199);
-      expression(0);
       setState(200);
+      match(SmplangParser::LPAREN);
+      setState(201);
+      expression(0);
+      setState(202);
       match(SmplangParser::RPAREN);
       break;
     }
 
+    case 2: {
+      setState(204);
+      match(SmplangParser::NEG);
+      setState(205);
+      expression(9);
+      break;
+    }
+
     case 3: {
-      setState(202);
-      match(SmplangParser::UNAROP);
-      setState(203);
-      expression(4);
+      setState(206);
+      match(SmplangParser::NOT);
+      setState(207);
+      expression(8);
+      break;
+    }
+
+    case 4: {
+      setState(208);
+      primaryExpression();
       break;
     }
 
@@ -2139,7 +2202,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
       break;
     }
     _ctx->stop = _input->LT(-1);
-    setState(222);
+    setState(233);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 15, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -2147,59 +2210,85 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
         if (!_parseListeners.empty())
           triggerExitRuleEvent();
         previousContext = _localctx;
-        setState(220);
+        setState(231);
         _errHandler->sync(this);
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 14, _ctx)) {
         case 1: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(206);
+          setState(211);
 
-          if (!(precpred(_ctx, 3))) throw FailedPredicateException(this, "precpred(_ctx, 3)");
-          setState(207);
-          match(SmplangParser::BINOP);
-          setState(208);
-          expression(4);
+          if (!(precpred(_ctx, 7))) throw FailedPredicateException(this, "precpred(_ctx, 7)");
+          setState(212);
+          match(SmplangParser::AND);
+          setState(213);
+          expression(8);
           break;
         }
 
         case 2: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(209);
+          setState(214);
 
-          if (!(precpred(_ctx, 2))) throw FailedPredicateException(this, "precpred(_ctx, 2)");
-          setState(210);
-          match(SmplangParser::COMPOP);
-          setState(211);
-          expression(3);
+          if (!(precpred(_ctx, 6))) throw FailedPredicateException(this, "precpred(_ctx, 6)");
+          setState(215);
+          match(SmplangParser::OR);
+          setState(216);
+          expression(7);
           break;
         }
 
         case 3: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(212);
+          setState(217);
 
-          if (!(precpred(_ctx, 1))) throw FailedPredicateException(this, "precpred(_ctx, 1)");
-          setState(213);
-          match(SmplangParser::LOGICOP);
-          setState(214);
-          expression(2);
+          if (!(precpred(_ctx, 5))) throw FailedPredicateException(this, "precpred(_ctx, 5)");
+          setState(218);
+          match(SmplangParser::MULT);
+          setState(219);
+          expression(6);
           break;
         }
 
         case 4: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(215);
+          setState(220);
 
-          if (!(precpred(_ctx, 5))) throw FailedPredicateException(this, "precpred(_ctx, 5)");
-          setState(216);
+          if (!(precpred(_ctx, 4))) throw FailedPredicateException(this, "precpred(_ctx, 4)");
+          setState(221);
+          match(SmplangParser::ADD);
+          setState(222);
+          expression(5);
+          break;
+        }
+
+        case 5: {
+          _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
+          pushNewRecursionContext(_localctx, startState, RuleExpression);
+          setState(223);
+
+          if (!(precpred(_ctx, 3))) throw FailedPredicateException(this, "precpred(_ctx, 3)");
+          setState(224);
+          match(SmplangParser::COMPOP);
+          setState(225);
+          expression(4);
+          break;
+        }
+
+        case 6: {
+          _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
+          pushNewRecursionContext(_localctx, startState, RuleExpression);
+          setState(226);
+
+          if (!(precpred(_ctx, 1))) throw FailedPredicateException(this, "precpred(_ctx, 1)");
+          setState(227);
           match(SmplangParser::LBRACK);
-          setState(217);
+          setState(228);
           expression(0);
-          setState(218);
+          setState(229);
           match(SmplangParser::RBRACK);
           break;
         }
@@ -2208,7 +2297,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
           break;
         } 
       }
-      setState(224);
+      setState(235);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 15, _ctx);
     }
@@ -2306,7 +2395,7 @@ std::any SmplangParser::PrimaryExpressionContext::accept(tree::ParseTreeVisitor 
 
 SmplangParser::PrimaryExpressionContext* SmplangParser::primaryExpression() {
   PrimaryExpressionContext *_localctx = _tracker.createInstance<PrimaryExpressionContext>(_ctx, getState());
-  enterRule(_localctx, 40, SmplangParser::RulePrimaryExpression);
+  enterRule(_localctx, 42, SmplangParser::RulePrimaryExpression);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2316,86 +2405,86 @@ SmplangParser::PrimaryExpressionContext* SmplangParser::primaryExpression() {
     exitRule();
   });
   try {
-    setState(239);
+    setState(250);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 16, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(225);
+      setState(236);
       match(SmplangParser::ID);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(226);
+      setState(237);
       fieldAccess();
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(227);
+      setState(238);
       arrayAccess();
       break;
     }
 
     case 4: {
       enterOuterAlt(_localctx, 4);
-      setState(228);
+      setState(239);
       functionCall();
       break;
     }
 
     case 5: {
       enterOuterAlt(_localctx, 5);
-      setState(229);
+      setState(240);
       match(SmplangParser::INT);
       break;
     }
 
     case 6: {
       enterOuterAlt(_localctx, 6);
-      setState(230);
+      setState(241);
       match(SmplangParser::DOUBLE);
       break;
     }
 
     case 7: {
       enterOuterAlt(_localctx, 7);
-      setState(231);
+      setState(242);
       match(SmplangParser::CHAR);
       break;
     }
 
     case 8: {
       enterOuterAlt(_localctx, 8);
-      setState(232);
+      setState(243);
       match(SmplangParser::BOOL);
       break;
     }
 
     case 9: {
       enterOuterAlt(_localctx, 9);
-      setState(233);
+      setState(244);
       match(SmplangParser::LPAREN);
-      setState(234);
+      setState(245);
       expression(0);
-      setState(235);
+      setState(246);
       match(SmplangParser::RPAREN);
       break;
     }
 
     case 10: {
       enterOuterAlt(_localctx, 10);
-      setState(237);
+      setState(248);
       arrayInit();
       break;
     }
 
     case 11: {
       enterOuterAlt(_localctx, 11);
-      setState(238);
+      setState(249);
       structInit();
       break;
     }
@@ -2471,7 +2560,7 @@ std::any SmplangParser::ArrayInitContext::accept(tree::ParseTreeVisitor *visitor
 
 SmplangParser::ArrayInitContext* SmplangParser::arrayInit() {
   ArrayInitContext *_localctx = _tracker.createInstance<ArrayInitContext>(_ctx, getState());
-  enterRule(_localctx, 42, SmplangParser::RuleArrayInit);
+  enterRule(_localctx, 44, SmplangParser::RuleArrayInit);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2483,30 +2572,30 @@ SmplangParser::ArrayInitContext* SmplangParser::arrayInit() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(241);
+    setState(252);
     match(SmplangParser::LBRACE);
-    setState(250);
+    setState(261);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 85442560) != 0)) {
-      setState(242);
+      ((1ULL << _la) & 2722037760) != 0)) {
+      setState(253);
       expression(0);
-      setState(247);
+      setState(258);
       _errHandler->sync(this);
       _la = _input->LA(1);
       while (_la == SmplangParser::COMMA) {
-        setState(243);
+        setState(254);
         match(SmplangParser::COMMA);
-        setState(244);
+        setState(255);
         expression(0);
-        setState(249);
+        setState(260);
         _errHandler->sync(this);
         _la = _input->LA(1);
       }
     }
-    setState(252);
+    setState(263);
     match(SmplangParser::RBRACE);
    
   }
@@ -2568,7 +2657,7 @@ std::any SmplangParser::StructInitContext::accept(tree::ParseTreeVisitor *visito
 
 SmplangParser::StructInitContext* SmplangParser::structInit() {
   StructInitContext *_localctx = _tracker.createInstance<StructInitContext>(_ctx, getState());
-  enterRule(_localctx, 44, SmplangParser::RuleStructInit);
+  enterRule(_localctx, 46, SmplangParser::RuleStructInit);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2580,20 +2669,20 @@ SmplangParser::StructInitContext* SmplangParser::structInit() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(254);
+    setState(265);
     match(SmplangParser::ID);
-    setState(255);
+    setState(266);
     match(SmplangParser::LPAREN);
-    setState(257);
+    setState(268);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 85442560) != 0)) {
-      setState(256);
+      ((1ULL << _la) & 2722037760) != 0)) {
+      setState(267);
       argumentList();
     }
-    setState(259);
+    setState(270);
     match(SmplangParser::RPAREN);
    
   }
@@ -2655,7 +2744,7 @@ std::any SmplangParser::ArgumentListContext::accept(tree::ParseTreeVisitor *visi
 
 SmplangParser::ArgumentListContext* SmplangParser::argumentList() {
   ArgumentListContext *_localctx = _tracker.createInstance<ArgumentListContext>(_ctx, getState());
-  enterRule(_localctx, 46, SmplangParser::RuleArgumentList);
+  enterRule(_localctx, 48, SmplangParser::RuleArgumentList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2667,17 +2756,17 @@ SmplangParser::ArgumentListContext* SmplangParser::argumentList() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(261);
+    setState(272);
     expression(0);
-    setState(266);
+    setState(277);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == SmplangParser::COMMA) {
-      setState(262);
+      setState(273);
       match(SmplangParser::COMMA);
-      setState(263);
+      setState(274);
       expression(0);
-      setState(268);
+      setState(279);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -2741,7 +2830,7 @@ std::any SmplangParser::FieldAccessContext::accept(tree::ParseTreeVisitor *visit
 
 SmplangParser::FieldAccessContext* SmplangParser::fieldAccess() {
   FieldAccessContext *_localctx = _tracker.createInstance<FieldAccessContext>(_ctx, getState());
-  enterRule(_localctx, 48, SmplangParser::RuleFieldAccess);
+  enterRule(_localctx, 50, SmplangParser::RuleFieldAccess);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2753,17 +2842,17 @@ SmplangParser::FieldAccessContext* SmplangParser::fieldAccess() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(269);
+    setState(280);
     match(SmplangParser::ID);
-    setState(272); 
+    setState(283); 
     _errHandler->sync(this);
     alt = 1;
     do {
       switch (alt) {
         case 1: {
-              setState(270);
+              setState(281);
               match(SmplangParser::DOT);
-              setState(271);
+              setState(282);
               match(SmplangParser::ID);
               break;
             }
@@ -2771,7 +2860,7 @@ SmplangParser::FieldAccessContext* SmplangParser::fieldAccess() {
       default:
         throw NoViableAltException(this);
       }
-      setState(274); 
+      setState(285); 
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 21, _ctx);
     } while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER);
@@ -2835,7 +2924,7 @@ std::any SmplangParser::ArrayAccessContext::accept(tree::ParseTreeVisitor *visit
 
 SmplangParser::ArrayAccessContext* SmplangParser::arrayAccess() {
   ArrayAccessContext *_localctx = _tracker.createInstance<ArrayAccessContext>(_ctx, getState());
-  enterRule(_localctx, 50, SmplangParser::RuleArrayAccess);
+  enterRule(_localctx, 52, SmplangParser::RuleArrayAccess);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2846,13 +2935,13 @@ SmplangParser::ArrayAccessContext* SmplangParser::arrayAccess() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(276);
+    setState(287);
     match(SmplangParser::ID);
-    setState(277);
+    setState(288);
     match(SmplangParser::LBRACK);
-    setState(278);
+    setState(289);
     expression(0);
-    setState(279);
+    setState(290);
     match(SmplangParser::RBRACK);
    
   }
@@ -2914,7 +3003,7 @@ std::any SmplangParser::FunctionCallContext::accept(tree::ParseTreeVisitor *visi
 
 SmplangParser::FunctionCallContext* SmplangParser::functionCall() {
   FunctionCallContext *_localctx = _tracker.createInstance<FunctionCallContext>(_ctx, getState());
-  enterRule(_localctx, 52, SmplangParser::RuleFunctionCall);
+  enterRule(_localctx, 54, SmplangParser::RuleFunctionCall);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2926,20 +3015,20 @@ SmplangParser::FunctionCallContext* SmplangParser::functionCall() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(281);
+    setState(292);
     match(SmplangParser::ID);
-    setState(282);
+    setState(293);
     match(SmplangParser::LPAREN);
-    setState(284);
+    setState(295);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 85442560) != 0)) {
-      setState(283);
+      ((1ULL << _la) & 2722037760) != 0)) {
+      setState(294);
       argumentList();
     }
-    setState(286);
+    setState(297);
     match(SmplangParser::RPAREN);
    
   }
@@ -2997,7 +3086,7 @@ std::any SmplangParser::AssignableContext::accept(tree::ParseTreeVisitor *visito
 
 SmplangParser::AssignableContext* SmplangParser::assignable() {
   AssignableContext *_localctx = _tracker.createInstance<AssignableContext>(_ctx, getState());
-  enterRule(_localctx, 54, SmplangParser::RuleAssignable);
+  enterRule(_localctx, 56, SmplangParser::RuleAssignable);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -3007,26 +3096,26 @@ SmplangParser::AssignableContext* SmplangParser::assignable() {
     exitRule();
   });
   try {
-    setState(291);
+    setState(302);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 23, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(288);
+      setState(299);
       match(SmplangParser::ID);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(289);
+      setState(300);
       fieldAccess();
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(290);
+      setState(301);
       arrayAccess();
       break;
     }
@@ -3048,7 +3137,7 @@ SmplangParser::AssignableContext* SmplangParser::assignable() {
 bool SmplangParser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
     case 7: return typeSempred(antlrcpp::downCast<TypeContext *>(context), predicateIndex);
-    case 19: return expressionSempred(antlrcpp::downCast<ExpressionContext *>(context), predicateIndex);
+    case 20: return expressionSempred(antlrcpp::downCast<ExpressionContext *>(context), predicateIndex);
 
   default:
     break;
@@ -3068,10 +3157,12 @@ bool SmplangParser::typeSempred(TypeContext *_localctx, size_t predicateIndex) {
 
 bool SmplangParser::expressionSempred(ExpressionContext *_localctx, size_t predicateIndex) {
   switch (predicateIndex) {
-    case 1: return precpred(_ctx, 3);
-    case 2: return precpred(_ctx, 2);
-    case 3: return precpred(_ctx, 1);
-    case 4: return precpred(_ctx, 5);
+    case 1: return precpred(_ctx, 7);
+    case 2: return precpred(_ctx, 6);
+    case 3: return precpred(_ctx, 5);
+    case 4: return precpred(_ctx, 4);
+    case 5: return precpred(_ctx, 3);
+    case 6: return precpred(_ctx, 1);
 
   default:
     break;

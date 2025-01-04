@@ -19,7 +19,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitFunction(SmplangParser::FunctionContext *ctx) override {
+  virtual std::any visitFunctionDecl(SmplangParser::FunctionDeclContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -79,7 +79,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitForStatement(SmplangParser::ForStatementContext *ctx) override {
+  virtual std::any visitBreakStatement(SmplangParser::BreakStatementContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitContinueStatement(SmplangParser::ContinueStatementContext *ctx) override {
     return visitChildren(ctx);
   }
 

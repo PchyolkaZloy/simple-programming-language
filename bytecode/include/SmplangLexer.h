@@ -13,11 +13,11 @@ class  SmplangLexer : public antlr4::Lexer {
 public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, FUNC = 5, VOID = 6, RETURN = 7, 
-    PRINT = 8, FOR = 9, WHILE = 10, IF = 11, ELSE = 12, STRUCT = 13, BOOL = 14, 
-    INT = 15, DOUBLE = 16, CHAR = 17, ID = 18, BINOP = 19, UNAROP = 20, 
-    COMPOP = 21, LOGICOP = 22, ASSIGN = 23, LPAREN = 24, RPAREN = 25, LBRACE = 26, 
-    RBRACE = 27, LBRACK = 28, RBRACK = 29, SEMI = 30, COMMA = 31, DOT = 32, 
-    WS = 33, COMMENT = 34
+    PRINT = 8, FOR = 9, WHILE = 10, IF = 11, ELSE = 12, STRUCT = 13, BREAK = 14, 
+    CONTINUE = 15, BOOL = 16, INT = 17, DOUBLE = 18, CHAR = 19, ID = 20, 
+    NEG = 21, MULT = 22, ADD = 23, COMPOP = 24, NOT = 25, AND = 26, OR = 27, 
+    ASSIGN = 28, LPAREN = 29, RPAREN = 30, LBRACE = 31, RBRACE = 32, LBRACK = 33, 
+    RBRACK = 34, SEMI = 35, COMMA = 36, DOT = 37, WS = 38, COMMENT = 39
   };
 
   explicit SmplangLexer(antlr4::CharStream *input);
