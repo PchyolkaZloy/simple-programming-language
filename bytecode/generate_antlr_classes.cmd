@@ -1,1 +1,0 @@
-java -jar "./jar/antlr-4.13.2-complete.jar" -Dlanguage=Cpp "./grammar/Smplang.g4" -visitor -o "./antlr_generated"
