@@ -1,5 +1,5 @@
 
-// Generated from grammar/Smplang.g4 by ANTLR 4.13.2
+// Generated from ./grammar/Smplang.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -91,10 +91,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitPrintStatement(SmplangParser::PrintStatementContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitExpression(SmplangParser::ExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -124,6 +120,10 @@ public:
   }
 
   virtual std::any visitFunctionCall(SmplangParser::FunctionCallContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitBuiltinCall(SmplangParser::BuiltinCallContext *ctx) override {
     return visitChildren(ctx);
   }
 

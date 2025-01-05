@@ -1,5 +1,5 @@
 
-// Generated from grammar/Smplang.g4 by ANTLR 4.13.2
+// Generated from ./grammar/Smplang.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -71,9 +71,6 @@ public:
   virtual void enterReturnStatement(SmplangParser::ReturnStatementContext *ctx) = 0;
   virtual void exitReturnStatement(SmplangParser::ReturnStatementContext *ctx) = 0;
 
-  virtual void enterPrintStatement(SmplangParser::PrintStatementContext *ctx) = 0;
-  virtual void exitPrintStatement(SmplangParser::PrintStatementContext *ctx) = 0;
-
   virtual void enterExpression(SmplangParser::ExpressionContext *ctx) = 0;
   virtual void exitExpression(SmplangParser::ExpressionContext *ctx) = 0;
 
@@ -97,6 +94,9 @@ public:
 
   virtual void enterFunctionCall(SmplangParser::FunctionCallContext *ctx) = 0;
   virtual void exitFunctionCall(SmplangParser::FunctionCallContext *ctx) = 0;
+
+  virtual void enterBuiltinCall(SmplangParser::BuiltinCallContext *ctx) = 0;
+  virtual void exitBuiltinCall(SmplangParser::BuiltinCallContext *ctx) = 0;
 
   virtual void enterAssignable(SmplangParser::AssignableContext *ctx) = 0;
   virtual void exitAssignable(SmplangParser::AssignableContext *ctx) = 0;

@@ -1,5 +1,5 @@
 
-// Generated from grammar/Smplang.g4 by ANTLR 4.13.2
+// Generated from ./grammar/Smplang.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -57,8 +57,6 @@ public:
 
     virtual std::any visitReturnStatement(SmplangParser::ReturnStatementContext *context) = 0;
 
-    virtual std::any visitPrintStatement(SmplangParser::PrintStatementContext *context) = 0;
-
     virtual std::any visitExpression(SmplangParser::ExpressionContext *context) = 0;
 
     virtual std::any visitPrimaryExpression(SmplangParser::PrimaryExpressionContext *context) = 0;
@@ -74,6 +72,8 @@ public:
     virtual std::any visitArrayAccess(SmplangParser::ArrayAccessContext *context) = 0;
 
     virtual std::any visitFunctionCall(SmplangParser::FunctionCallContext *context) = 0;
+
+    virtual std::any visitBuiltinCall(SmplangParser::BuiltinCallContext *context) = 0;
 
     virtual std::any visitAssignable(SmplangParser::AssignableContext *context) = 0;
 

@@ -11,7 +11,7 @@ parameter: type ID;
 structDecl: STRUCT structType LBRACE fieldDecl+ RBRACE SEMI;
 fieldDecl: type ID SEMI;
 
-type: primitiveType | type LBRACK INT RBRACK | structType;
+type: primitiveType | type ARRAYTYPE | structType;
 primitiveType: 'int' | 'double' | 'char' | 'bool';
 structType: ID;
 
@@ -25,14 +25,13 @@ statement:
     | ifStatement
     | whileStatement
     | breakStatement SEMI
-    | continueStatement SEMI
-    | block;
+    | continueStatement SEMI;
 
 varDecl: type ID (ASSIGN expression)?;
 assignment: assignable ASSIGN expression;
 
-ifStatement: IF LPAREN expression RPAREN statement (ELSE statement)?;
-whileStatement: WHILE LPAREN expression RPAREN statement;
+ifStatement: IF LPAREN expression RPAREN (statement | block) (ELIF LPAREN expression RPAREN (statement | block))* (ELSE (statement | block))?;
+whileStatement: WHILE LPAREN expression RPAREN (statement | block);
 
 breakStatement: BREAK;
 continueStatement: CONTINUE;
@@ -86,6 +85,7 @@ FOR: 'for';
 WHILE: 'while';
 IF: 'if';
 ELSE: 'else';
+ELIF: 'elif';
 STRUCT: 'struct';
 BREAK: 'break';
 CONTINUE: 'continue';
@@ -110,6 +110,7 @@ LBRACE: '{';
 RBRACE: '}';
 LBRACK: '[';
 RBRACK: ']';
+ARRAYTYPE: '[]';
 SEMI: ';';
 COMMA: ',';
 DOT: '.';
