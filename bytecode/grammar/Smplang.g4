@@ -21,7 +21,6 @@ statement:
     varDecl SEMI
     | assignment SEMI
     | returnStatement SEMI
-    | printStatement SEMI
     | expression SEMI
     | ifStatement
     | whileStatement
@@ -39,7 +38,7 @@ breakStatement: BREAK;
 continueStatement: CONTINUE;
 
 returnStatement: RETURN expression?;
-printStatement: PRINT LPAREN expression RPAREN;
+//printStatement: PRINT LPAREN expression RPAREN;
 
 expression:
       LPAREN expression RPAREN
@@ -58,6 +57,7 @@ primaryExpression:
       ID
     | fieldAccess
     | arrayAccess
+    | builtinCall
     | functionCall
     | INT
     | DOUBLE
@@ -74,13 +74,14 @@ argumentList: expression (COMMA expression)*;
 fieldAccess: ID (DOT ID)+;
 arrayAccess: ID LBRACK expression RBRACK;
 functionCall: ID LPAREN argumentList? RPAREN;
+builtinCall: BUILTINFUNC LPAREN argumentList? RPAREN;
 assignable: ID | fieldAccess | arrayAccess;
 
 // Lexer
 FUNC: 'func';
 VOID: 'void';
 RETURN: 'return';
-PRINT: 'print';
+BUILTINFUNC: 'print';
 FOR: 'for';
 WHILE: 'while';
 IF: 'if';
