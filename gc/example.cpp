@@ -106,7 +106,7 @@ void example_5() {
     }
     gc.collect();
     gc.showObjects();
-    // don't change anything, memory leak
+    // delete cycle referencing
 }
 
 void example_6() {
@@ -130,6 +130,22 @@ void example_6() {
     gc.showObjects();
 }
 
+void example_7() {
+    // Example from chat
+    gc::GarbageCollector gc;
+
+    for (int i = 0; i < 1000000; i++) {
+        {
+            auto first = gc.createStruct({"next"});
+            auto second = gc.createStruct({"next"});
+            first.object().set("next", second);
+            second.object().set("next", first);
+        }
+        gc.collect();
+    }
+    gc.showObjects();
+}
+
 int main() {
     std::cout << "Example 1:\n";
     example_1();
@@ -143,6 +159,8 @@ int main() {
     example_5();
     std::cout << "Example 6:\n";
     example_6();
+    std::cout << "Example 7:\n";
+    example_7();
 
     return 0;
 }
