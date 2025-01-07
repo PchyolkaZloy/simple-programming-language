@@ -11,6 +11,7 @@ set(SOURCES
         src/SmplangVisitor.cpp
         src/SmplangBaseListener.cpp
         src/SmplangListener.cpp
+        src/SmplangThrowingErrorListener.cpp
 )
 
 set(HEADERS
@@ -20,7 +21,12 @@ set(HEADERS
         include/SmplangVisitor.h
         include/SmplangBaseListener.h
         include/SmplangListener.h
+        include/SmplangThrowingErrorListener.h
+        include/smplang_common.h
+        include/variables_util.h
 )
+
+add_subdirectory(multiprecision-1.79)
 
 # Ищем ANTLR4 runtime (с conan находим)
 find_package(antlr4-runtime REQUIRED)
@@ -29,7 +35,7 @@ find_package(antlr4-runtime REQUIRED)
 add_library(Bytecode STATIC ${SOURCES} ${HEADERS})
 
 # Подключаем ANTLR runtime к библиотеке
-target_link_libraries(Bytecode PUBLIC antlr4_static)
+target_link_libraries(Bytecode PUBLIC antlr4_static boost_multiprecision)
 # Указываем, где искать заголовочные файлы
 target_include_directories(Bytecode PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

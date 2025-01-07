@@ -56,7 +56,6 @@ primaryExpression:
       ID
     | fieldAccess
     | arrayAccess
-    | builtinCall
     | functionCall
     | INT
     | DOUBLE
@@ -73,14 +72,12 @@ argumentList: expression (COMMA expression)*;
 fieldAccess: ID (DOT ID)+;
 arrayAccess: ID LBRACK expression RBRACK;
 functionCall: ID LPAREN argumentList? RPAREN;
-builtinCall: BUILTINFUNC LPAREN argumentList? RPAREN;
 assignable: ID | fieldAccess | arrayAccess;
 
 // Lexer
 FUNC: 'func';
 VOID: 'void';
 RETURN: 'return';
-BUILTINFUNC: 'print';
 FOR: 'for';
 WHILE: 'while';
 IF: 'if';
