@@ -24,6 +24,8 @@ set(HEADERS
         include/SmplangThrowingErrorListener.h
         include/smplang_common.h
         include/variables_util.h
+        include/type_inference.h
+        include/operators.h
 )
 
 add_subdirectory(multiprecision-1.79)
