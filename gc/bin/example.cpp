@@ -1,5 +1,5 @@
 #include <iostream>
-#include "gc.cpp"
+#include <gc/lib/gc.h>
 
 void example_1() {
     // Base example

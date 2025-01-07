@@ -146,9 +146,12 @@ public:
     Struct(const std::vector<std::string>& names);
 
     void set(const std::string& name, const Ref<BaseObject>& value);
-    template<typename T>
-    Ref<T> get(const std::string& name);
     std::vector<Ref<BaseObject>> getChildren() override;
+
+    template<typename T>
+    Ref<T> get(const std::string& name) {
+        return *reinterpret_cast<Ref<T>*>(&_data[name]);
+    }
 private:
     std::unordered_map<std::string, bool> _is_present;
     std::unordered_map<std::string, Ref<BaseObject>> _data;
@@ -160,9 +163,21 @@ public:
     ~GarbageCollector();
 
     template<typename T>
-    Ref<LeafObject<T>> createLeafObject(const T& value);
+    Ref<LeafObject<T>> createLeafObject(const T& value) {
+        auto obj = new LeafObject<T>(value);
+        _objects.insert(obj);
+
+        return gc::Ref(&_root, obj);
+    }
+
     template<typename T>
-    Ref<Array<T>> createArray(size_t size);
+    Ref<Array<T>> createArray(size_t size) {
+        auto obj = new gc::Array<T>(size);
+        _objects.insert(obj);
+
+        return gc::Ref(&_root, obj);
+    }
+
     Ref<Struct> createStruct(const std::vector<std::string>& names);
     void collect();
 

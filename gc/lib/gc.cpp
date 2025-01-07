@@ -1,6 +1,3 @@
-#include <iostream>
-#include <list>
-#include <vector>
 #include "gc.h"
 
 
@@ -20,11 +17,6 @@ void gc::Struct::set(const std::string& name, const Ref<BaseObject>& value) {
     _is_present[name] = true;
 }
 
-template<typename T>
-gc::Ref<T> gc::Struct::get(const std::string& name) {
-    return *reinterpret_cast<Ref<T>*>(&_data[name]);
-}
-
 std::vector<gc::Ref<gc::BaseObject>> gc::Struct::getChildren() {
     std::vector<gc::Ref<gc::BaseObject>> keys;
     for (auto it : _data) {
@@ -42,22 +34,6 @@ gc::GarbageCollector::~GarbageCollector() {
     for (BaseObject* obj : _root) {
         delete obj;
     }
-}
-
-template<typename T>
-gc::Ref<gc::LeafObject<T>> gc::GarbageCollector::createLeafObject(const T& value) {
-    auto obj = new LeafObject<T>(value);
-    _objects.insert(obj);
-
-    return gc::Ref(&_root, obj);
-}
-
-template<typename T>
-gc::Ref<gc::Array<T>> gc::GarbageCollector::createArray(size_t size) {
-    auto obj = new gc::Array<T>(size);
-    _objects.insert(obj);
-
-    return gc::Ref(&_root, obj);
 }
 
 gc::Ref<gc::Struct> gc::GarbageCollector::createStruct(const std::vector<std::string>& names) {
