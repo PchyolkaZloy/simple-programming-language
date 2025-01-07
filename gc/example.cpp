@@ -135,31 +135,30 @@ void example_7() {
     gc::GarbageCollector gc;
 
     for (int i = 0; i < 1000000; i++) {
-        {
-            auto first = gc.createStruct({"next"});
-            auto second = gc.createStruct({"next"});
-            first.object().set("next", second);
-            second.object().set("next", first);
-        }
+        auto first = gc.createStruct({"next"});
+        auto second = gc.createStruct({"next"});
+        first.object().set("next", second);
+        second.object().set("next", first);
         gc.collect();
     }
+    gc.collect();
     gc.showObjects();
 }
 
 int main() {
-    std::cout << "Example 1:\n";
+    std::cout << "Example 1:" << std::endl;
     example_1();
-    std::cout << "Example 2:\n";
+    std::cout << "Example 2:" << std::endl;
     example_2();
-    std::cout << "Example 3:\n";
+    std::cout << "Example 3:" << std::endl;
     example_3();
-    std::cout << "Example 4:\n";
+    std::cout << "Example 4:" << std::endl;
     example_4();
-    std::cout << "Example 5:\n";
+    std::cout << "Example 5:" << std::endl;
     example_5();
-    std::cout << "Example 6:\n";
+    std::cout << "Example 6:" << std::endl;
     example_6();
-    std::cout << "Example 7:\n";
+    std::cout << "Example 7:" << std::endl;
     example_7();
 
     return 0;

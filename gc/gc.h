@@ -1,5 +1,4 @@
 #pragma once
-#include <list>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -15,16 +14,18 @@ public:
     Ref(std::unordered_set<BaseObject*>* root = nullptr, T* obj = nullptr)
         : _object(obj)
         , _root(root) {
-        if (_root != nullptr) {
+        if (_root != nullptr && _root->find(_object) == _root->end()) {
             _root->insert(_object);
+            _is_rooted = true;
         }
     }
 
     Ref(const gc::Ref<T>& obj)
         : _object(obj._object)
         , _root(obj._root) {
-        if (_root != nullptr) {
+        if (_root != nullptr && _root->find(_object) == _root->end()) {
             _root->insert(_object);
+            _is_rooted = true;
         }
     }
 
@@ -32,23 +33,25 @@ public:
     Ref(const Ref<U>& other)
         : _object(reinterpret_cast<T*>(&other.object()))
         , _root(other.scope()) {
-        if (_root != nullptr) {
+        if (_root != nullptr && _root->find(_object) == _root->end()) {
             _root->insert(_object);
+            _is_rooted = true;
         }
     }
 
     Ref& operator=(const Ref<T>& obj) {
         _object = obj._object;
         _root = obj._root;
-        if (_root != nullptr) {
+        if (_root != nullptr && _root->find(_object) == _root->end()) {
             _root->insert(_object);
+            _is_rooted = true;
         }
 
         return *this;
     }
 
     ~Ref() {
-        if (_root != nullptr) {
+        if (_root != nullptr && _is_rooted) {
             _root->erase(_object);
         }
     }
@@ -62,17 +65,13 @@ public:
     }
 private:
     T* _object = nullptr;
+    bool _is_rooted = false;
     std::unordered_set<BaseObject*>* _root;
 };
 
 class BaseObject {
 public:
-    void increment();
-    size_t counter();
-
     virtual std::vector<Ref<BaseObject>> getChildren();
-private:
-    size_t _counter{};
 };
 
 template<typename T>

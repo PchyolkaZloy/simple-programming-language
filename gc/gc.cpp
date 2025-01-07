@@ -4,14 +4,6 @@
 #include "gc.h"
 
 
-void gc::BaseObject::increment() {
-    _counter++;
-}
-
-size_t gc::BaseObject::counter() {
-    return _counter;
-}
-
 std::vector<gc::Ref<gc::BaseObject>> gc::BaseObject::getChildren() {
     return {};
 }
@@ -55,7 +47,6 @@ gc::GarbageCollector::~GarbageCollector() {
 template<typename T>
 gc::Ref<gc::LeafObject<T>> gc::GarbageCollector::createLeafObject(const T& value) {
     auto obj = new LeafObject<T>(value);
-    _root.insert(obj);
     _objects.insert(obj);
 
     return gc::Ref(&_root, obj);
@@ -64,7 +55,6 @@ gc::Ref<gc::LeafObject<T>> gc::GarbageCollector::createLeafObject(const T& value
 template<typename T>
 gc::Ref<gc::Array<T>> gc::GarbageCollector::createArray(size_t size) {
     auto obj = new gc::Array<T>(size);
-    _root.insert(obj);
     _objects.insert(obj);
 
     return gc::Ref(&_root, obj);
@@ -72,7 +62,6 @@ gc::Ref<gc::Array<T>> gc::GarbageCollector::createArray(size_t size) {
 
 gc::Ref<gc::Struct> gc::GarbageCollector::createStruct(const std::vector<std::string>& names) {
     auto obj = new gc::Struct(names);
-    _root.insert(obj);
     _objects.insert(obj);
 
     return gc::Ref(&_root, obj);
@@ -87,6 +76,10 @@ void gc::GarbageCollector::collect() {
 }
 
 void gc::GarbageCollector::mark(gc::BaseObject& obj) {
+    if (_marked.find(&obj) != _marked.end()) {
+        return;
+    }
+
     _marked.insert(&obj);
 
     for (const auto& child : obj.getChildren()) {
@@ -108,5 +101,5 @@ void gc::GarbageCollector::sweep() {
 void gc::GarbageCollector::showObjects() {
     std::cout << "Objects in gc, root\n";
     std::cout << _objects.size() << " " << _root.size() << "\n";
-    std::cout << "-------------\n";
+    std::cout << "-------------" << std::endl;
 }
