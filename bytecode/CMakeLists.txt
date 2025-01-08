@@ -13,6 +13,7 @@ set(SOURCES
         src/SmplangListener.cpp
         src/SmplangThrowingErrorListener.cpp
         src/SmplangStructFuncNamePositionVisitor.cpp
+        src/SmplangStructDeclVisitor.cpp
 )
 
 set(HEADERS
@@ -28,6 +29,7 @@ set(HEADERS
         include/type_inference.h
         include/operators.h
         include/SmplangStructFuncNamePositionVisitor.h
+        include/SmplangStructDeclVisitor.h
 )
 
 add_subdirectory(multiprecision-1.79)

@@ -90,7 +90,9 @@ namespace bytecode {
         }
 
         [[nodiscard]] bool canCastTo(const Type &other) const override {
-            if (other.isArrayType() || this->isArrayType())
+            if (this->isArrayType())
+                return other.getTypeValue() == "bool";
+            if (other.isArrayType() || !other.isPrimitive())
                 return false;
             return true;
         }

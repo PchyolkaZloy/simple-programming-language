@@ -2,6 +2,7 @@
 #include "SmplangParser.h"
 #include "SmplangThrowingErrorListener.h"
 #include "SmplangStructFuncNamePositionVisitor.h"
+#include "SmplangStructDeclVisitor.h"
 #include "smplang_common.h"
 #include <antlr4-runtime.h>
 #include <iostream>
@@ -13,8 +14,13 @@ int main() {
     SmplangParser::ProgramContext *tree;
     try {
         std::string input = R"(
-func int sum(int[][] a, int a) {
-}
+struct aoo {
+double c;
+};
+struct aoo {
+double b;
+
+};
 struct myStruct {
  int a;
 };
@@ -36,7 +42,10 @@ struct secondStruct {
 
 
         tree = parser.program();
+        auto def_result = SmplangBaseVisitor().visitProgram(tree);
         SmplangStructFuncNamePositionVisitor name_visitor({"print"});
+        SmplangStructDeclVisitor().visitProgram(tree);
+        std::cout << std::endl;
         auto names_info = std::any_cast<NamesInfo>(name_visitor.visitProgram(tree));
         for (auto str_it = names_info.structure_positions.begin();
              str_it != names_info.structure_positions.end(); ++str_it) {

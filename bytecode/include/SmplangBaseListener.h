@@ -64,12 +64,6 @@ public:
   virtual void enterWhileStatement(SmplangParser::WhileStatementContext * /*ctx*/) override { }
   virtual void exitWhileStatement(SmplangParser::WhileStatementContext * /*ctx*/) override { }
 
-  virtual void enterBreakStatement(SmplangParser::BreakStatementContext * /*ctx*/) override { }
-  virtual void exitBreakStatement(SmplangParser::BreakStatementContext * /*ctx*/) override { }
-
-  virtual void enterContinueStatement(SmplangParser::ContinueStatementContext * /*ctx*/) override { }
-  virtual void exitContinueStatement(SmplangParser::ContinueStatementContext * /*ctx*/) override { }
-
   virtual void enterReturnStatement(SmplangParser::ReturnStatementContext * /*ctx*/) override { }
   virtual void exitReturnStatement(SmplangParser::ReturnStatementContext * /*ctx*/) override { }
 
@@ -96,9 +90,6 @@ public:
 
   virtual void enterFunctionCall(SmplangParser::FunctionCallContext * /*ctx*/) override { }
   virtual void exitFunctionCall(SmplangParser::FunctionCallContext * /*ctx*/) override { }
-
-  virtual void enterPrintCall(SmplangParser::PrintCallContext * /*ctx*/) override { }
-  virtual void exitPrintCall(SmplangParser::PrintCallContext * /*ctx*/) override { }
 
   virtual void enterAssignable(SmplangParser::AssignableContext * /*ctx*/) override { }
   virtual void exitAssignable(SmplangParser::AssignableContext * /*ctx*/) override { }

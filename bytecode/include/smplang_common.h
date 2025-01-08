@@ -55,5 +55,10 @@ namespace bytecode {
             return ValidatorException(
                     std::format("name {0} redefined at line {1}, symbol {2}", name, position.line, position.symbol));
         }
+
+        static ValidatorException unknownName(const TokenPosition &position, const std::string &name) {
+            return ValidatorException(
+                    std::format("name {0} unknown at line {1}, symbol {2}", name, position.line, position.symbol));
+        }
     };
 }

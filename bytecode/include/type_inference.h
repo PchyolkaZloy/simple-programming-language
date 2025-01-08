@@ -10,7 +10,7 @@ namespace bytecode {
 
     class TypeInspector {
     public:
-        [[nodiscard]] std::unique_ptr<Type>
+        [[nodiscard]] std::shared_ptr<Type>
         inferForBinaryOp(const Type &v1_type, const Type &v2_type, BinaryOperator op) const {
             Type *result;
             if (!(v1_type.isPrimitive() && v2_type.isPrimitive()))
@@ -44,10 +44,10 @@ namespace bytecode {
                     result = new PrimitiveType(PrimitiveTypeValue::Bool, 0);
                     break;
             }
-            return std::unique_ptr<Type>(result);
+            return std::shared_ptr<Type>(result);
         }
 
-        [[nodiscard]] std::unique_ptr<Type> inferForUnaryOp(const Type &v_type, UnaryOperator op) const {
+        [[nodiscard]] std::shared_ptr<Type> inferForUnaryOp(const Type &v_type, UnaryOperator op) const {
             Type *result;
             if (!v_type.isPrimitive() || v_type.isArrayType())
                 return {nullptr};
@@ -62,24 +62,25 @@ namespace bytecode {
                     result = new PrimitiveType(PrimitiveTypeValue::Bool, 0);
                     break;
             }
+            return std::shared_ptr<Type>(result);
         }
 
-        [[nodiscard]] std::unique_ptr<Type> inferArrayAccess(const Type &v_type) const {
+        [[nodiscard]] std::shared_ptr<Type> inferArrayAccess(const Type &v_type) const {
             if (!v_type.isArrayType())
                 return {nullptr};
-            std::unique_ptr<Type> new_type(v_type.clone());
+            std::shared_ptr<Type> new_type(v_type.clone());
             new_type->setArrayDepth(new_type->getArrayDepth() - 1);
             return new_type;
         }
 
-        [[nodiscard]] std::unique_ptr<Type>
+        [[nodiscard]] std::shared_ptr<Type>
         inferFieldAccess(const std::string &field_name, const StructureSignature &structure) const {
 //            changing nothing, honestly
             auto &st = const_cast<StructureSignature &>(structure);
             auto it = st.find(field_name);
             if (it == st.end())
                 return {nullptr};
-            return std::unique_ptr<Type>(it->second->clone());
+            return std::shared_ptr<Type>(it->second->clone());
         }
 
     };

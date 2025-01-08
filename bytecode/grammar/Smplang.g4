@@ -1,7 +1,7 @@
 grammar Smplang;
 
 // Parser
-program: (functionDecl | structDecl | statement)* EOF;
+program: structDecl* functionDecl* statement* EOF;
 
 functionDecl: FUNC returnType ID LPAREN parameterList? RPAREN block;
 returnType: type | VOID;
@@ -23,9 +23,9 @@ statement:
     | returnStatement SEMI
     | expression SEMI
     | ifStatement
-    | whileStatement
-    | breakStatement SEMI
-    | continueStatement SEMI;
+    | whileStatement;
+//    | breakStatement SEMI
+//    | continueStatement SEMI;
 
 varDecl: type ID (ASSIGN expression)?;
 assignment: assignable ASSIGN expression;
@@ -33,8 +33,8 @@ assignment: assignable ASSIGN expression;
 ifStatement: IF LPAREN expression RPAREN (statement | block) (ELIF LPAREN expression RPAREN (statement | block))* (ELSE (statement | block))?;
 whileStatement: WHILE LPAREN expression RPAREN (statement | block);
 
-breakStatement: BREAK;
-continueStatement: CONTINUE;
+//breakStatement: BREAK;
+//continueStatement: CONTINUE;
 
 returnStatement: RETURN expression?;
 //printStatement: PRINT LPAREN expression RPAREN;
@@ -55,8 +55,7 @@ expression:
 primaryExpression:
       ID
     | fieldAccess
-    | arrayAccess
-    | printCall
+    | arrayAccess //    | printCall
     | functionCall
     | INT
     | DOUBLE
@@ -73,7 +72,7 @@ argumentList: expression (COMMA expression)*;
 fieldAccess: ID (DOT ID)+;
 arrayAccess: ID LBRACK expression RBRACK;
 functionCall: ID LPAREN argumentList? RPAREN;
-printCall: PRINT LPAREN expression RPAREN;
+//printCall: PRINT LPAREN expression RPAREN;
 assignable: ID | fieldAccess | arrayAccess;
 
 // Lexer
@@ -81,7 +80,7 @@ FUNC: 'func';
 VOID: 'void';
 RETURN: 'return';
 FOR: 'for';
-PRINT: 'print';
+//PRINT: 'print';
 WHILE: 'while';
 IF: 'if';
 ELSE: 'else';

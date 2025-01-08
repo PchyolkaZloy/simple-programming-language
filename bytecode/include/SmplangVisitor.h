@@ -51,10 +51,6 @@ public:
 
     virtual std::any visitWhileStatement(SmplangParser::WhileStatementContext *context) = 0;
 
-    virtual std::any visitBreakStatement(SmplangParser::BreakStatementContext *context) = 0;
-
-    virtual std::any visitContinueStatement(SmplangParser::ContinueStatementContext *context) = 0;
-
     virtual std::any visitReturnStatement(SmplangParser::ReturnStatementContext *context) = 0;
 
     virtual std::any visitExpression(SmplangParser::ExpressionContext *context) = 0;
@@ -72,8 +68,6 @@ public:
     virtual std::any visitArrayAccess(SmplangParser::ArrayAccessContext *context) = 0;
 
     virtual std::any visitFunctionCall(SmplangParser::FunctionCallContext *context) = 0;
-
-    virtual std::any visitPrintCall(SmplangParser::PrintCallContext *context) = 0;
 
     virtual std::any visitAssignable(SmplangParser::AssignableContext *context) = 0;
 

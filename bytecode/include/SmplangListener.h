@@ -62,12 +62,6 @@ public:
   virtual void enterWhileStatement(SmplangParser::WhileStatementContext *ctx) = 0;
   virtual void exitWhileStatement(SmplangParser::WhileStatementContext *ctx) = 0;
 
-  virtual void enterBreakStatement(SmplangParser::BreakStatementContext *ctx) = 0;
-  virtual void exitBreakStatement(SmplangParser::BreakStatementContext *ctx) = 0;
-
-  virtual void enterContinueStatement(SmplangParser::ContinueStatementContext *ctx) = 0;
-  virtual void exitContinueStatement(SmplangParser::ContinueStatementContext *ctx) = 0;
-
   virtual void enterReturnStatement(SmplangParser::ReturnStatementContext *ctx) = 0;
   virtual void exitReturnStatement(SmplangParser::ReturnStatementContext *ctx) = 0;
 
@@ -94,9 +88,6 @@ public:
 
   virtual void enterFunctionCall(SmplangParser::FunctionCallContext *ctx) = 0;
   virtual void exitFunctionCall(SmplangParser::FunctionCallContext *ctx) = 0;
-
-  virtual void enterPrintCall(SmplangParser::PrintCallContext *ctx) = 0;
-  virtual void exitPrintCall(SmplangParser::PrintCallContext *ctx) = 0;
 
   virtual void enterAssignable(SmplangParser::AssignableContext *ctx) = 0;
   virtual void exitAssignable(SmplangParser::AssignableContext *ctx) = 0;
