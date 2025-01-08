@@ -12,7 +12,7 @@ set(SOURCES
         src/SmplangBaseListener.cpp
         src/SmplangListener.cpp
         src/SmplangThrowingErrorListener.cpp
-        src/SmplangStructFuncVisitor.cpp
+        src/SmplangStructFuncNamePositionVisitor.cpp
 )
 
 set(HEADERS
@@ -27,8 +27,7 @@ set(HEADERS
         include/variables_util.h
         include/type_inference.h
         include/operators.h
-        include/visitor_util.h
-        include/SmplangStructFuncVisitor.h
+        include/SmplangStructFuncNamePositionVisitor.h
 )
 
 add_subdirectory(multiprecision-1.79)
@@ -45,6 +44,6 @@ target_link_libraries(Bytecode PUBLIC antlr4_static boost_multiprecision)
 target_include_directories(Bytecode PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # main.cpp для тестирования
-add_executable(SmplangParserTest main.cpp)
-target_link_libraries(SmplangParserTest Bytecode)
-target_link_libraries(SmplangParserTest antlr4_static)
+add_executable(SmplangBytecodeTest main.cpp)
+target_link_libraries(SmplangBytecodeTest Bytecode)
+target_link_libraries(SmplangBytecodeTest antlr4_static)
