@@ -58,128 +58,131 @@ void smplangParserInitialize() {
       "block", "statement", "varDecl", "assignment", "ifStatement", "whileStatement", 
       "breakStatement", "continueStatement", "returnStatement", "expression", 
       "primaryExpression", "arrayInit", "structInit", "argumentList", "fieldAccess", 
-      "arrayAccess", "functionCall", "assignable"
+      "arrayAccess", "functionCall", "printCall", "assignable"
     },
     std::vector<std::string>{
       "", "'int'", "'double'", "'char'", "'bool'", "'func'", "'void'", "'return'", 
-      "'for'", "'while'", "'if'", "'else'", "'elif'", "'struct'", "'break'", 
-      "'continue'", "", "", "", "", "", "'--'", "", "", "", "'!'", "'&&'", 
-      "'||'", "'='", "'('", "')'", "'{'", "'}'", "'['", "']'", "'[]'", "';'", 
-      "','", "'.'"
+      "'for'", "'print'", "'while'", "'if'", "'else'", "'elif'", "'struct'", 
+      "'break'", "'continue'", "", "", "", "", "", "'--'", "", "", "", "'!'", 
+      "'&&'", "'||'", "'='", "'('", "')'", "'{'", "'}'", "'['", "']'", "'[]'", 
+      "';'", "','", "'.'"
     },
     std::vector<std::string>{
-      "", "", "", "", "", "FUNC", "VOID", "RETURN", "FOR", "WHILE", "IF", 
-      "ELSE", "ELIF", "STRUCT", "BREAK", "CONTINUE", "BOOL", "INT", "DOUBLE", 
-      "CHAR", "ID", "NEG", "MULT", "ADD", "COMPOP", "NOT", "AND", "OR", 
-      "ASSIGN", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", 
-      "ARRAYTYPE", "SEMI", "COMMA", "DOT", "WS", "COMMENT"
+      "", "", "", "", "", "FUNC", "VOID", "RETURN", "FOR", "PRINT", "WHILE", 
+      "IF", "ELSE", "ELIF", "STRUCT", "BREAK", "CONTINUE", "BOOL", "INT", 
+      "DOUBLE", "CHAR", "ID", "NEG", "MULT", "ADD", "COMPOP", "NOT", "AND", 
+      "OR", "ASSIGN", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "LBRACK", 
+      "RBRACK", "ARRAYTYPE", "SEMI", "COMMA", "DOT", "WS", "COMMENT"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,40,313,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,41,321,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,
   	14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,
-  	21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,2,27,7,27,1,0,1,
-  	0,1,0,5,0,60,8,0,10,0,12,0,63,9,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,3,1,72,
-  	8,1,1,1,1,1,1,1,1,2,1,2,3,2,79,8,2,1,3,1,3,1,3,5,3,84,8,3,10,3,12,3,87,
-  	9,3,1,4,1,4,1,4,1,5,1,5,1,5,1,5,4,5,96,8,5,11,5,12,5,97,1,5,1,5,1,5,1,
-  	6,1,6,1,6,1,6,1,7,1,7,1,7,3,7,110,8,7,1,7,1,7,5,7,114,8,7,10,7,12,7,117,
-  	9,7,1,8,1,8,1,9,1,9,1,10,1,10,5,10,125,8,10,10,10,12,10,128,9,10,1,10,
-  	1,10,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,
-  	1,11,1,11,1,11,1,11,1,11,1,11,1,11,3,11,152,8,11,1,12,1,12,1,12,1,12,
-  	3,12,158,8,12,1,13,1,13,1,13,1,13,1,14,1,14,1,14,1,14,1,14,1,14,3,14,
-  	170,8,14,1,14,1,14,1,14,1,14,1,14,1,14,3,14,178,8,14,5,14,180,8,14,10,
-  	14,12,14,183,9,14,1,14,1,14,1,14,3,14,188,8,14,3,14,190,8,14,1,15,1,15,
-  	1,15,1,15,1,15,1,15,3,15,198,8,15,1,16,1,16,1,17,1,17,1,18,1,18,3,18,
-  	206,8,18,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,3,19,218,8,
-  	19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,
-  	19,1,19,1,19,1,19,1,19,1,19,1,19,5,19,240,8,19,10,19,12,19,243,9,19,1,
-  	20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,3,
-  	20,259,8,20,1,21,1,21,1,21,1,21,5,21,265,8,21,10,21,12,21,268,9,21,3,
-  	21,270,8,21,1,21,1,21,1,22,1,22,1,22,3,22,277,8,22,1,22,1,22,1,23,1,23,
-  	1,23,5,23,284,8,23,10,23,12,23,287,9,23,1,24,1,24,1,24,4,24,292,8,24,
-  	11,24,12,24,293,1,25,1,25,1,25,1,25,1,25,1,26,1,26,1,26,3,26,304,8,26,
-  	1,26,1,26,1,27,1,27,1,27,3,27,311,8,27,1,27,0,2,14,38,28,0,2,4,6,8,10,
-  	12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,0,1,
-  	1,0,1,4,336,0,61,1,0,0,0,2,66,1,0,0,0,4,78,1,0,0,0,6,80,1,0,0,0,8,88,
-  	1,0,0,0,10,91,1,0,0,0,12,102,1,0,0,0,14,109,1,0,0,0,16,118,1,0,0,0,18,
-  	120,1,0,0,0,20,122,1,0,0,0,22,151,1,0,0,0,24,153,1,0,0,0,26,159,1,0,0,
-  	0,28,163,1,0,0,0,30,191,1,0,0,0,32,199,1,0,0,0,34,201,1,0,0,0,36,203,
-  	1,0,0,0,38,217,1,0,0,0,40,258,1,0,0,0,42,260,1,0,0,0,44,273,1,0,0,0,46,
-  	280,1,0,0,0,48,288,1,0,0,0,50,295,1,0,0,0,52,300,1,0,0,0,54,310,1,0,0,
-  	0,56,60,3,2,1,0,57,60,3,10,5,0,58,60,3,22,11,0,59,56,1,0,0,0,59,57,1,
-  	0,0,0,59,58,1,0,0,0,60,63,1,0,0,0,61,59,1,0,0,0,61,62,1,0,0,0,62,64,1,
-  	0,0,0,63,61,1,0,0,0,64,65,5,0,0,1,65,1,1,0,0,0,66,67,5,5,0,0,67,68,3,
-  	4,2,0,68,69,5,20,0,0,69,71,5,29,0,0,70,72,3,6,3,0,71,70,1,0,0,0,71,72,
-  	1,0,0,0,72,73,1,0,0,0,73,74,5,30,0,0,74,75,3,20,10,0,75,3,1,0,0,0,76,
-  	79,3,14,7,0,77,79,5,6,0,0,78,76,1,0,0,0,78,77,1,0,0,0,79,5,1,0,0,0,80,
-  	85,3,8,4,0,81,82,5,37,0,0,82,84,3,8,4,0,83,81,1,0,0,0,84,87,1,0,0,0,85,
-  	83,1,0,0,0,85,86,1,0,0,0,86,7,1,0,0,0,87,85,1,0,0,0,88,89,3,14,7,0,89,
-  	90,5,20,0,0,90,9,1,0,0,0,91,92,5,13,0,0,92,93,3,18,9,0,93,95,5,31,0,0,
-  	94,96,3,12,6,0,95,94,1,0,0,0,96,97,1,0,0,0,97,95,1,0,0,0,97,98,1,0,0,
-  	0,98,99,1,0,0,0,99,100,5,32,0,0,100,101,5,36,0,0,101,11,1,0,0,0,102,103,
-  	3,14,7,0,103,104,5,20,0,0,104,105,5,36,0,0,105,13,1,0,0,0,106,107,6,7,
-  	-1,0,107,110,3,16,8,0,108,110,3,18,9,0,109,106,1,0,0,0,109,108,1,0,0,
-  	0,110,115,1,0,0,0,111,112,10,2,0,0,112,114,5,35,0,0,113,111,1,0,0,0,114,
-  	117,1,0,0,0,115,113,1,0,0,0,115,116,1,0,0,0,116,15,1,0,0,0,117,115,1,
-  	0,0,0,118,119,7,0,0,0,119,17,1,0,0,0,120,121,5,20,0,0,121,19,1,0,0,0,
-  	122,126,5,31,0,0,123,125,3,22,11,0,124,123,1,0,0,0,125,128,1,0,0,0,126,
-  	124,1,0,0,0,126,127,1,0,0,0,127,129,1,0,0,0,128,126,1,0,0,0,129,130,5,
-  	32,0,0,130,21,1,0,0,0,131,132,3,24,12,0,132,133,5,36,0,0,133,152,1,0,
-  	0,0,134,135,3,26,13,0,135,136,5,36,0,0,136,152,1,0,0,0,137,138,3,36,18,
-  	0,138,139,5,36,0,0,139,152,1,0,0,0,140,141,3,38,19,0,141,142,5,36,0,0,
-  	142,152,1,0,0,0,143,152,3,28,14,0,144,152,3,30,15,0,145,146,3,32,16,0,
-  	146,147,5,36,0,0,147,152,1,0,0,0,148,149,3,34,17,0,149,150,5,36,0,0,150,
-  	152,1,0,0,0,151,131,1,0,0,0,151,134,1,0,0,0,151,137,1,0,0,0,151,140,1,
-  	0,0,0,151,143,1,0,0,0,151,144,1,0,0,0,151,145,1,0,0,0,151,148,1,0,0,0,
-  	152,23,1,0,0,0,153,154,3,14,7,0,154,157,5,20,0,0,155,156,5,28,0,0,156,
-  	158,3,38,19,0,157,155,1,0,0,0,157,158,1,0,0,0,158,25,1,0,0,0,159,160,
-  	3,54,27,0,160,161,5,28,0,0,161,162,3,38,19,0,162,27,1,0,0,0,163,164,5,
-  	10,0,0,164,165,5,29,0,0,165,166,3,38,19,0,166,169,5,30,0,0,167,170,3,
-  	22,11,0,168,170,3,20,10,0,169,167,1,0,0,0,169,168,1,0,0,0,170,181,1,0,
-  	0,0,171,172,5,12,0,0,172,173,5,29,0,0,173,174,3,38,19,0,174,177,5,30,
-  	0,0,175,178,3,22,11,0,176,178,3,20,10,0,177,175,1,0,0,0,177,176,1,0,0,
-  	0,178,180,1,0,0,0,179,171,1,0,0,0,180,183,1,0,0,0,181,179,1,0,0,0,181,
-  	182,1,0,0,0,182,189,1,0,0,0,183,181,1,0,0,0,184,187,5,11,0,0,185,188,
-  	3,22,11,0,186,188,3,20,10,0,187,185,1,0,0,0,187,186,1,0,0,0,188,190,1,
-  	0,0,0,189,184,1,0,0,0,189,190,1,0,0,0,190,29,1,0,0,0,191,192,5,9,0,0,
-  	192,193,5,29,0,0,193,194,3,38,19,0,194,197,5,30,0,0,195,198,3,22,11,0,
-  	196,198,3,20,10,0,197,195,1,0,0,0,197,196,1,0,0,0,198,31,1,0,0,0,199,
-  	200,5,14,0,0,200,33,1,0,0,0,201,202,5,15,0,0,202,35,1,0,0,0,203,205,5,
-  	7,0,0,204,206,3,38,19,0,205,204,1,0,0,0,205,206,1,0,0,0,206,37,1,0,0,
-  	0,207,208,6,19,-1,0,208,209,5,29,0,0,209,210,3,38,19,0,210,211,5,30,0,
-  	0,211,218,1,0,0,0,212,213,5,21,0,0,213,218,3,38,19,9,214,215,5,25,0,0,
-  	215,218,3,38,19,8,216,218,3,40,20,0,217,207,1,0,0,0,217,212,1,0,0,0,217,
-  	214,1,0,0,0,217,216,1,0,0,0,218,241,1,0,0,0,219,220,10,7,0,0,220,221,
-  	5,26,0,0,221,240,3,38,19,8,222,223,10,6,0,0,223,224,5,27,0,0,224,240,
-  	3,38,19,7,225,226,10,5,0,0,226,227,5,22,0,0,227,240,3,38,19,6,228,229,
-  	10,4,0,0,229,230,5,23,0,0,230,240,3,38,19,5,231,232,10,3,0,0,232,233,
-  	5,24,0,0,233,240,3,38,19,4,234,235,10,1,0,0,235,236,5,33,0,0,236,237,
-  	3,38,19,0,237,238,5,34,0,0,238,240,1,0,0,0,239,219,1,0,0,0,239,222,1,
-  	0,0,0,239,225,1,0,0,0,239,228,1,0,0,0,239,231,1,0,0,0,239,234,1,0,0,0,
-  	240,243,1,0,0,0,241,239,1,0,0,0,241,242,1,0,0,0,242,39,1,0,0,0,243,241,
-  	1,0,0,0,244,259,5,20,0,0,245,259,3,48,24,0,246,259,3,50,25,0,247,259,
-  	3,52,26,0,248,259,5,17,0,0,249,259,5,18,0,0,250,259,5,19,0,0,251,259,
-  	5,16,0,0,252,253,5,29,0,0,253,254,3,38,19,0,254,255,5,30,0,0,255,259,
-  	1,0,0,0,256,259,3,42,21,0,257,259,3,44,22,0,258,244,1,0,0,0,258,245,1,
-  	0,0,0,258,246,1,0,0,0,258,247,1,0,0,0,258,248,1,0,0,0,258,249,1,0,0,0,
-  	258,250,1,0,0,0,258,251,1,0,0,0,258,252,1,0,0,0,258,256,1,0,0,0,258,257,
-  	1,0,0,0,259,41,1,0,0,0,260,269,5,31,0,0,261,266,3,38,19,0,262,263,5,37,
-  	0,0,263,265,3,38,19,0,264,262,1,0,0,0,265,268,1,0,0,0,266,264,1,0,0,0,
-  	266,267,1,0,0,0,267,270,1,0,0,0,268,266,1,0,0,0,269,261,1,0,0,0,269,270,
-  	1,0,0,0,270,271,1,0,0,0,271,272,5,32,0,0,272,43,1,0,0,0,273,274,5,20,
-  	0,0,274,276,5,29,0,0,275,277,3,46,23,0,276,275,1,0,0,0,276,277,1,0,0,
-  	0,277,278,1,0,0,0,278,279,5,30,0,0,279,45,1,0,0,0,280,285,3,38,19,0,281,
-  	282,5,37,0,0,282,284,3,38,19,0,283,281,1,0,0,0,284,287,1,0,0,0,285,283,
-  	1,0,0,0,285,286,1,0,0,0,286,47,1,0,0,0,287,285,1,0,0,0,288,291,5,20,0,
-  	0,289,290,5,38,0,0,290,292,5,20,0,0,291,289,1,0,0,0,292,293,1,0,0,0,293,
-  	291,1,0,0,0,293,294,1,0,0,0,294,49,1,0,0,0,295,296,5,20,0,0,296,297,5,
-  	33,0,0,297,298,3,38,19,0,298,299,5,34,0,0,299,51,1,0,0,0,300,301,5,20,
-  	0,0,301,303,5,29,0,0,302,304,3,46,23,0,303,302,1,0,0,0,303,304,1,0,0,
-  	0,304,305,1,0,0,0,305,306,5,30,0,0,306,53,1,0,0,0,307,311,5,20,0,0,308,
-  	311,3,48,24,0,309,311,3,50,25,0,310,307,1,0,0,0,310,308,1,0,0,0,310,309,
-  	1,0,0,0,311,55,1,0,0,0,29,59,61,71,78,85,97,109,115,126,151,157,169,177,
-  	181,187,189,197,205,217,239,241,258,266,269,276,285,293,303,310
+  	21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,2,27,7,27,2,28,7,
+  	28,1,0,1,0,1,0,5,0,62,8,0,10,0,12,0,65,9,0,1,0,1,0,1,1,1,1,1,1,1,1,1,
+  	1,3,1,74,8,1,1,1,1,1,1,1,1,2,1,2,3,2,81,8,2,1,3,1,3,1,3,5,3,86,8,3,10,
+  	3,12,3,89,9,3,1,4,1,4,1,4,1,5,1,5,1,5,1,5,4,5,98,8,5,11,5,12,5,99,1,5,
+  	1,5,1,5,1,6,1,6,1,6,1,6,1,7,1,7,1,7,3,7,112,8,7,1,7,1,7,5,7,116,8,7,10,
+  	7,12,7,119,9,7,1,8,1,8,1,9,1,9,1,10,1,10,5,10,127,8,10,10,10,12,10,130,
+  	9,10,1,10,1,10,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,
+  	1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,1,11,3,11,154,8,11,1,12,1,12,
+  	1,12,1,12,3,12,160,8,12,1,13,1,13,1,13,1,13,1,14,1,14,1,14,1,14,1,14,
+  	1,14,3,14,172,8,14,1,14,1,14,1,14,1,14,1,14,1,14,3,14,180,8,14,5,14,182,
+  	8,14,10,14,12,14,185,9,14,1,14,1,14,1,14,3,14,190,8,14,3,14,192,8,14,
+  	1,15,1,15,1,15,1,15,1,15,1,15,3,15,200,8,15,1,16,1,16,1,17,1,17,1,18,
+  	1,18,3,18,208,8,18,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,
+  	3,19,220,8,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,
+  	1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,5,19,242,8,19,10,19,12,19,
+  	245,9,19,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,
+  	1,20,1,20,1,20,3,20,262,8,20,1,21,1,21,1,21,1,21,5,21,268,8,21,10,21,
+  	12,21,271,9,21,3,21,273,8,21,1,21,1,21,1,22,1,22,1,22,3,22,280,8,22,1,
+  	22,1,22,1,23,1,23,1,23,5,23,287,8,23,10,23,12,23,290,9,23,1,24,1,24,1,
+  	24,4,24,295,8,24,11,24,12,24,296,1,25,1,25,1,25,1,25,1,25,1,26,1,26,1,
+  	26,3,26,307,8,26,1,26,1,26,1,27,1,27,1,27,1,27,1,27,1,28,1,28,1,28,3,
+  	28,319,8,28,1,28,0,2,14,38,29,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,
+  	30,32,34,36,38,40,42,44,46,48,50,52,54,56,0,1,1,0,1,4,344,0,63,1,0,0,
+  	0,2,68,1,0,0,0,4,80,1,0,0,0,6,82,1,0,0,0,8,90,1,0,0,0,10,93,1,0,0,0,12,
+  	104,1,0,0,0,14,111,1,0,0,0,16,120,1,0,0,0,18,122,1,0,0,0,20,124,1,0,0,
+  	0,22,153,1,0,0,0,24,155,1,0,0,0,26,161,1,0,0,0,28,165,1,0,0,0,30,193,
+  	1,0,0,0,32,201,1,0,0,0,34,203,1,0,0,0,36,205,1,0,0,0,38,219,1,0,0,0,40,
+  	261,1,0,0,0,42,263,1,0,0,0,44,276,1,0,0,0,46,283,1,0,0,0,48,291,1,0,0,
+  	0,50,298,1,0,0,0,52,303,1,0,0,0,54,310,1,0,0,0,56,318,1,0,0,0,58,62,3,
+  	2,1,0,59,62,3,10,5,0,60,62,3,22,11,0,61,58,1,0,0,0,61,59,1,0,0,0,61,60,
+  	1,0,0,0,62,65,1,0,0,0,63,61,1,0,0,0,63,64,1,0,0,0,64,66,1,0,0,0,65,63,
+  	1,0,0,0,66,67,5,0,0,1,67,1,1,0,0,0,68,69,5,5,0,0,69,70,3,4,2,0,70,71,
+  	5,21,0,0,71,73,5,30,0,0,72,74,3,6,3,0,73,72,1,0,0,0,73,74,1,0,0,0,74,
+  	75,1,0,0,0,75,76,5,31,0,0,76,77,3,20,10,0,77,3,1,0,0,0,78,81,3,14,7,0,
+  	79,81,5,6,0,0,80,78,1,0,0,0,80,79,1,0,0,0,81,5,1,0,0,0,82,87,3,8,4,0,
+  	83,84,5,38,0,0,84,86,3,8,4,0,85,83,1,0,0,0,86,89,1,0,0,0,87,85,1,0,0,
+  	0,87,88,1,0,0,0,88,7,1,0,0,0,89,87,1,0,0,0,90,91,3,14,7,0,91,92,5,21,
+  	0,0,92,9,1,0,0,0,93,94,5,14,0,0,94,95,3,18,9,0,95,97,5,32,0,0,96,98,3,
+  	12,6,0,97,96,1,0,0,0,98,99,1,0,0,0,99,97,1,0,0,0,99,100,1,0,0,0,100,101,
+  	1,0,0,0,101,102,5,33,0,0,102,103,5,37,0,0,103,11,1,0,0,0,104,105,3,14,
+  	7,0,105,106,5,21,0,0,106,107,5,37,0,0,107,13,1,0,0,0,108,109,6,7,-1,0,
+  	109,112,3,16,8,0,110,112,3,18,9,0,111,108,1,0,0,0,111,110,1,0,0,0,112,
+  	117,1,0,0,0,113,114,10,2,0,0,114,116,5,36,0,0,115,113,1,0,0,0,116,119,
+  	1,0,0,0,117,115,1,0,0,0,117,118,1,0,0,0,118,15,1,0,0,0,119,117,1,0,0,
+  	0,120,121,7,0,0,0,121,17,1,0,0,0,122,123,5,21,0,0,123,19,1,0,0,0,124,
+  	128,5,32,0,0,125,127,3,22,11,0,126,125,1,0,0,0,127,130,1,0,0,0,128,126,
+  	1,0,0,0,128,129,1,0,0,0,129,131,1,0,0,0,130,128,1,0,0,0,131,132,5,33,
+  	0,0,132,21,1,0,0,0,133,134,3,24,12,0,134,135,5,37,0,0,135,154,1,0,0,0,
+  	136,137,3,26,13,0,137,138,5,37,0,0,138,154,1,0,0,0,139,140,3,36,18,0,
+  	140,141,5,37,0,0,141,154,1,0,0,0,142,143,3,38,19,0,143,144,5,37,0,0,144,
+  	154,1,0,0,0,145,154,3,28,14,0,146,154,3,30,15,0,147,148,3,32,16,0,148,
+  	149,5,37,0,0,149,154,1,0,0,0,150,151,3,34,17,0,151,152,5,37,0,0,152,154,
+  	1,0,0,0,153,133,1,0,0,0,153,136,1,0,0,0,153,139,1,0,0,0,153,142,1,0,0,
+  	0,153,145,1,0,0,0,153,146,1,0,0,0,153,147,1,0,0,0,153,150,1,0,0,0,154,
+  	23,1,0,0,0,155,156,3,14,7,0,156,159,5,21,0,0,157,158,5,29,0,0,158,160,
+  	3,38,19,0,159,157,1,0,0,0,159,160,1,0,0,0,160,25,1,0,0,0,161,162,3,56,
+  	28,0,162,163,5,29,0,0,163,164,3,38,19,0,164,27,1,0,0,0,165,166,5,11,0,
+  	0,166,167,5,30,0,0,167,168,3,38,19,0,168,171,5,31,0,0,169,172,3,22,11,
+  	0,170,172,3,20,10,0,171,169,1,0,0,0,171,170,1,0,0,0,172,183,1,0,0,0,173,
+  	174,5,13,0,0,174,175,5,30,0,0,175,176,3,38,19,0,176,179,5,31,0,0,177,
+  	180,3,22,11,0,178,180,3,20,10,0,179,177,1,0,0,0,179,178,1,0,0,0,180,182,
+  	1,0,0,0,181,173,1,0,0,0,182,185,1,0,0,0,183,181,1,0,0,0,183,184,1,0,0,
+  	0,184,191,1,0,0,0,185,183,1,0,0,0,186,189,5,12,0,0,187,190,3,22,11,0,
+  	188,190,3,20,10,0,189,187,1,0,0,0,189,188,1,0,0,0,190,192,1,0,0,0,191,
+  	186,1,0,0,0,191,192,1,0,0,0,192,29,1,0,0,0,193,194,5,10,0,0,194,195,5,
+  	30,0,0,195,196,3,38,19,0,196,199,5,31,0,0,197,200,3,22,11,0,198,200,3,
+  	20,10,0,199,197,1,0,0,0,199,198,1,0,0,0,200,31,1,0,0,0,201,202,5,15,0,
+  	0,202,33,1,0,0,0,203,204,5,16,0,0,204,35,1,0,0,0,205,207,5,7,0,0,206,
+  	208,3,38,19,0,207,206,1,0,0,0,207,208,1,0,0,0,208,37,1,0,0,0,209,210,
+  	6,19,-1,0,210,211,5,30,0,0,211,212,3,38,19,0,212,213,5,31,0,0,213,220,
+  	1,0,0,0,214,215,5,22,0,0,215,220,3,38,19,9,216,217,5,26,0,0,217,220,3,
+  	38,19,8,218,220,3,40,20,0,219,209,1,0,0,0,219,214,1,0,0,0,219,216,1,0,
+  	0,0,219,218,1,0,0,0,220,243,1,0,0,0,221,222,10,7,0,0,222,223,5,27,0,0,
+  	223,242,3,38,19,8,224,225,10,6,0,0,225,226,5,28,0,0,226,242,3,38,19,7,
+  	227,228,10,5,0,0,228,229,5,23,0,0,229,242,3,38,19,6,230,231,10,4,0,0,
+  	231,232,5,24,0,0,232,242,3,38,19,5,233,234,10,3,0,0,234,235,5,25,0,0,
+  	235,242,3,38,19,4,236,237,10,1,0,0,237,238,5,34,0,0,238,239,3,38,19,0,
+  	239,240,5,35,0,0,240,242,1,0,0,0,241,221,1,0,0,0,241,224,1,0,0,0,241,
+  	227,1,0,0,0,241,230,1,0,0,0,241,233,1,0,0,0,241,236,1,0,0,0,242,245,1,
+  	0,0,0,243,241,1,0,0,0,243,244,1,0,0,0,244,39,1,0,0,0,245,243,1,0,0,0,
+  	246,262,5,21,0,0,247,262,3,48,24,0,248,262,3,50,25,0,249,262,3,54,27,
+  	0,250,262,3,52,26,0,251,262,5,18,0,0,252,262,5,19,0,0,253,262,5,20,0,
+  	0,254,262,5,17,0,0,255,256,5,30,0,0,256,257,3,38,19,0,257,258,5,31,0,
+  	0,258,262,1,0,0,0,259,262,3,42,21,0,260,262,3,44,22,0,261,246,1,0,0,0,
+  	261,247,1,0,0,0,261,248,1,0,0,0,261,249,1,0,0,0,261,250,1,0,0,0,261,251,
+  	1,0,0,0,261,252,1,0,0,0,261,253,1,0,0,0,261,254,1,0,0,0,261,255,1,0,0,
+  	0,261,259,1,0,0,0,261,260,1,0,0,0,262,41,1,0,0,0,263,272,5,32,0,0,264,
+  	269,3,38,19,0,265,266,5,38,0,0,266,268,3,38,19,0,267,265,1,0,0,0,268,
+  	271,1,0,0,0,269,267,1,0,0,0,269,270,1,0,0,0,270,273,1,0,0,0,271,269,1,
+  	0,0,0,272,264,1,0,0,0,272,273,1,0,0,0,273,274,1,0,0,0,274,275,5,33,0,
+  	0,275,43,1,0,0,0,276,277,5,21,0,0,277,279,5,30,0,0,278,280,3,46,23,0,
+  	279,278,1,0,0,0,279,280,1,0,0,0,280,281,1,0,0,0,281,282,5,31,0,0,282,
+  	45,1,0,0,0,283,288,3,38,19,0,284,285,5,38,0,0,285,287,3,38,19,0,286,284,
+  	1,0,0,0,287,290,1,0,0,0,288,286,1,0,0,0,288,289,1,0,0,0,289,47,1,0,0,
+  	0,290,288,1,0,0,0,291,294,5,21,0,0,292,293,5,39,0,0,293,295,5,21,0,0,
+  	294,292,1,0,0,0,295,296,1,0,0,0,296,294,1,0,0,0,296,297,1,0,0,0,297,49,
+  	1,0,0,0,298,299,5,21,0,0,299,300,5,34,0,0,300,301,3,38,19,0,301,302,5,
+  	35,0,0,302,51,1,0,0,0,303,304,5,21,0,0,304,306,5,30,0,0,305,307,3,46,
+  	23,0,306,305,1,0,0,0,306,307,1,0,0,0,307,308,1,0,0,0,308,309,5,31,0,0,
+  	309,53,1,0,0,0,310,311,5,9,0,0,311,312,5,30,0,0,312,313,3,38,19,0,313,
+  	314,5,31,0,0,314,55,1,0,0,0,315,319,5,21,0,0,316,319,3,48,24,0,317,319,
+  	3,50,25,0,318,315,1,0,0,0,318,316,1,0,0,0,318,317,1,0,0,0,319,57,1,0,
+  	0,0,29,61,63,73,80,87,99,111,117,128,153,159,171,179,183,189,191,199,
+  	207,219,241,243,261,269,272,279,288,296,306,318
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -301,22 +304,22 @@ SmplangParser::ProgramContext* SmplangParser::program() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(61);
+    setState(63);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2722096830) != 0)) {
-      setState(59);
+      ((1ULL << _la) & 5444193982) != 0)) {
+      setState(61);
       _errHandler->sync(this);
       switch (_input->LA(1)) {
         case SmplangParser::FUNC: {
-          setState(56);
+          setState(58);
           functionDecl();
           break;
         }
 
         case SmplangParser::STRUCT: {
-          setState(57);
+          setState(59);
           structDecl();
           break;
         }
@@ -326,6 +329,7 @@ SmplangParser::ProgramContext* SmplangParser::program() {
         case SmplangParser::T__2:
         case SmplangParser::T__3:
         case SmplangParser::RETURN:
+        case SmplangParser::PRINT:
         case SmplangParser::WHILE:
         case SmplangParser::IF:
         case SmplangParser::BREAK:
@@ -339,7 +343,7 @@ SmplangParser::ProgramContext* SmplangParser::program() {
         case SmplangParser::NOT:
         case SmplangParser::LPAREN:
         case SmplangParser::LBRACE: {
-          setState(58);
+          setState(60);
           statement();
           break;
         }
@@ -347,11 +351,11 @@ SmplangParser::ProgramContext* SmplangParser::program() {
       default:
         throw NoViableAltException(this);
       }
-      setState(63);
+      setState(65);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(64);
+    setState(66);
     match(SmplangParser::EOF);
    
   }
@@ -437,26 +441,26 @@ SmplangParser::FunctionDeclContext* SmplangParser::functionDecl() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(66);
-    match(SmplangParser::FUNC);
-    setState(67);
-    returnType();
     setState(68);
-    match(SmplangParser::ID);
+    match(SmplangParser::FUNC);
     setState(69);
-    match(SmplangParser::LPAREN);
+    returnType();
+    setState(70);
+    match(SmplangParser::ID);
     setState(71);
+    match(SmplangParser::LPAREN);
+    setState(73);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 1048606) != 0)) {
-      setState(70);
+      ((1ULL << _la) & 2097182) != 0)) {
+      setState(72);
       parameterList();
     }
-    setState(73);
+    setState(75);
     match(SmplangParser::RPAREN);
-    setState(74);
+    setState(76);
     block();
    
   }
@@ -520,7 +524,7 @@ SmplangParser::ReturnTypeContext* SmplangParser::returnType() {
     exitRule();
   });
   try {
-    setState(78);
+    setState(80);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case SmplangParser::T__0:
@@ -529,14 +533,14 @@ SmplangParser::ReturnTypeContext* SmplangParser::returnType() {
       case SmplangParser::T__3:
       case SmplangParser::ID: {
         enterOuterAlt(_localctx, 1);
-        setState(76);
+        setState(78);
         type(0);
         break;
       }
 
       case SmplangParser::VOID: {
         enterOuterAlt(_localctx, 2);
-        setState(77);
+        setState(79);
         match(SmplangParser::VOID);
         break;
       }
@@ -616,17 +620,17 @@ SmplangParser::ParameterListContext* SmplangParser::parameterList() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(80);
+    setState(82);
     parameter();
-    setState(85);
+    setState(87);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == SmplangParser::COMMA) {
-      setState(81);
+      setState(83);
       match(SmplangParser::COMMA);
-      setState(82);
+      setState(84);
       parameter();
-      setState(87);
+      setState(89);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -693,9 +697,9 @@ SmplangParser::ParameterContext* SmplangParser::parameter() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(88);
+    setState(90);
     type(0);
-    setState(89);
+    setState(91);
     match(SmplangParser::ID);
    
   }
@@ -781,26 +785,26 @@ SmplangParser::StructDeclContext* SmplangParser::structDecl() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(91);
-    match(SmplangParser::STRUCT);
-    setState(92);
-    structType();
     setState(93);
+    match(SmplangParser::STRUCT);
+    setState(94);
+    structType();
+    setState(95);
     match(SmplangParser::LBRACE);
-    setState(95); 
+    setState(97); 
     _errHandler->sync(this);
     _la = _input->LA(1);
     do {
-      setState(94);
+      setState(96);
       fieldDecl();
-      setState(97); 
+      setState(99); 
       _errHandler->sync(this);
       _la = _input->LA(1);
     } while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 1048606) != 0));
-    setState(99);
+      ((1ULL << _la) & 2097182) != 0));
+    setState(101);
     match(SmplangParser::RBRACE);
-    setState(100);
+    setState(102);
     match(SmplangParser::SEMI);
    
   }
@@ -869,11 +873,11 @@ SmplangParser::FieldDeclContext* SmplangParser::fieldDecl() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(102);
-    type(0);
-    setState(103);
-    match(SmplangParser::ID);
     setState(104);
+    type(0);
+    setState(105);
+    match(SmplangParser::ID);
+    setState(106);
     match(SmplangParser::SEMI);
    
   }
@@ -959,20 +963,20 @@ SmplangParser::TypeContext* SmplangParser::type(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(109);
+    setState(111);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case SmplangParser::T__0:
       case SmplangParser::T__1:
       case SmplangParser::T__2:
       case SmplangParser::T__3: {
-        setState(107);
+        setState(109);
         primitiveType();
         break;
       }
 
       case SmplangParser::ID: {
-        setState(108);
+        setState(110);
         structType();
         break;
       }
@@ -981,7 +985,7 @@ SmplangParser::TypeContext* SmplangParser::type(int precedence) {
       throw NoViableAltException(this);
     }
     _ctx->stop = _input->LT(-1);
-    setState(115);
+    setState(117);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 7, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -991,13 +995,13 @@ SmplangParser::TypeContext* SmplangParser::type(int precedence) {
         previousContext = _localctx;
         _localctx = _tracker.createInstance<TypeContext>(parentContext, parentState);
         pushNewRecursionContext(_localctx, startState, RuleType);
-        setState(111);
+        setState(113);
 
         if (!(precpred(_ctx, 2))) throw FailedPredicateException(this, "precpred(_ctx, 2)");
-        setState(112);
+        setState(114);
         match(SmplangParser::ARRAYTYPE); 
       }
-      setState(117);
+      setState(119);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 7, _ctx);
     }
@@ -1055,7 +1059,7 @@ SmplangParser::PrimitiveTypeContext* SmplangParser::primitiveType() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(118);
+    setState(120);
     _la = _input->LA(1);
     if (!((((_la & ~ 0x3fULL) == 0) &&
       ((1ULL << _la) & 30) != 0))) {
@@ -1124,7 +1128,7 @@ SmplangParser::StructTypeContext* SmplangParser::structType() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(120);
+    setState(122);
     match(SmplangParser::ID);
    
   }
@@ -1198,20 +1202,20 @@ SmplangParser::BlockContext* SmplangParser::block() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(122);
+    setState(124);
     match(SmplangParser::LBRACE);
-    setState(126);
+    setState(128);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2722088606) != 0)) {
-      setState(123);
+      ((1ULL << _la) & 5444177566) != 0)) {
+      setState(125);
       statement();
-      setState(128);
+      setState(130);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(129);
+    setState(131);
     match(SmplangParser::RBRACE);
    
   }
@@ -1303,73 +1307,73 @@ SmplangParser::StatementContext* SmplangParser::statement() {
     exitRule();
   });
   try {
-    setState(151);
+    setState(153);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 9, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(131);
+      setState(133);
       varDecl();
-      setState(132);
+      setState(134);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(134);
+      setState(136);
       assignment();
-      setState(135);
+      setState(137);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(137);
+      setState(139);
       returnStatement();
-      setState(138);
+      setState(140);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 4: {
       enterOuterAlt(_localctx, 4);
-      setState(140);
+      setState(142);
       expression(0);
-      setState(141);
+      setState(143);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 5: {
       enterOuterAlt(_localctx, 5);
-      setState(143);
+      setState(145);
       ifStatement();
       break;
     }
 
     case 6: {
       enterOuterAlt(_localctx, 6);
-      setState(144);
+      setState(146);
       whileStatement();
       break;
     }
 
     case 7: {
       enterOuterAlt(_localctx, 7);
-      setState(145);
+      setState(147);
       breakStatement();
-      setState(146);
+      setState(148);
       match(SmplangParser::SEMI);
       break;
     }
 
     case 8: {
       enterOuterAlt(_localctx, 8);
-      setState(148);
+      setState(150);
       continueStatement();
-      setState(149);
+      setState(151);
       match(SmplangParser::SEMI);
       break;
     }
@@ -1449,18 +1453,18 @@ SmplangParser::VarDeclContext* SmplangParser::varDecl() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(153);
+    setState(155);
     type(0);
-    setState(154);
+    setState(156);
     match(SmplangParser::ID);
-    setState(157);
+    setState(159);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == SmplangParser::ASSIGN) {
-      setState(155);
+      setState(157);
       match(SmplangParser::ASSIGN);
-      setState(156);
+      setState(158);
       expression(0);
     }
    
@@ -1530,11 +1534,11 @@ SmplangParser::AssignmentContext* SmplangParser::assignment() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(159);
-    assignable();
-    setState(160);
-    match(SmplangParser::ASSIGN);
     setState(161);
+    assignable();
+    setState(162);
+    match(SmplangParser::ASSIGN);
+    setState(163);
     expression(0);
    
   }
@@ -1648,25 +1652,25 @@ SmplangParser::IfStatementContext* SmplangParser::ifStatement() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(163);
-    match(SmplangParser::IF);
-    setState(164);
-    match(SmplangParser::LPAREN);
     setState(165);
-    expression(0);
+    match(SmplangParser::IF);
     setState(166);
+    match(SmplangParser::LPAREN);
+    setState(167);
+    expression(0);
+    setState(168);
     match(SmplangParser::RPAREN);
-    setState(169);
+    setState(171);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 11, _ctx)) {
     case 1: {
-      setState(167);
+      setState(169);
       statement();
       break;
     }
 
     case 2: {
-      setState(168);
+      setState(170);
       block();
       break;
     }
@@ -1674,30 +1678,30 @@ SmplangParser::IfStatementContext* SmplangParser::ifStatement() {
     default:
       break;
     }
-    setState(181);
+    setState(183);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 13, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
-        setState(171);
-        match(SmplangParser::ELIF);
-        setState(172);
-        match(SmplangParser::LPAREN);
         setState(173);
-        expression(0);
+        match(SmplangParser::ELIF);
         setState(174);
+        match(SmplangParser::LPAREN);
+        setState(175);
+        expression(0);
+        setState(176);
         match(SmplangParser::RPAREN);
-        setState(177);
+        setState(179);
         _errHandler->sync(this);
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 12, _ctx)) {
         case 1: {
-          setState(175);
+          setState(177);
           statement();
           break;
         }
 
         case 2: {
-          setState(176);
+          setState(178);
           block();
           break;
         }
@@ -1706,28 +1710,28 @@ SmplangParser::IfStatementContext* SmplangParser::ifStatement() {
           break;
         } 
       }
-      setState(183);
+      setState(185);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 13, _ctx);
     }
-    setState(189);
+    setState(191);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 15, _ctx)) {
     case 1: {
-      setState(184);
+      setState(186);
       match(SmplangParser::ELSE);
-      setState(187);
+      setState(189);
       _errHandler->sync(this);
       switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 14, _ctx)) {
       case 1: {
-        setState(185);
+        setState(187);
         statement();
         break;
       }
 
       case 2: {
-        setState(186);
+        setState(188);
         block();
         break;
       }
@@ -1820,25 +1824,25 @@ SmplangParser::WhileStatementContext* SmplangParser::whileStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(191);
-    match(SmplangParser::WHILE);
-    setState(192);
-    match(SmplangParser::LPAREN);
     setState(193);
-    expression(0);
+    match(SmplangParser::WHILE);
     setState(194);
+    match(SmplangParser::LPAREN);
+    setState(195);
+    expression(0);
+    setState(196);
     match(SmplangParser::RPAREN);
-    setState(197);
+    setState(199);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 16, _ctx)) {
     case 1: {
-      setState(195);
+      setState(197);
       statement();
       break;
     }
 
     case 2: {
-      setState(196);
+      setState(198);
       block();
       break;
     }
@@ -1905,7 +1909,7 @@ SmplangParser::BreakStatementContext* SmplangParser::breakStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(199);
+    setState(201);
     match(SmplangParser::BREAK);
    
   }
@@ -1966,7 +1970,7 @@ SmplangParser::ContinueStatementContext* SmplangParser::continueStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(201);
+    setState(203);
     match(SmplangParser::CONTINUE);
    
   }
@@ -2032,15 +2036,15 @@ SmplangParser::ReturnStatementContext* SmplangParser::returnStatement() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(203);
-    match(SmplangParser::RETURN);
     setState(205);
+    match(SmplangParser::RETURN);
+    setState(207);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2722037760) != 0)) {
-      setState(204);
+      ((1ULL << _la) & 5444076032) != 0)) {
+      setState(206);
       expression(0);
     }
    
@@ -2167,37 +2171,37 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(217);
+    setState(219);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 18, _ctx)) {
     case 1: {
-      setState(208);
-      match(SmplangParser::LPAREN);
-      setState(209);
-      expression(0);
       setState(210);
+      match(SmplangParser::LPAREN);
+      setState(211);
+      expression(0);
+      setState(212);
       match(SmplangParser::RPAREN);
       break;
     }
 
     case 2: {
-      setState(212);
+      setState(214);
       match(SmplangParser::NEG);
-      setState(213);
+      setState(215);
       expression(9);
       break;
     }
 
     case 3: {
-      setState(214);
+      setState(216);
       match(SmplangParser::NOT);
-      setState(215);
+      setState(217);
       expression(8);
       break;
     }
 
     case 4: {
-      setState(216);
+      setState(218);
       primaryExpression();
       break;
     }
@@ -2206,7 +2210,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
       break;
     }
     _ctx->stop = _input->LT(-1);
-    setState(241);
+    setState(243);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 20, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -2214,18 +2218,18 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
         if (!_parseListeners.empty())
           triggerExitRuleEvent();
         previousContext = _localctx;
-        setState(239);
+        setState(241);
         _errHandler->sync(this);
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 19, _ctx)) {
         case 1: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(219);
+          setState(221);
 
           if (!(precpred(_ctx, 7))) throw FailedPredicateException(this, "precpred(_ctx, 7)");
-          setState(220);
+          setState(222);
           match(SmplangParser::AND);
-          setState(221);
+          setState(223);
           expression(8);
           break;
         }
@@ -2233,12 +2237,12 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
         case 2: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(222);
+          setState(224);
 
           if (!(precpred(_ctx, 6))) throw FailedPredicateException(this, "precpred(_ctx, 6)");
-          setState(223);
+          setState(225);
           match(SmplangParser::OR);
-          setState(224);
+          setState(226);
           expression(7);
           break;
         }
@@ -2246,12 +2250,12 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
         case 3: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(225);
+          setState(227);
 
           if (!(precpred(_ctx, 5))) throw FailedPredicateException(this, "precpred(_ctx, 5)");
-          setState(226);
+          setState(228);
           match(SmplangParser::MULT);
-          setState(227);
+          setState(229);
           expression(6);
           break;
         }
@@ -2259,12 +2263,12 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
         case 4: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(228);
+          setState(230);
 
           if (!(precpred(_ctx, 4))) throw FailedPredicateException(this, "precpred(_ctx, 4)");
-          setState(229);
+          setState(231);
           match(SmplangParser::ADD);
-          setState(230);
+          setState(232);
           expression(5);
           break;
         }
@@ -2272,12 +2276,12 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
         case 5: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(231);
+          setState(233);
 
           if (!(precpred(_ctx, 3))) throw FailedPredicateException(this, "precpred(_ctx, 3)");
-          setState(232);
+          setState(234);
           match(SmplangParser::COMPOP);
-          setState(233);
+          setState(235);
           expression(4);
           break;
         }
@@ -2285,14 +2289,14 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
         case 6: {
           _localctx = _tracker.createInstance<ExpressionContext>(parentContext, parentState);
           pushNewRecursionContext(_localctx, startState, RuleExpression);
-          setState(234);
+          setState(236);
 
           if (!(precpred(_ctx, 1))) throw FailedPredicateException(this, "precpred(_ctx, 1)");
-          setState(235);
-          match(SmplangParser::LBRACK);
-          setState(236);
-          expression(0);
           setState(237);
+          match(SmplangParser::LBRACK);
+          setState(238);
+          expression(0);
+          setState(239);
           match(SmplangParser::RBRACK);
           break;
         }
@@ -2301,7 +2305,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
           break;
         } 
       }
-      setState(243);
+      setState(245);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 20, _ctx);
     }
@@ -2330,6 +2334,10 @@ SmplangParser::FieldAccessContext* SmplangParser::PrimaryExpressionContext::fiel
 
 SmplangParser::ArrayAccessContext* SmplangParser::PrimaryExpressionContext::arrayAccess() {
   return getRuleContext<SmplangParser::ArrayAccessContext>(0);
+}
+
+SmplangParser::PrintCallContext* SmplangParser::PrimaryExpressionContext::printCall() {
+  return getRuleContext<SmplangParser::PrintCallContext>(0);
 }
 
 SmplangParser::FunctionCallContext* SmplangParser::PrimaryExpressionContext::functionCall() {
@@ -2409,86 +2417,93 @@ SmplangParser::PrimaryExpressionContext* SmplangParser::primaryExpression() {
     exitRule();
   });
   try {
-    setState(258);
+    setState(261);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 21, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(244);
+      setState(246);
       match(SmplangParser::ID);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(245);
+      setState(247);
       fieldAccess();
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(246);
+      setState(248);
       arrayAccess();
       break;
     }
 
     case 4: {
       enterOuterAlt(_localctx, 4);
-      setState(247);
-      functionCall();
+      setState(249);
+      printCall();
       break;
     }
 
     case 5: {
       enterOuterAlt(_localctx, 5);
-      setState(248);
-      match(SmplangParser::INT);
+      setState(250);
+      functionCall();
       break;
     }
 
     case 6: {
       enterOuterAlt(_localctx, 6);
-      setState(249);
-      match(SmplangParser::DOUBLE);
+      setState(251);
+      match(SmplangParser::INT);
       break;
     }
 
     case 7: {
       enterOuterAlt(_localctx, 7);
-      setState(250);
-      match(SmplangParser::CHAR);
+      setState(252);
+      match(SmplangParser::DOUBLE);
       break;
     }
 
     case 8: {
       enterOuterAlt(_localctx, 8);
-      setState(251);
-      match(SmplangParser::BOOL);
+      setState(253);
+      match(SmplangParser::CHAR);
       break;
     }
 
     case 9: {
       enterOuterAlt(_localctx, 9);
-      setState(252);
-      match(SmplangParser::LPAREN);
-      setState(253);
-      expression(0);
       setState(254);
-      match(SmplangParser::RPAREN);
+      match(SmplangParser::BOOL);
       break;
     }
 
     case 10: {
       enterOuterAlt(_localctx, 10);
+      setState(255);
+      match(SmplangParser::LPAREN);
       setState(256);
-      arrayInit();
+      expression(0);
+      setState(257);
+      match(SmplangParser::RPAREN);
       break;
     }
 
     case 11: {
       enterOuterAlt(_localctx, 11);
-      setState(257);
+      setState(259);
+      arrayInit();
+      break;
+    }
+
+    case 12: {
+      enterOuterAlt(_localctx, 12);
+      setState(260);
       structInit();
       break;
     }
@@ -2576,30 +2591,30 @@ SmplangParser::ArrayInitContext* SmplangParser::arrayInit() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(260);
+    setState(263);
     match(SmplangParser::LBRACE);
-    setState(269);
+    setState(272);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2722037760) != 0)) {
-      setState(261);
+      ((1ULL << _la) & 5444076032) != 0)) {
+      setState(264);
       expression(0);
-      setState(266);
+      setState(269);
       _errHandler->sync(this);
       _la = _input->LA(1);
       while (_la == SmplangParser::COMMA) {
-        setState(262);
+        setState(265);
         match(SmplangParser::COMMA);
-        setState(263);
+        setState(266);
         expression(0);
-        setState(268);
+        setState(271);
         _errHandler->sync(this);
         _la = _input->LA(1);
       }
     }
-    setState(271);
+    setState(274);
     match(SmplangParser::RBRACE);
    
   }
@@ -2673,20 +2688,20 @@ SmplangParser::StructInitContext* SmplangParser::structInit() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(273);
-    match(SmplangParser::ID);
-    setState(274);
-    match(SmplangParser::LPAREN);
     setState(276);
+    match(SmplangParser::ID);
+    setState(277);
+    match(SmplangParser::LPAREN);
+    setState(279);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2722037760) != 0)) {
-      setState(275);
+      ((1ULL << _la) & 5444076032) != 0)) {
+      setState(278);
       argumentList();
     }
-    setState(278);
+    setState(281);
     match(SmplangParser::RPAREN);
    
   }
@@ -2760,17 +2775,17 @@ SmplangParser::ArgumentListContext* SmplangParser::argumentList() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(280);
+    setState(283);
     expression(0);
-    setState(285);
+    setState(288);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == SmplangParser::COMMA) {
-      setState(281);
+      setState(284);
       match(SmplangParser::COMMA);
-      setState(282);
+      setState(285);
       expression(0);
-      setState(287);
+      setState(290);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -2846,17 +2861,17 @@ SmplangParser::FieldAccessContext* SmplangParser::fieldAccess() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(288);
+    setState(291);
     match(SmplangParser::ID);
-    setState(291); 
+    setState(294); 
     _errHandler->sync(this);
     alt = 1;
     do {
       switch (alt) {
         case 1: {
-              setState(289);
+              setState(292);
               match(SmplangParser::DOT);
-              setState(290);
+              setState(293);
               match(SmplangParser::ID);
               break;
             }
@@ -2864,7 +2879,7 @@ SmplangParser::FieldAccessContext* SmplangParser::fieldAccess() {
       default:
         throw NoViableAltException(this);
       }
-      setState(293); 
+      setState(296); 
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 26, _ctx);
     } while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER);
@@ -2939,13 +2954,13 @@ SmplangParser::ArrayAccessContext* SmplangParser::arrayAccess() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(295);
-    match(SmplangParser::ID);
-    setState(296);
-    match(SmplangParser::LBRACK);
-    setState(297);
-    expression(0);
     setState(298);
+    match(SmplangParser::ID);
+    setState(299);
+    match(SmplangParser::LBRACK);
+    setState(300);
+    expression(0);
+    setState(301);
     match(SmplangParser::RBRACK);
    
   }
@@ -3019,20 +3034,99 @@ SmplangParser::FunctionCallContext* SmplangParser::functionCall() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(300);
-    match(SmplangParser::ID);
-    setState(301);
-    match(SmplangParser::LPAREN);
     setState(303);
+    match(SmplangParser::ID);
+    setState(304);
+    match(SmplangParser::LPAREN);
+    setState(306);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2722037760) != 0)) {
-      setState(302);
+      ((1ULL << _la) & 5444076032) != 0)) {
+      setState(305);
       argumentList();
     }
-    setState(305);
+    setState(308);
+    match(SmplangParser::RPAREN);
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- PrintCallContext ------------------------------------------------------------------
+
+SmplangParser::PrintCallContext::PrintCallContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+tree::TerminalNode* SmplangParser::PrintCallContext::PRINT() {
+  return getToken(SmplangParser::PRINT, 0);
+}
+
+tree::TerminalNode* SmplangParser::PrintCallContext::LPAREN() {
+  return getToken(SmplangParser::LPAREN, 0);
+}
+
+SmplangParser::ExpressionContext* SmplangParser::PrintCallContext::expression() {
+  return getRuleContext<SmplangParser::ExpressionContext>(0);
+}
+
+tree::TerminalNode* SmplangParser::PrintCallContext::RPAREN() {
+  return getToken(SmplangParser::RPAREN, 0);
+}
+
+
+size_t SmplangParser::PrintCallContext::getRuleIndex() const {
+  return SmplangParser::RulePrintCall;
+}
+
+void SmplangParser::PrintCallContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<SmplangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterPrintCall(this);
+}
+
+void SmplangParser::PrintCallContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<SmplangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitPrintCall(this);
+}
+
+
+std::any SmplangParser::PrintCallContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<SmplangVisitor*>(visitor))
+    return parserVisitor->visitPrintCall(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+SmplangParser::PrintCallContext* SmplangParser::printCall() {
+  PrintCallContext *_localctx = _tracker.createInstance<PrintCallContext>(_ctx, getState());
+  enterRule(_localctx, 54, SmplangParser::RulePrintCall);
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    enterOuterAlt(_localctx, 1);
+    setState(310);
+    match(SmplangParser::PRINT);
+    setState(311);
+    match(SmplangParser::LPAREN);
+    setState(312);
+    expression(0);
+    setState(313);
     match(SmplangParser::RPAREN);
    
   }
@@ -3090,7 +3184,7 @@ std::any SmplangParser::AssignableContext::accept(tree::ParseTreeVisitor *visito
 
 SmplangParser::AssignableContext* SmplangParser::assignable() {
   AssignableContext *_localctx = _tracker.createInstance<AssignableContext>(_ctx, getState());
-  enterRule(_localctx, 54, SmplangParser::RuleAssignable);
+  enterRule(_localctx, 56, SmplangParser::RuleAssignable);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -3100,26 +3194,26 @@ SmplangParser::AssignableContext* SmplangParser::assignable() {
     exitRule();
   });
   try {
-    setState(310);
+    setState(318);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 28, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(307);
+      setState(315);
       match(SmplangParser::ID);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(308);
+      setState(316);
       fieldAccess();
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(309);
+      setState(317);
       arrayAccess();
       break;
     }

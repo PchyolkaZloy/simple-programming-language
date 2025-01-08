@@ -44,6 +44,8 @@ namespace bytecode {
 
 
         bool operator==(const Type &other) const {
+            if (this == &other)
+                return true;
             if (this->getTypeValue() != other.getTypeValue())
                 return false;
             if (this->isArrayType())
@@ -52,7 +54,7 @@ namespace bytecode {
         }
 
         bool operator!=(const Type &other) const {
-            return !(*this == other);
+            return !(this->operator==(other));
         }
     };
 
@@ -214,6 +216,7 @@ namespace bytecode {
     class FunctionSignature {
     private:
         std::unordered_map<std::string, Type *const> parameters_;
+        std::vector<VariableSignature> parameters_vector_;
         Type *const return_type_;
         bool has_repetitions_;
     public:
@@ -223,7 +226,8 @@ namespace bytecode {
         template<VariableSignatureInputIterator InputIt>
         FunctionSignature(InputIt parameters_first, InputIt parameters_last,
                           const Type &return_type) :
-                parameters_(), return_type_(return_type.copy()), has_repetitions_(false) {
+                parameters_(), parameters_vector_(parameters_first, parameters_last), return_type_(return_type.clone()),
+                has_repetitions_(false) {
             for (InputIt input_it = parameters_first; input_it != parameters_last; ++input_it) {
                 if (parameters_.find(input_it->getName()) != parameters_.end()) {
                     this->has_repetitions_ = true;
@@ -266,6 +270,10 @@ namespace bytecode {
 
         [[nodiscard]] const Type &getReturnType() const {
             return *return_type_;
+        }
+
+        [[nodiscard]] const std::vector<VariableSignature> &getParametersVector() const {
+            return parameters_vector_;
         }
 
     };

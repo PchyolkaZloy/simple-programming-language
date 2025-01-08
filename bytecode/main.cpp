@@ -9,7 +9,7 @@
 int main() {
     try {
         std::string input = "int a =11;[];";
-        auto *error_listener = new SmplangThrowingErrorListener();
+        auto *error_listener = new bytecode::SmplangThrowingErrorListener();
 
         antlr4::ANTLRInputStream inputStream(input);
         SmplangLexer lexer(&inputStream);
@@ -26,7 +26,7 @@ int main() {
 
 //    std::cout << tree->
         std::cout << tree->toStringTree(&parser) << std::endl;
-    } catch (ParserException ex) {
+    } catch (bytecode::ParserException ex) {
         std::cout << ex.what();
     }
 

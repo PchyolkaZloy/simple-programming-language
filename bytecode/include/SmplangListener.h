@@ -95,6 +95,9 @@ public:
   virtual void enterFunctionCall(SmplangParser::FunctionCallContext *ctx) = 0;
   virtual void exitFunctionCall(SmplangParser::FunctionCallContext *ctx) = 0;
 
+  virtual void enterPrintCall(SmplangParser::PrintCallContext *ctx) = 0;
+  virtual void exitPrintCall(SmplangParser::PrintCallContext *ctx) = 0;
+
   virtual void enterAssignable(SmplangParser::AssignableContext *ctx) = 0;
   virtual void exitAssignable(SmplangParser::AssignableContext *ctx) = 0;
 

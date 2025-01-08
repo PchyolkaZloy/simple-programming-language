@@ -97,6 +97,9 @@ public:
   virtual void enterFunctionCall(SmplangParser::FunctionCallContext * /*ctx*/) override { }
   virtual void exitFunctionCall(SmplangParser::FunctionCallContext * /*ctx*/) override { }
 
+  virtual void enterPrintCall(SmplangParser::PrintCallContext * /*ctx*/) override { }
+  virtual void exitPrintCall(SmplangParser::PrintCallContext * /*ctx*/) override { }
+
   virtual void enterAssignable(SmplangParser::AssignableContext * /*ctx*/) override { }
   virtual void exitAssignable(SmplangParser::AssignableContext * /*ctx*/) override { }
 

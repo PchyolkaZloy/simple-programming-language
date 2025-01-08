@@ -73,6 +73,8 @@ public:
 
     virtual std::any visitFunctionCall(SmplangParser::FunctionCallContext *context) = 0;
 
+    virtual std::any visitPrintCall(SmplangParser::PrintCallContext *context) = 0;
+
     virtual std::any visitAssignable(SmplangParser::AssignableContext *context) = 0;
 
 

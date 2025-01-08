@@ -12,6 +12,7 @@ set(SOURCES
         src/SmplangBaseListener.cpp
         src/SmplangListener.cpp
         src/SmplangThrowingErrorListener.cpp
+        src/SmplangStructFuncVisitor.cpp
 )
 
 set(HEADERS
@@ -26,6 +27,8 @@ set(HEADERS
         include/variables_util.h
         include/type_inference.h
         include/operators.h
+        include/visitor_util.h
+        include/SmplangStructFuncVisitor.h
 )
 
 add_subdirectory(multiprecision-1.79)

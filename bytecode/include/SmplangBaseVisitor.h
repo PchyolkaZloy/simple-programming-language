@@ -123,6 +123,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitPrintCall(SmplangParser::PrintCallContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitAssignable(SmplangParser::AssignableContext *ctx) override {
     return visitChildren(ctx);
   }

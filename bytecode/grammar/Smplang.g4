@@ -56,6 +56,7 @@ primaryExpression:
       ID
     | fieldAccess
     | arrayAccess
+    | printCall
     | functionCall
     | INT
     | DOUBLE
@@ -72,6 +73,7 @@ argumentList: expression (COMMA expression)*;
 fieldAccess: ID (DOT ID)+;
 arrayAccess: ID LBRACK expression RBRACK;
 functionCall: ID LPAREN argumentList? RPAREN;
+printCall: PRINT LPAREN expression RPAREN;
 assignable: ID | fieldAccess | arrayAccess;
 
 // Lexer
@@ -79,6 +81,7 @@ FUNC: 'func';
 VOID: 'void';
 RETURN: 'return';
 FOR: 'for';
+PRINT: 'print';
 WHILE: 'while';
 IF: 'if';
 ELSE: 'else';
