@@ -4,8 +4,11 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
 
 #include <boost/multiprecision/cpp_int.hpp>
+
+using cpp_int = boost::multiprecision::cpp_int;
 
 constexpr double EPS = 1e-13;
 
@@ -22,6 +25,11 @@ enum class TypeIndex {
 struct Bool;
 
 struct BaseType {
+    using IntType = cpp_int;
+    using DoubleType = double;
+    using BoolType = bool;
+    using CharType = char;
+
     BaseType(TypeIndex type, void* value)
         : Type(type)
         , Value(value) {
@@ -29,104 +37,108 @@ struct BaseType {
 
     virtual ~BaseType() = default;
 
-    virtual int IntCast() const = 0;
-    virtual double DoubleCast() const = 0;
-    virtual bool BoolCast() const = 0;
+    virtual IntType IntCast() const = 0;
+    virtual DoubleType DoubleCast() const = 0;
+    virtual BoolType BoolCast() const = 0;
 
-    virtual BaseType* operator+(const BaseType& other) const = 0;
-    virtual BaseType* operator-(const BaseType& other) const = 0;
-    virtual BaseType* operator*(const BaseType& other) const = 0;
-    virtual BaseType* operator/(const BaseType& other) const = 0;
+    virtual std::shared_ptr<BaseType> operator+(const BaseType& other) const = 0;
+    virtual std::shared_ptr<BaseType> operator-(const BaseType& other) const = 0;
+    virtual std::shared_ptr<BaseType> operator*(const BaseType& other) const = 0;
+    virtual std::shared_ptr<BaseType> operator/(const BaseType& other) const = 0;
 
-    virtual Bool* operator==(const BaseType& other) const = 0;
-    virtual Bool* operator!=(const BaseType& other) const = 0;
+    virtual std::shared_ptr<Bool> operator==(const BaseType& other) const = 0;
+    virtual std::shared_ptr<Bool> operator!=(const BaseType& other) const = 0;
+    virtual std::shared_ptr<Bool> operator>(const BaseType& other) const = 0;
+    virtual std::shared_ptr<Bool> operator<(const BaseType& other) const = 0;
+    virtual std::shared_ptr<Bool> operator>=(const BaseType& other) const = 0;
+    virtual std::shared_ptr<Bool> operator<=(const BaseType& other) const = 0;
 
     TypeIndex Type = TypeIndex::Null;
     void* Value = nullptr;
 };
 
 struct Int: public BaseType {
-    Int(int* value)
+    Int(IntType* value)
         : BaseType(TypeIndex::Int, value) {
     }
 
     virtual ~Int() = default;
 
-    int IntCast() const override {
-        return *reinterpret_cast<int*>(Value);
+    IntType IntCast() const override {
+        return *reinterpret_cast<cpp_int*>(Value);
     }
 
-    double DoubleCast() const override {
-        return static_cast<double>(IntCast());
+    DoubleType DoubleCast() const override {
+        return static_cast<DoubleType>(IntCast());
     }
 
-    bool BoolCast() const override {
+    BoolType BoolCast() const override {
         return IntCast() != 0;
     }
 
-    BaseType* IntOperatorTemplate(const BaseType& other, int (*op)(int, int)) const {
+    std::shared_ptr<BaseType> IntOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const {
         if (other.Type == TypeIndex::Bool ||
             other.Type == TypeIndex::Char ||
             other.Type == TypeIndex::Int) {
-            int l = IntCast();
-            int r = other.IntCast();
-            return new Int(new int(op(l, r)));
+            IntType l = IntCast();
+            IntType r = other.IntCast();
+            return std::make_shared<Int>(new IntType(op(l, r)));
         }
-        return nullptr;
+        return {};
     }
 
-    BaseType* DoubleOperatorTemplate(const BaseType& other, double (*op)(double, double)) const;
+    std::shared_ptr<BaseType> DoubleOperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const;
 
-    BaseType* operator+(const BaseType& other) const override {
-        if (BaseType *res = IntOperatorTemplate(other, [](int l, int r) { return l + r; })) {
+    std::shared_ptr<BaseType> operator+(const BaseType& other) const override {
+        if (auto res = IntOperatorTemplate(other, [](const IntType& l, const IntType& r) -> IntType { return l + r; })) {
             return res;
         }
-        if (BaseType *res = DoubleOperatorTemplate(other, [](double l, double r) { return l + r; })) {
+        if (auto res = DoubleOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) -> DoubleType { return l + r; })) {
             return res;
         }
         throw std::invalid_argument("invalid usage of operator +\n");
     }
 
-    BaseType* operator-(const BaseType& other) const override {
-        if (BaseType *res = IntOperatorTemplate(other, [](int l, int r) { return l - r; })) {
+    std::shared_ptr<BaseType> operator-(const BaseType& other) const override {
+        if (auto res = IntOperatorTemplate(other, [](const IntType& l, const IntType& r) -> IntType { return l - r; })) {
             return res;
         }
-        if (BaseType *res = DoubleOperatorTemplate(other, [](double l, double r) { return l - r; })) {
-            return res;
-        }
-        throw std::invalid_argument("invalid usage of operator +\n");
-    }
-
-    BaseType* operator*(const BaseType& other) const override {
-        if (BaseType *res = IntOperatorTemplate(other, [](int l, int r) { return l * r; })) {
-            return res;
-        }
-        if (BaseType *res = DoubleOperatorTemplate(other, [](double l, double r) { return l * r; })) {
-            return res;
-        }
-        throw std::invalid_argument("invalid usage of operator +\n");
-    }
-    BaseType* operator/(const BaseType& other) const override {
-        if (BaseType *res = IntOperatorTemplate(other, [](int l, int r) { return l / r; })) {
-            return res;
-        }
-        if (BaseType *res = DoubleOperatorTemplate(other, [](double l, double r) { return l / r; })) {
+        if (auto res = DoubleOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) -> DoubleType { return l - r; })) {
             return res;
         }
         throw std::invalid_argument("invalid usage of operator +\n");
     }
 
-    Bool* IntCompareOperatorTemplate(const BaseType& other, bool (*op)(int, int)) const;
+    std::shared_ptr<BaseType> operator*(const BaseType& other) const override {
+        if (auto res = IntOperatorTemplate(other, [](const IntType& l, const IntType& r) -> IntType { return l * r; })) {
+            return res;
+        }
+        if (auto res = DoubleOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) -> DoubleType { return l * r; })) {
+            return res;
+        }
+        throw std::invalid_argument("invalid usage of operator +\n");
+    }
+    std::shared_ptr<BaseType> operator/(const BaseType& other) const override {
+        if (auto res = IntOperatorTemplate(other, [](const IntType& l, const IntType& r) -> IntType { return l / r; })) {
+            return res;
+        }
+        if (auto res = DoubleOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) -> DoubleType { return l / r; })) {
+            return res;
+        }
+        throw std::invalid_argument("invalid usage of operator +\n");
+    }
 
-    Bool* DoubleCompareOperatorTemplate(const BaseType& other, bool (*op)(double, double)) const;
+    std::shared_ptr<Bool> IntCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const IntType&, const IntType&)) const;
 
-    Bool* operator==(const BaseType& other) const override;
+    std::shared_ptr<Bool> DoubleCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const;
 
-    Bool* operator!=(const BaseType& other) const override;
+    std::shared_ptr<Bool> operator==(const BaseType& other) const override;
+
+    std::shared_ptr<Bool> operator!=(const BaseType& other) const override;
 };
 
 struct Bool: public Int {
-    Bool(bool* value)
+    Bool(BoolType* value)
         : Int(nullptr) {
         Type = TypeIndex::Bool;
         Value = value;
@@ -134,14 +146,14 @@ struct Bool: public Int {
 
     virtual ~Bool() = default;
 
-    int IntCast() const override {
-        bool v = *reinterpret_cast<bool*>(Value);
-        return static_cast<int>(v);
+    IntType IntCast() const override {
+        BoolType v = *reinterpret_cast<BoolType*>(Value);
+        return v;
     }
 
-    Bool* operator!() {
-        bool cur = *static_cast<bool*>(Value);
-        return new Bool(new bool(!cur));
+    std::shared_ptr<Bool> operator!() {
+        BoolType cur = *static_cast<BoolType*>(Value);
+        return std::make_shared<Bool>(new BoolType(!cur));
     }
 };
 
@@ -154,9 +166,9 @@ struct Char: public Int {
 
     virtual ~Char() = default;
 
-    int IntCast() const override {
-        bool v = *reinterpret_cast<char*>(Value);
-        return static_cast<int>(v);
+    IntType IntCast() const override {
+        char v = *reinterpret_cast<char*>(Value);
+        return v;
     }
 };
 
@@ -167,131 +179,87 @@ struct Double: public BaseType {
 
     virtual ~Double() = default;
 
-    double DoubleCast() const override {
-        return *reinterpret_cast<double*>(Value);
+    DoubleType DoubleCast() const override {
+        return *reinterpret_cast<DoubleType*>(Value);
     }
 
-    int IntCast() const override {
-        return static_cast<int>(DoubleCast());
+    IntType IntCast() const override {
+        return IntType(DoubleCast());
     }
 
-    bool BoolCast() const override {
-        return static_cast<bool>(DoubleCast());
+    BoolType BoolCast() const override {
+        return BoolType(DoubleCast());
     }
 
-    BaseType* OperatorTemplate(const BaseType& other, double (*op)(double, double)) const {
+    std::shared_ptr<BaseType> OperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const {
         if (other.Type == TypeIndex::Bool ||
             other.Type == TypeIndex::Char ||
             other.Type == TypeIndex::Int ||
             other.Type == TypeIndex::Double) {
-            double l = DoubleCast();
-            double r = other.DoubleCast();
-            return new Double(new double(op(l, r)));
+            DoubleType l = DoubleCast();
+            DoubleType r = other.DoubleCast();
+            return std::make_shared<Double>(new DoubleType(op(l, r)));
         }
         return nullptr;
     }
 
-    Bool* CompareOperatorTemplate(const BaseType& other, bool (*op)(double, double)) const {
+    std::shared_ptr<Bool> CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const {
         if (other.Type == TypeIndex::Bool ||
             other.Type == TypeIndex::Char ||
             other.Type == TypeIndex::Int ||
             other.Type == TypeIndex::Double) {
-            double l = DoubleCast();
-            double r = other.DoubleCast();
-            return new Bool(new bool(op(l, r)));
+            DoubleType l = DoubleCast();
+            DoubleType r = other.DoubleCast();
+            return std::make_shared<Bool>(new BoolType(op(l, r)));
         }
         return nullptr;
     }
 
-    BaseType* operator+(const BaseType& other) const override {
-        if (BaseType *res = OperatorTemplate(other, [](double l, double r) { return l + r; })) {
+    std::shared_ptr<BaseType> operator+(const BaseType& other) const override {
+        if (auto res = OperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return l + r; })) {
             return res;
         }
         throw std::invalid_argument("invalid usage of operator +\n");
     }
 
-    BaseType* operator-(const BaseType& other) const override {
-        if (BaseType *res = OperatorTemplate(other, [](double l, double r) { return l - r; })) {
+    std::shared_ptr<BaseType> operator-(const BaseType& other) const override {
+        if (auto res = OperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return l - r; })) {
             return res;
         }
         throw std::invalid_argument("invalid usage of operator -\n");
     }
 
-    BaseType* operator*(const BaseType& other) const override {
-        if (BaseType *res = OperatorTemplate(other, [](double l, double r) { return l * r; })) {
+    std::shared_ptr<BaseType> operator*(const BaseType& other) const override {
+        if (auto res = OperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return l * r; })) {
             return res;
         }
         throw std::invalid_argument("invalid usage of operator *\n");
     }
 
-    BaseType* operator/(const BaseType& other) const override {
-        if (BaseType *res = OperatorTemplate(other, [](double l, double r) { return l / r; })) {
+    std::shared_ptr<BaseType> operator/(const BaseType& other) const override {
+        if (auto res = OperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return l / r; })) {
             return res;
         }
         throw std::invalid_argument("invalid usage of operator /\n");
     }
 
-    Bool* operator==(const BaseType& other) const override {
-        if (Bool *res = CompareOperatorTemplate(other, [](double l, double r) { return abs(l - r) < EPS; })) {
+    std::shared_ptr<Bool> operator==(const BaseType& other) const override {
+        if (auto res = CompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) < EPS; })) {
             return res;
         }
-        return new Bool(new bool(false));
+        return std::make_shared<Bool>(new BoolType(false));
     }
 
-    Bool* operator!=(const BaseType& other) const override {
-        if (Bool *res = CompareOperatorTemplate(other, [](double l, double r) { return abs(l - r) >= EPS; })) {
+    std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
+        if (auto res = CompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) >= EPS; })) {
             return res;
         }
-        return new Bool(new bool(true));
-    }
-};
-
-struct Null: public BaseType {
-    Null()
-        : BaseType(TypeIndex::Null, nullptr) {
-    }
-
-    virtual ~Null() = default;
-
-    double DoubleCast() const override {
-        return 0.0;
-    }
-
-    int IntCast() const override {
-        return 0;
-    }
-
-    bool BoolCast() const override {
-        return false;
-    }
-
-    BaseType* operator+(const BaseType& other) const override {
-        throw std::invalid_argument("null has no operator +\n");
-    }
-
-    BaseType* operator-(const BaseType& other) const override {
-        throw std::invalid_argument("null has no operator -\n");
-    }
-
-    BaseType* operator*(const BaseType& other) const override {
-        throw std::invalid_argument("null has no operator *\n");
-    }
-
-    BaseType* operator/(const BaseType& other) const override {
-        throw std::invalid_argument("null has no operator /\n");
-    }
-
-    Bool* operator==(const BaseType& other) const override {
-        return new Bool(new bool(other.Type == TypeIndex::Null));
-    }
-
-    Bool* operator!=(const BaseType& other) const override {
-        return new Bool(new bool(other.Type != TypeIndex::Null));
+        return std::make_shared<Bool>(new BoolType(true));
     }
 };
 
 struct Struct: public BaseType {
-    using ValueType = std::map<std::string, BaseType*>;
+    using ValueType = std::map<std::string, std::shared_ptr<BaseType>>;
 
     Struct()
         : BaseType(TypeIndex::Struct, new ValueType()) {
@@ -307,43 +275,43 @@ struct Struct: public BaseType {
 
     virtual ~Struct() = default;
 
-    double DoubleCast() const override {
+    DoubleType DoubleCast() const override {
         throw std::invalid_argument("struct is not convertible to double\n");
     }
 
-    int IntCast() const override {
+    IntType IntCast() const override {
         throw std::invalid_argument("struct is not convertible to int\n");
     }
 
-    bool BoolCast() const override {
+    BoolType BoolCast() const override {
         throw std::invalid_argument("struct is not convertible to bool\n");
     }
 
-    BaseType* operator+(const BaseType& other) const override {
+    std::shared_ptr<BaseType> operator+(const BaseType& other) const override {
         throw std::invalid_argument("struct has no operator +\n");
     }
 
-    BaseType* operator-(const BaseType& other) const override {
+    std::shared_ptr<BaseType> operator-(const BaseType& other) const override {
         throw std::invalid_argument("struct has no operator -\n");
     }
 
-    BaseType* operator*(const BaseType& other) const override {
+    std::shared_ptr<BaseType> operator*(const BaseType& other) const override {
         throw std::invalid_argument("struct has no operator *\n");
     }
 
-    BaseType* operator/(const BaseType& other) const override {
+    std::shared_ptr<BaseType> operator/(const BaseType& other) const override {
         throw std::invalid_argument("struct has no operator /\n");
     }
 
-    Bool* operator==(const BaseType& other) const override {
+    std::shared_ptr<Bool> operator==(const BaseType& other) const override {
         if (other.Type != TypeIndex::Struct) {
-            return new Bool(new bool(false));
+            return std::make_shared<Bool>(new BoolType(false));
         }
         const Struct& arr = static_cast<const Struct&>(other);
         const ValueType& l = GetMap();
         const ValueType& r = arr.GetMap();
         if (l != r) {
-            return new Bool(new bool(false));
+            return std::make_shared<Bool>(new BoolType(false));
         }
         // bool typesEqual = std::all_of(
         //     l.begin(),
@@ -351,33 +319,40 @@ struct Struct: public BaseType {
         //     [&r](const std::pair<std::string, BaseType*>& pair1, const std::pair<std::string, BaseType*>& pair2) {
         //         pair1.second->Type == r.at(pair1.first)->Type;
         //     });
-        return new Bool(new bool(false));
+        return std::make_shared<Bool>(new BoolType(true));
     }
 
-    Bool* operator!=(const BaseType& other) const override {
+    std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
         Bool& equal = *(*this == other);
         return !equal;
     }
 };
 
 struct Array: public BaseType {
-    using ValueType = std::vector<BaseType*>;
-    Array(TypeIndex elementType)
-        : BaseType(TypeIndex::Array, new std::vector<BaseType*>())
-        , ElementType(elementType) {
+    using ValueType = std::vector<std::shared_ptr<BaseType>>;
+    Array()
+        : BaseType(TypeIndex::Array, new ValueType()) {
+    }
+
+    Array(ValueType&& value)
+        : BaseType(TypeIndex::Array, new ValueType(std::move(value))) {
+    }
+
+    Array(const ValueType& value)
+        : BaseType(TypeIndex::Array, new ValueType(value)) {
     }
 
     virtual ~Array() = default;
 
-    double DoubleCast() const override {
+    DoubleType DoubleCast() const override {
         throw std::invalid_argument("array cannot be interpreted as double\n");
     }
 
-    int IntCast() const override {
+    IntType IntCast() const override {
         throw std::invalid_argument("array cannot be interpreted as int\n");
     }
 
-    bool BoolCast() const override {
+    BoolType BoolCast() const override {
         return reinterpret_cast<ValueType*>(Value)->size() > 0;
     }
 
@@ -389,10 +364,12 @@ struct Array: public BaseType {
         return *reinterpret_cast<ValueType*>(Value);
     }
 
-    Bool* CompareOperatorTemplate(const BaseType& other, bool (*op)(const BaseType*, const BaseType*)) const {
+    std::shared_ptr<Bool> CompareOperatorTemplate(
+        const BaseType& other,
+        BoolType (*op)(const std::shared_ptr<BaseType>&, const std::shared_ptr<BaseType>&)) const {
         const Array& arr = static_cast<const Array&>(other);
         if (other.Type != TypeIndex::Array || Size() != arr.Size()) {
-            return new Bool(new bool(false));
+            return std::make_shared<Bool>(new BoolType(false));
         }
         const ValueType& l = GetArray();
         const ValueType& r = arr.GetArray();
@@ -400,118 +377,130 @@ struct Array: public BaseType {
         auto it2 = r.begin();
         while (it1 != l.end()) {
             if (!op(*it1, *it2)) {
-                return new Bool(new bool(false));
+                return std::make_shared<Bool>(new BoolType(false));
             }
         }
 
-        return new Bool(new bool(true));
+        return std::make_shared<Bool>(new BoolType(true));
     }
 
-    BaseType* operator+(const BaseType& other) const override {
+    std::shared_ptr<BaseType> operator+(const BaseType& other) const override {
         const Array& arr = static_cast<const Array&>(other);
-        if (other.Type != TypeIndex::Array || arr.ElementType != ElementType) {
+        if (other.Type != TypeIndex::Array) {
             throw std::invalid_argument("array can be added only with another array of the same type\n");
         }
         const ValueType& l = GetArray();
         const ValueType& r = arr.GetArray();
-        Array* res = new Array(ElementType);
+        std::shared_ptr<Array> res = std::make_shared<Array>();
         std::copy(l.begin(), l.end(), std::back_inserter(res->GetArray()));
         std::copy(r.begin(), r.end(), std::back_inserter(res->GetArray()));
         return res;
     }
 
-    BaseType* operator-(const BaseType& other) const override {
+    std::shared_ptr<BaseType> operator-(const BaseType& other) const override {
         throw std::invalid_argument("array has not operator -\n");
     }
 
-    BaseType* operator*(const BaseType& other) const override {
+    std::shared_ptr<BaseType> operator*(const BaseType& other) const override {
         throw std::invalid_argument("array has not operator *\n");
     }
 
-    BaseType* operator/(const BaseType& other) const override {
+    std::shared_ptr<BaseType> operator/(const BaseType& other) const override {
         throw std::invalid_argument("array has not operator /\n");
     }
 
-    Bool* operator==(const BaseType& other) const override {
-        if (Bool *res = CompareOperatorTemplate(other, [](const BaseType* l, const BaseType* r) { return (*l == *r)->BoolCast(); })) {
+    std::shared_ptr<Bool> operator==(const BaseType& other) const override {
+        auto op = [](const std::shared_ptr<BaseType>& l, const std::shared_ptr<BaseType>& r) { return (*l == *r)->BoolCast(); };
+        if (auto res = CompareOperatorTemplate(other, op)) {
             return res;
         }
-        return new Bool(new bool(false));
+        return std::make_shared<Bool>(new BoolType(false));
     };
 
-    Bool* operator!=(const BaseType& other) const override {
-        if (Bool *res = CompareOperatorTemplate(other, [](const BaseType* l, const BaseType* r) { return (*l != *r)->BoolCast(); })) {
+    std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
+        auto op = [](const std::shared_ptr<BaseType>& l, const std::shared_ptr<BaseType>& r) { return (*l != *r)->BoolCast(); };
+        if (auto res = CompareOperatorTemplate(other, op)) {
             return res;
         }
-        return new Bool(new bool(true));
+        return std::make_shared<Bool>(new BoolType(true));
     }
 
-    const BaseType& operator[](size_t idx) const {
-        return *GetArray()[idx];
+    const std::shared_ptr<BaseType>& operator[](const IntType& idx) const {
+        return GetArray()[static_cast<size_t>(idx)];
     }
 
-    BaseType& operator[](size_t idx) {
-        return *GetArray()[idx];
+    std::shared_ptr<BaseType>& operator[](const IntType& idx) {
+        return GetArray()[static_cast<size_t>(idx)];
     }
 
-    void Append(BaseType* element) {
+    const std::shared_ptr<BaseType>& operator[](const Int& idx) const {
+        return GetArray()[static_cast<size_t>(idx.IntCast())];
+    }
+
+    std::shared_ptr<BaseType>& operator[](const Int& idx) {
+        return GetArray()[static_cast<size_t>(idx.IntCast())];
+    }
+
+    void Append(std::shared_ptr<BaseType>&& element) {
+        GetArray().push_back(std::move(element));
+    }
+
+    void Append(const std::shared_ptr<BaseType>& element) {
         GetArray().push_back(element);
     }
 
     size_t Size() const {
         return GetArray().size();
     }
-
-    TypeIndex ElementType;
 };
 
 /// int definitions
 
-BaseType* Int::DoubleOperatorTemplate(const BaseType& other, double (*op)(double, double)) const {
+std::shared_ptr<BaseType> Int::DoubleOperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const {
     if (other.Type == TypeIndex::Double) {
-        double l = DoubleCast();
-        double r = other.DoubleCast();
-        return new Double(new double(op(l, r)));
+        DoubleType l = DoubleCast();
+        DoubleType r = other.DoubleCast();
+        return std::make_shared<Double>(new DoubleType(op(l, r)));
     }
     return nullptr;
 }
 
-Bool* Int::IntCompareOperatorTemplate(const BaseType& other, bool (*op)(int, int)) const {
+std::shared_ptr<Bool> Int::IntCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const IntType&, const IntType&)) const {
     if (other.Type == TypeIndex::Bool ||
         other.Type == TypeIndex::Char ||
         other.Type == TypeIndex::Int) {
-        int l = IntCast();
-        int r = other.IntCast();
-        return new Bool(new bool(op(l, r)));
+        IntType l = IntCast();
+        IntType r = other.IntCast();
+        return std::make_shared<Bool>(new BoolType(op(l, r)));
     }
     return nullptr;
 }
 
-Bool* Int::DoubleCompareOperatorTemplate(const BaseType& other, bool (*op)(double, double)) const {
+std::shared_ptr<Bool> Int::DoubleCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const {
     if (other.Type == TypeIndex::Double) {
-        double l = DoubleCast();
-        double r = other.DoubleCast();
-        return new Bool(new bool(op(l, r)));
+        DoubleType l = DoubleCast();
+        DoubleType r = other.DoubleCast();
+        return std::make_shared<Bool>(new BoolType(op(l, r)));
     }
     return nullptr;
 }
 
-Bool* Int::operator==(const BaseType& other) const {
-    if (Bool *res = IntCompareOperatorTemplate(other, [](int l, int r) { return l == r; })) {
+std::shared_ptr<Bool> Int::operator==(const BaseType& other) const {
+    if (auto res = IntCompareOperatorTemplate(other, [](const IntType& l, const IntType& r) { return l == r; })) {
         return res;
     }
-    if (Bool *res = DoubleCompareOperatorTemplate(other, [](double l, double r) { return abs(l - r) < EPS; })) {
+    if (auto res = DoubleCompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) < EPS; })) {
         return res;
     }
-    return new Bool(new bool(false));
+    return std::make_shared<Bool>(new BoolType(false));
 }
 
-Bool* Int::operator!=(const BaseType& other) const {
-    if (Bool *res = IntCompareOperatorTemplate(other, [](int l, int r) { return l != r; })) {
+std::shared_ptr<Bool> Int::operator!=(const BaseType& other) const {
+    if (auto res = IntCompareOperatorTemplate(other, [](const IntType& l, const IntType& r) { return l != r; })) {
         return res;
     }
-    if (Bool *res = DoubleCompareOperatorTemplate(other, [](double l, double r) { return abs(l - r) >= EPS; })) {
+    if (auto res = DoubleCompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) >= EPS; })) {
         return res;
     }
-    return new Bool(new bool(true));
+    return std::make_shared<Bool>(new BoolType(true));
 }
