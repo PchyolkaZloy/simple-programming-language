@@ -169,7 +169,19 @@ std::any bytecode::SmplangBytecodeVisitor::visitAssignment(SmplangParser::Assign
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfStatementContext *ctx) {
-    return SmplangBaseVisitor::visitIfStatement(ctx);
+    std::vector
+}
+
+std::any bytecode::SmplangBytecodeVisitor::visitIfBlock(SmplangParser::IfBlockContext *ctx) {
+    return SmplangBaseVisitor::visitIfBlock(ctx);
+}
+
+std::any bytecode::SmplangBytecodeVisitor::visitElifBlock(SmplangParser::ElifBlockContext *ctx) {
+    return SmplangBaseVisitor::visitElifBlock(ctx);
+}
+
+std::any bytecode::SmplangBytecodeVisitor::visitElseBlock(SmplangParser::ElseBlockContext *ctx) {
+    return SmplangBaseVisitor::visitElseBlock(ctx);
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitWhileStatement(SmplangParser::WhileStatementContext *ctx) {
@@ -401,24 +413,15 @@ void bytecode::SmplangBytecodeVisitor::appendLoadMember(std::vector<bytecode::Op
     code.emplace_back(ByteCodes::LoadMember);
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitIfBlock(SmplangParser::IfBlockContext *ctx) {
-    return SmplangBaseVisitor::visitIfBlock(ctx);
-}
-
-std::any bytecode::SmplangBytecodeVisitor::visitElifBlock(SmplangParser::ElifBlockContext *ctx) {
-    return SmplangBaseVisitor::visitElifBlock(ctx);
-}
-
-std::any bytecode::SmplangBytecodeVisitor::visitElseBlock(SmplangParser::ElseBlockContext *ctx) {
-    return SmplangBaseVisitor::visitElseBlock(ctx);
-}
-
 
 std::vector<char> &bytecode::insertIntToCharVector(std::vector<char> &vector, const cpp_int &value, size_t position) {
     std::vector<char> v;
     std::cout << value << '\n';
-    boost::multiprecision::export_bits(value, std::back_inserter(v), 8);
-    insertToCharVector<int>(vector, static_cast<int>(v.size()), position);
+    boost::multiprecision::export_bits(value, std::back_inserter(v), 7);
+    int size = static_cast<int>(v.size());
+    if (value < 0)
+        size = -size;
+    insertToCharVector<int>(vector, size, position);
     vector.insert(vector.begin() + position + 4, v.begin(), v.end());
     return vector;
 }

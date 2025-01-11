@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <unordered_set>
+#include <ostream>
 #include "eof_fix.h"
 #include "bytecodes.h"
 #include <boost/multiprecision/cpp_int.hpp>
@@ -11,6 +12,7 @@
 using cpp_int = boost::multiprecision::cpp_int;
 
 namespace bytecode {
+
 
     struct Operation {
     public:
@@ -32,6 +34,15 @@ namespace bytecode {
         std::vector<char> value_bytes;
 
     };
+
+    template<typename InputIterator>
+    void writeByteCode(InputIterator byte_code_begin, InputIterator byte_code_end, std::ostream &out_stream) {
+        for (auto it = byte_code_begin; it != byte_code_end; ++it) {
+            const Operation &op = *it;
+            out_stream << static_cast<char>(op.code);
+            out_stream.write(op.value_bytes.data(), op.value_bytes.size());
+        }
+    }
 
     [[nodiscard]] inline decltype(auto) vec_cast(std::any &&any) {
         return std::any_cast<std::vector<Operation>>(any);
