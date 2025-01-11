@@ -19,28 +19,5 @@ cmake_dependent_option(BOOST_MP_STANDALONE "Use Boost.Multiprecision in standalo
 
 message(STATUS "Boost.Multiprecision: standalone mode ${BOOST_MP_STANDALONE}")
 
-if(BOOST_MP_STANDALONE)
-
-  target_compile_definitions(boost_multiprecision INTERFACE BOOST_MP_STANDALONE=1)
-
-else()
-
-  target_link_libraries(boost_multiprecision
-    INTERFACE
-      Boost::assert
-      Boost::config
-      Boost::core
-      Boost::integer
-      Boost::lexical_cast
-      Boost::math
-      Boost::random
-  )
-
-endif()
-
-if(BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test/CMakeLists.txt")
-
-  add_subdirectory(test)
-
-endif()
+target_compile_definitions(boost_multiprecision INTERFACE BOOST_MP_STANDALONE=1)
 
