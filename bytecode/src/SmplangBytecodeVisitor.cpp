@@ -1,3 +1,5 @@
+#pragma once
+
 #include "SmplangBytecodeVisitor.h"
 #include "bytecodes.h"
 #include "smplang_common.h"
@@ -17,7 +19,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramCo
         program_code.insert(program_code.end(), func_decl_code.begin(), func_decl_code.end());
     }
     for (auto *statement_ctx: ctx->statement()) {
-        auto statement_decl_code = vec_cast(statement_ctx);
+        auto statement_decl_code = vec_cast(visitStatement(statement_ctx));
         program_code.insert(program_code.end(), statement_decl_code.begin(), statement_decl_code.end());
     }
     std::cout << ' ';
@@ -117,24 +119,25 @@ std::any bytecode::SmplangBytecodeVisitor::visitStatement(SmplangParser::Stateme
         auto result = vec_cast(visitExpression(ctx->expression()));
         const auto &last_op = result.back();
         if (last_op.code == ByteCodes::Call) {
-            std::string func_name(last_op.value_bytes.begin() + sizeof(int), last_op.value_bytes.end());
+            Operation load_func_name_op = result[result.size() - 2];
+            std::string func_name(load_func_name_op.value_bytes.begin() + sizeof(int),
+                                  load_func_name_op.value_bytes.end());
             if (void_typed_functions_.find(func_name) != void_typed_functions_.end()) {
-                return result;
+                return std::any{result};
             }
         }
         result.emplace_back(ByteCodes::Pop);
-        return result;
+        return std::any{result};
     }
 //    TODO: throw
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitVarDecl(SmplangParser::VarDeclContext *ctx) {
     std::vector<Operation> result{};
-    result.push_back(loadString(ctx->ID()->getText()));
     if (!ctx->expression()) {
-        result.emplace_back(ByteCodes::Pop);
         return std::any{result};
     }
+    result.push_back(loadString(ctx->ID()->getText()));
     auto expr_code = vec_cast(visitExpression(ctx->expression()));
     result.insert(result.end(), expr_code.begin(), expr_code.end());
     result.emplace_back(ByteCodes::StoreName);
@@ -169,7 +172,72 @@ std::any bytecode::SmplangBytecodeVisitor::visitAssignment(SmplangParser::Assign
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfStatementContext *ctx) {
-    return std::vector<Operation>{};
+    int left_size = 0;
+    std::vector<std::vector<Operation>> if_bodies{};
+    std::vector<std::vector<Operation>> if_conditions{};
+//    std::vector<int> if_bodies_op_count;
+//    std::vector<int> if_conditions_op_count;
+    std::vector<Operation> else_body{};
+    std::vector<Operation> result{};
+    if (ctx->elseBlock()) {
+        auto *else_ctx = ctx->elseBlock();
+        if (else_ctx->statement())
+            else_body = vec_cast(visitStatement(ctx->elseBlock()->statement()));
+        else
+            else_body = vec_cast(visitBlock(else_ctx->block()));
+        left_size += else_body.size();
+    }
+
+//    int else_body_op_count = static_cast<int>(else_body.size());
+
+
+    auto *if_ctx = ctx->ifBlock();
+    if (if_ctx->statement())
+        if_bodies.push_back(vec_cast(visitStatement(if_ctx->statement())));
+    else
+        if_bodies.push_back(vec_cast(visitBlock(if_ctx->block())));
+    if_conditions.push_back(vec_cast(visitExpression(if_ctx->expression())));
+    left_size += if_conditions.back().size() + 1;
+    left_size += if_bodies.back().size() + 1;
+
+//    if_bodies_op_count.push_back(if_bodies[0].size());
+//    if_conditions_op_count.push_back(if_conditions[0].size());
+
+
+    for (auto *elif_ctx: ctx->elifBlock()) {
+        if_conditions.push_back(vec_cast(visitExpression(elif_ctx->expression())));
+        left_size += if_conditions.back().size() + 1;
+//        if_conditions_op_count.push_back(if_conditions.back().size());
+        if (elif_ctx->statement())
+            if_bodies.push_back(vec_cast(visitStatement(elif_ctx->statement())));
+        else
+            if_bodies.push_back(vec_cast(visitBlock(elif_ctx->block())));
+//        if_bodies_op_count.push_back(if_bodies.back().size());
+        left_size += if_bodies.back().size() + 1;
+    }
+    --left_size;
+
+    for (size_t i = 0; i + 1 < if_conditions.size(); ++i) {
+        result.insert(result.end(), if_conditions[i].begin(), if_conditions[i].end());
+        result.emplace_back(ByteCodes::JumpIfFalse);
+        appendToCharVector<int>(result.back().value_bytes, if_bodies[i].size() + 2);
+        result.insert(result.end(), if_bodies[i].begin(), if_bodies[i].end());
+        left_size -= (if_conditions[i].size() + if_bodies[i].size() + 2);
+        result.emplace_back(ByteCodes::Jump);
+        appendToCharVector<int>(result.back().value_bytes, left_size);
+    }
+
+    result.insert(result.end(), if_conditions.back().begin(), if_conditions.back().end());
+    result.emplace_back(ByteCodes::JumpIfFalse);
+    appendToCharVector<int>(result.back().value_bytes, if_bodies.back().size() + 2);
+    result.insert(result.end(), if_bodies.back().begin(), if_bodies.back().end());
+    left_size -= (if_conditions.back().size() + if_bodies.back().size() + 2);
+    if (ctx->elseBlock()) {
+        result.emplace_back(ByteCodes::Jump);
+        appendToCharVector<int>(result.back().value_bytes, left_size);
+    }
+    result.insert(result.end(), else_body.begin(), else_body.end());
+    return std::any{result};
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitIfBlock(SmplangParser::IfBlockContext *ctx) {
@@ -274,20 +342,20 @@ std::any bytecode::SmplangBytecodeVisitor::visitExpression(SmplangParser::Expres
 std::any bytecode::SmplangBytecodeVisitor::visitPrimaryExpression(SmplangParser::PrimaryExpressionContext *ctx) {
     if (ctx->INT()) {
         cpp_int value(ctx->INT()->getText());
-        return std::any{loadInt(value)};
+        return std::any{std::vector(1, loadInt(value))};
     }
     if (ctx->BOOL()) {
         bool value = (ctx->BOOL()->getText() == "true") ? true : false;
-        return std::any{loadBool(value)};
+        return std::any{std::vector(1, loadBool(value))};
     }
     if (ctx->CHAR()) {
 //        text ~= "\'[symbol]\'";
         char value = ctx->getText()[1];
-        return std::any{loadChar(value)};
+        return std::any{std::vector(1, loadChar(value))};
     }
     if (ctx->DOUBLE()) {
         double value = std::stod(ctx->DOUBLE()->getText());
-        return std::any{loadDouble(value)};
+        return std::any{std::vector(1, loadDouble(value))};
     }
 //    struct.field
     if (ctx->DOT()) {
@@ -430,7 +498,7 @@ std::vector<char> &bytecode::appendIntToCharVector(std::vector<char> &vector, co
     return insertIntToCharVector(vector, value, vector.size());
 }
 
-bytecode::Operation::Operation(ByteCodes code, const std::vector<char> &valueBytes) : code(code), value_bytes(
+bytecode::Operation::Operation(bytecode::ByteCodes code, const std::vector<char> &valueBytes) : code(code), value_bytes(
         valueBytes) {}
 
-bytecode::Operation::Operation(ByteCodes code) : code(code), value_bytes{} {}
+bytecode::Operation::Operation(bytecode::ByteCodes code) : code(code), value_bytes(std::vector<char>{}) {}

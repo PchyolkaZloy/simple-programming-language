@@ -30,19 +30,19 @@ int main() {
     SmplangParser::ProgramContext *tree;
     try {
         std::string input = R"(
-struct aoo {
-double c;
-};
-//struct aoo {
-//double b;
-//
-//};
-struct myStruct {
- int a;
-};
-struct secondStruct {
- int a;
-};
+if (true) {
+    print(12);
+}
+ elif (false) {
+    print(12);
+    print(12);
+    print(12);
+}
+elif (false) {
+    print(12);
+} else
+   print(12 + 12 + 90);
+int a;
 )";
         auto *error_listener = new bytecode::SmplangThrowingErrorListener();
 
@@ -74,12 +74,14 @@ struct secondStruct {
         auto code = std::any_cast<std::vector<bytecode::Operation>>(
                 bytecode::SmplangBytecodeVisitor(void_typed_functions.begin(),
                                                  void_typed_functions.end()).visitProgram(tree));
+        std::ofstream fout("file.spl");
+        bytecode::writeByteCode(code.begin(), code.end(), fout);
 //        std::ofstream fout("myfile.spl");
 //        fout.write(code.data(), code.size());
 
 //    std::cout << tree->
 //        std::cout << tree->toStringTree(&parser) << std::endl;
-    } catch (const bytecode::ParserException &ex) {
+    } catch (const std::exception &ex) {
         std::cout << "Error: " << ex.what() << '\n';
         return 1;
     } catch (const bytecode::ValidatorException &ex) {
@@ -89,6 +91,10 @@ struct secondStruct {
         std::cout << "Error: " << ex.what() << '\n';
         return 1;
     }
+//    } catch (const std::exception &ex) {
+//        std::cout << "Error: " << ex.what() << '\n';
+//        return 1;
+//    }
 
 
     return 0;
