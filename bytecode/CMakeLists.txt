@@ -31,12 +31,9 @@ set(HEADERS
         include/operators.h
         include/SmplangStructFuncNamePositionVisitor.h
         #        include/SmplangStructDeclVisitor.h
-        include/bytecodes.h
         include/SmplangBytecodeVisitor.h
         include/eof_fix.h
 )
-
-add_subdirectory(multiprecision-1.79)
 
 # Ищем ANTLR4 runtime (с conan находим)
 find_package(antlr4-runtime REQUIRED)

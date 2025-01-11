@@ -5,9 +5,9 @@
 #include <format>
 
 namespace bytecode {
-    class ParserException : public std::exception {
+    class ParserException : public std::logic_error {
     public:
-        explicit ParserException(const std::string &message) : std::exception(message.c_str()) {}
+        explicit ParserException(const std::string &message) : std::logic_error(message.c_str()) {}
     };
 
     struct TokenPosition {
@@ -47,9 +47,9 @@ namespace bytecode {
 
     };
 
-    class ValidatorException : public std::exception {
+    class ValidatorException : public std::logic_error {
     public:
-        explicit ValidatorException(const std::string &message) : std::exception(message.c_str()) {}
+        explicit ValidatorException(const std::string &message) : std::logic_error(message.c_str()) {}
 
         static ValidatorException doubleDefinition(const TokenPosition &position, const std::string &name) {
             return ValidatorException(
@@ -62,8 +62,8 @@ namespace bytecode {
         }
     };
 
-    class ASTException : public std::exception {
+    class ASTException : public std::logic_error {
     public:
-        explicit ASTException(const std::string &message) : std::exception(message.c_str()) {}
+        explicit ASTException(const std::string &message) : std::logic_error(message.c_str()) {}
     };
 }
