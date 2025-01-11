@@ -169,7 +169,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitAssignment(SmplangParser::Assign
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfStatementContext *ctx) {
-    std::vector
+    return std::vector<Operation>{};
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitIfBlock(SmplangParser::IfBlockContext *ctx) {
@@ -430,7 +430,7 @@ std::vector<char> &bytecode::appendIntToCharVector(std::vector<char> &vector, co
     return insertIntToCharVector(vector, value, vector.size());
 }
 
-bytecode::Operation::Operation(bytecode::ByteCodes code, const std::vector<char> &valueBytes) : code(code), value_bytes(
+bytecode::Operation::Operation(ByteCodes code, const std::vector<char> &valueBytes) : code(code), value_bytes(
         valueBytes) {}
 
-bytecode::Operation::Operation(bytecode::ByteCodes code) : code(code), value_bytes{} {}
+bytecode::Operation::Operation(ByteCodes code) : code(code), value_bytes{} {}

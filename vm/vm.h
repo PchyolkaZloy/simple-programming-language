@@ -519,7 +519,6 @@ void Frame::StoreMember() {
 }
 
 void Frame::MakeFunction(int argc) {
-    auto code = Pop();
     Function f;
     std::string& fName = PopString();
     f.Params = PopnStrings(argc);

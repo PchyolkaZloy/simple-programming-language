@@ -10,7 +10,7 @@
 #include <fstream>
 #include <array>
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
     std::unordered_set<std::string> builtinFunctions = {
         "print",
         "append"};
@@ -44,9 +44,12 @@ int main(int argc, char** argv) {
         bytecode::SmplangStructFuncNamePositionVisitor name_visitor(builtinFunctions);
         auto names_info = std::any_cast<bytecode::NamesInfo>(name_visitor.visitProgram(tree));
         auto code = std::any_cast<std::vector<bytecode::Operation>>(
-            bytecode::SmplangBytecodeVisitor(voidFunctions.begin(),
-                                             voidFunctions.end())
+            bytecode::SmplangBytecodeVisitor(
+                voidFunctions.begin(),
+                voidFunctions.end())
                 .visitProgram(tree));
+
+        std::cerr << "starting vm..." << std::endl;
 
         VirtualMachine vm;
         vm.Run(code);

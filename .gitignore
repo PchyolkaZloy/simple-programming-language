@@ -55,3 +55,7 @@ Makefile
 bytecode/antlr_generated
 # cmake build
 bytecode/cmake-build*
+
+#vscode
+.vscode
+build
