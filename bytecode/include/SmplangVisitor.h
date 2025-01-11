@@ -49,6 +49,12 @@ public:
 
     virtual std::any visitIfStatement(SmplangParser::IfStatementContext *context) = 0;
 
+    virtual std::any visitIfBlock(SmplangParser::IfBlockContext *context) = 0;
+
+    virtual std::any visitElifBlock(SmplangParser::ElifBlockContext *context) = 0;
+
+    virtual std::any visitElseBlock(SmplangParser::ElseBlockContext *context) = 0;
+
     virtual std::any visitWhileStatement(SmplangParser::WhileStatementContext *context) = 0;
 
     virtual std::any visitReturnStatement(SmplangParser::ReturnStatementContext *context) = 0;
@@ -59,17 +65,13 @@ public:
 
     virtual std::any visitArrayInit(SmplangParser::ArrayInitContext *context) = 0;
 
-    virtual std::any visitStructInit(SmplangParser::StructInitContext *context) = 0;
-
     virtual std::any visitArgumentList(SmplangParser::ArgumentListContext *context) = 0;
-
-    virtual std::any visitFieldAccess(SmplangParser::FieldAccessContext *context) = 0;
-
-    virtual std::any visitArrayAccess(SmplangParser::ArrayAccessContext *context) = 0;
 
     virtual std::any visitFunctionCall(SmplangParser::FunctionCallContext *context) = 0;
 
     virtual std::any visitAssignable(SmplangParser::AssignableContext *context) = 0;
+
+    virtual std::any visitAssignablePrefix(SmplangParser::AssignablePrefixContext *context) = 0;
 
 
 };

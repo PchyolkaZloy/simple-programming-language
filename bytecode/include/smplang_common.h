@@ -61,4 +61,9 @@ namespace bytecode {
                     std::format("name {0} unknown at line {1}, symbol {2}", name, position.line, position.symbol));
         }
     };
+
+    class ASTException : public std::exception {
+    public:
+        explicit ASTException(const std::string &message) : std::exception(message.c_str()) {}
+    };
 }

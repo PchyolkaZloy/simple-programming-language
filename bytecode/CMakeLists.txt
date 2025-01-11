@@ -13,7 +13,8 @@ set(SOURCES
         src/SmplangListener.cpp
         src/SmplangThrowingErrorListener.cpp
         src/SmplangStructFuncNamePositionVisitor.cpp
-        src/SmplangStructDeclVisitor.cpp
+        #        src/SmplangStructDeclVisitor.cpp
+        src/SmplangBytecodeVisitor.cpp
 )
 
 set(HEADERS
@@ -29,7 +30,10 @@ set(HEADERS
         include/type_inference.h
         include/operators.h
         include/SmplangStructFuncNamePositionVisitor.h
-        include/SmplangStructDeclVisitor.h
+        #        include/SmplangStructDeclVisitor.h
+        include/bytecodes.h
+        include/SmplangBytecodeVisitor.h
+        include/eof_fix.h
 )
 
 add_subdirectory(multiprecision-1.79)
@@ -49,3 +53,4 @@ target_include_directories(Bytecode PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_executable(SmplangBytecodeTest main.cpp)
 target_link_libraries(SmplangBytecodeTest Bytecode)
 target_link_libraries(SmplangBytecodeTest antlr4_static)
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")

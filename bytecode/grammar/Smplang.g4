@@ -1,7 +1,7 @@
 grammar Smplang;
 
 // Parser
-program: structDecl* functionDecl* statement* EOF;
+program: structDecl* functionDecl* statement*;
 
 functionDecl: FUNC returnType ID LPAREN parameterList? RPAREN block;
 returnType: type | VOID;
@@ -30,14 +30,16 @@ statement:
 varDecl: type ID (ASSIGN expression)?;
 assignment: assignable ASSIGN expression;
 
-ifStatement: IF LPAREN expression RPAREN (statement | block) (ELIF LPAREN expression RPAREN (statement | block))* (ELSE (statement | block))?;
+ifStatement: ifBlock (elifBlock)* (elseBlock)?;
+ifBlock: IF LPAREN expression RPAREN (statement | block);
+elifBlock: ELIF LPAREN expression RPAREN (statement | block);
+elseBlock: ELSE (statement | block);
 whileStatement: WHILE LPAREN expression RPAREN (statement | block);
 
 //breakStatement: BREAK;
 //continueStatement: CONTINUE;
 
 returnStatement: RETURN expression?;
-//printStatement: PRINT LPAREN expression RPAREN;
 
 expression:
       LPAREN expression RPAREN
@@ -48,32 +50,32 @@ expression:
     | expression MULT expression
     | expression ADD expression
     | expression COMPOP expression
-    | primaryExpression
-    | expression LBRACK expression RBRACK
-    ;
+    | primaryExpression;
 
 primaryExpression:
       ID
-    | fieldAccess
-    | arrayAccess //    | printCall
+    | primaryExpression DOT ID
+    | primaryExpression LBRACK expression RBRACK
     | functionCall
     | INT
     | DOUBLE
     | CHAR
     | BOOL
     | LPAREN expression RPAREN
-    | arrayInit
-    | structInit;
+    | arrayInit;
+//    | structInit;
 
 arrayInit: LBRACE (expression (COMMA expression)*)? RBRACE;
-structInit: ID LPAREN argumentList? RPAREN;
+//structInit: ID LPAREN argumentList? RPAREN;
 argumentList: expression (COMMA expression)*;
+//structureInitList: ID COLON expression (COMMA ID COLON expression)*;
 
-fieldAccess: ID (DOT ID)+;
-arrayAccess: ID LBRACK expression RBRACK;
 functionCall: ID LPAREN argumentList? RPAREN;
-//printCall: PRINT LPAREN expression RPAREN;
-assignable: ID | fieldAccess | arrayAccess;
+assignable: ID | (assignablePrefix (DOT ID | LBRACK expression RBRACK));
+assignablePrefix:
+    ID
+  | assignablePrefix DOT ID
+  | assignablePrefix LBRACK expression RBRACK;
 
 // Lexer
 FUNC: 'func';
@@ -112,6 +114,7 @@ RBRACK: ']';
 ARRAYTYPE: '[]';
 SEMI: ';';
 COMMA: ',';
+//COLON: ':';
 DOT: '.';
 
 WS: [ \t\r\n]+ -> skip;

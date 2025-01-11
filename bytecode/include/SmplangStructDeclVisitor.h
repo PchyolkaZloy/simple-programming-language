@@ -45,13 +45,7 @@ namespace bytecode {
 
         std::any visitArrayInit(SmplangParser::ArrayInitContext *ctx) override;
 
-        std::any visitStructInit(SmplangParser::StructInitContext *ctx) override;
-
         std::any visitArgumentList(SmplangParser::ArgumentListContext *ctx) override;
-
-        std::any visitFieldAccess(SmplangParser::FieldAccessContext *ctx) override;
-
-        std::any visitArrayAccess(SmplangParser::ArrayAccessContext *ctx) override;
 
         std::any visitFunctionCall(SmplangParser::FunctionCallContext *ctx) override;
 

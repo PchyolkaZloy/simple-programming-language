@@ -59,6 +59,15 @@ public:
   virtual void enterIfStatement(SmplangParser::IfStatementContext *ctx) = 0;
   virtual void exitIfStatement(SmplangParser::IfStatementContext *ctx) = 0;
 
+  virtual void enterIfBlock(SmplangParser::IfBlockContext *ctx) = 0;
+  virtual void exitIfBlock(SmplangParser::IfBlockContext *ctx) = 0;
+
+  virtual void enterElifBlock(SmplangParser::ElifBlockContext *ctx) = 0;
+  virtual void exitElifBlock(SmplangParser::ElifBlockContext *ctx) = 0;
+
+  virtual void enterElseBlock(SmplangParser::ElseBlockContext *ctx) = 0;
+  virtual void exitElseBlock(SmplangParser::ElseBlockContext *ctx) = 0;
+
   virtual void enterWhileStatement(SmplangParser::WhileStatementContext *ctx) = 0;
   virtual void exitWhileStatement(SmplangParser::WhileStatementContext *ctx) = 0;
 
@@ -74,23 +83,17 @@ public:
   virtual void enterArrayInit(SmplangParser::ArrayInitContext *ctx) = 0;
   virtual void exitArrayInit(SmplangParser::ArrayInitContext *ctx) = 0;
 
-  virtual void enterStructInit(SmplangParser::StructInitContext *ctx) = 0;
-  virtual void exitStructInit(SmplangParser::StructInitContext *ctx) = 0;
-
   virtual void enterArgumentList(SmplangParser::ArgumentListContext *ctx) = 0;
   virtual void exitArgumentList(SmplangParser::ArgumentListContext *ctx) = 0;
-
-  virtual void enterFieldAccess(SmplangParser::FieldAccessContext *ctx) = 0;
-  virtual void exitFieldAccess(SmplangParser::FieldAccessContext *ctx) = 0;
-
-  virtual void enterArrayAccess(SmplangParser::ArrayAccessContext *ctx) = 0;
-  virtual void exitArrayAccess(SmplangParser::ArrayAccessContext *ctx) = 0;
 
   virtual void enterFunctionCall(SmplangParser::FunctionCallContext *ctx) = 0;
   virtual void exitFunctionCall(SmplangParser::FunctionCallContext *ctx) = 0;
 
   virtual void enterAssignable(SmplangParser::AssignableContext *ctx) = 0;
   virtual void exitAssignable(SmplangParser::AssignableContext *ctx) = 0;
+
+  virtual void enterAssignablePrefix(SmplangParser::AssignablePrefixContext *ctx) = 0;
+  virtual void exitAssignablePrefix(SmplangParser::AssignablePrefixContext *ctx) = 0;
 
 
 };

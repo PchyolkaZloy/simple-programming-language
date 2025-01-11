@@ -2,25 +2,41 @@
 #include "SmplangParser.h"
 #include "SmplangThrowingErrorListener.h"
 #include "SmplangStructFuncNamePositionVisitor.h"
-#include "SmplangStructDeclVisitor.h"
+//#include "SmplangStructDeclVisitor.h"
 #include "smplang_common.h"
-#include <antlr4-runtime.h>
+#include "SmplangBytecodeVisitor.h"
 #include <iostream>
+#include <fstream>
 
-using namespace bytecode;
+//using namespace bytecode;
+
 
 // Для тестов
 int main() {
+//    auto it = bytecode::appendToCharVector(vec, 'b');
+    std::vector<char> vec({12, 13});
+    std::vector<char> vec2({12, 13});
+    bytecode::appendIntToCharVector(vec, cpp_int(10));
+    bytecode::appendIntToCharVector(vec2, cpp_int(-10));
+    for (auto v: vec) {
+        std::cout << (int) v << ' ';
+    }
+    std::cout << std::endl;
+    for (auto v: vec2) {
+        std::cout << (int) v << ' ';
+    }
+    std::cout << std::endl;
+
     SmplangParser::ProgramContext *tree;
     try {
         std::string input = R"(
 struct aoo {
 double c;
 };
-struct aoo {
-double b;
-
-};
+//struct aoo {
+//double b;
+//
+//};
 struct myStruct {
  int a;
 };
@@ -28,7 +44,7 @@ struct secondStruct {
  int a;
 };
 )";
-        auto *error_listener = new SmplangThrowingErrorListener();
+        auto *error_listener = new bytecode::SmplangThrowingErrorListener();
 
         antlr4::ANTLRInputStream inputStream(input);
         SmplangLexer lexer(&inputStream);
@@ -42,11 +58,10 @@ struct secondStruct {
 
 
         tree = parser.program();
-        auto def_result = SmplangBaseVisitor().visitProgram(tree);
-        SmplangStructFuncNamePositionVisitor name_visitor({"print"});
-        SmplangStructDeclVisitor().visitProgram(tree);
+        bytecode::SmplangStructFuncNamePositionVisitor name_visitor({"print"});
+//        bytecode::SmplangStructDeclVisitor().visitProgram(tree);
         std::cout << std::endl;
-        auto names_info = std::any_cast<NamesInfo>(name_visitor.visitProgram(tree));
+        auto names_info = std::any_cast<bytecode::NamesInfo>(name_visitor.visitProgram(tree));
         for (auto str_it = names_info.structure_positions.begin();
              str_it != names_info.structure_positions.end(); ++str_it) {
             std::cout << str_it->first << ' ' << str_it->second.toString() << std::endl;
@@ -55,13 +70,22 @@ struct secondStruct {
              func_it != names_info.function_positions.end(); ++func_it) {
             std::cout << func_it->first << ' ' << func_it->second.toString() << std::endl;
         }
+        std::vector<std::string> void_typed_functions({"print"});
+        auto code = std::any_cast<std::vector<bytecode::Operation>>(
+                bytecode::SmplangBytecodeVisitor(void_typed_functions.begin(),
+                                                 void_typed_functions.end()).visitProgram(tree));
+//        std::ofstream fout("myfile.spl");
+//        fout.write(code.data(), code.size());
 
 //    std::cout << tree->
 //        std::cout << tree->toStringTree(&parser) << std::endl;
-    } catch (const ParserException &ex) {
+    } catch (const bytecode::ParserException &ex) {
         std::cout << "Error: " << ex.what() << '\n';
         return 1;
-    } catch (const ValidatorException &ex) {
+    } catch (const bytecode::ValidatorException &ex) {
+        std::cout << "Error: " << ex.what() << '\n';
+        return 1;
+    } catch (const bytecode::ASTException &ex) {
         std::cout << "Error: " << ex.what() << '\n';
         return 1;
     }

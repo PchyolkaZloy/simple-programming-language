@@ -75,6 +75,18 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitIfBlock(SmplangParser::IfBlockContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitElifBlock(SmplangParser::ElifBlockContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitElseBlock(SmplangParser::ElseBlockContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitWhileStatement(SmplangParser::WhileStatementContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -95,19 +107,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitStructInit(SmplangParser::StructInitContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitArgumentList(SmplangParser::ArgumentListContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitFieldAccess(SmplangParser::FieldAccessContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitArrayAccess(SmplangParser::ArrayAccessContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -116,6 +116,10 @@ public:
   }
 
   virtual std::any visitAssignable(SmplangParser::AssignableContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitAssignablePrefix(SmplangParser::AssignablePrefixContext *ctx) override {
     return visitChildren(ctx);
   }
 

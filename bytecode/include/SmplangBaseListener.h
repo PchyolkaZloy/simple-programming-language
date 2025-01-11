@@ -61,6 +61,15 @@ public:
   virtual void enterIfStatement(SmplangParser::IfStatementContext * /*ctx*/) override { }
   virtual void exitIfStatement(SmplangParser::IfStatementContext * /*ctx*/) override { }
 
+  virtual void enterIfBlock(SmplangParser::IfBlockContext * /*ctx*/) override { }
+  virtual void exitIfBlock(SmplangParser::IfBlockContext * /*ctx*/) override { }
+
+  virtual void enterElifBlock(SmplangParser::ElifBlockContext * /*ctx*/) override { }
+  virtual void exitElifBlock(SmplangParser::ElifBlockContext * /*ctx*/) override { }
+
+  virtual void enterElseBlock(SmplangParser::ElseBlockContext * /*ctx*/) override { }
+  virtual void exitElseBlock(SmplangParser::ElseBlockContext * /*ctx*/) override { }
+
   virtual void enterWhileStatement(SmplangParser::WhileStatementContext * /*ctx*/) override { }
   virtual void exitWhileStatement(SmplangParser::WhileStatementContext * /*ctx*/) override { }
 
@@ -76,23 +85,17 @@ public:
   virtual void enterArrayInit(SmplangParser::ArrayInitContext * /*ctx*/) override { }
   virtual void exitArrayInit(SmplangParser::ArrayInitContext * /*ctx*/) override { }
 
-  virtual void enterStructInit(SmplangParser::StructInitContext * /*ctx*/) override { }
-  virtual void exitStructInit(SmplangParser::StructInitContext * /*ctx*/) override { }
-
   virtual void enterArgumentList(SmplangParser::ArgumentListContext * /*ctx*/) override { }
   virtual void exitArgumentList(SmplangParser::ArgumentListContext * /*ctx*/) override { }
-
-  virtual void enterFieldAccess(SmplangParser::FieldAccessContext * /*ctx*/) override { }
-  virtual void exitFieldAccess(SmplangParser::FieldAccessContext * /*ctx*/) override { }
-
-  virtual void enterArrayAccess(SmplangParser::ArrayAccessContext * /*ctx*/) override { }
-  virtual void exitArrayAccess(SmplangParser::ArrayAccessContext * /*ctx*/) override { }
 
   virtual void enterFunctionCall(SmplangParser::FunctionCallContext * /*ctx*/) override { }
   virtual void exitFunctionCall(SmplangParser::FunctionCallContext * /*ctx*/) override { }
 
   virtual void enterAssignable(SmplangParser::AssignableContext * /*ctx*/) override { }
   virtual void exitAssignable(SmplangParser::AssignableContext * /*ctx*/) override { }
+
+  virtual void enterAssignablePrefix(SmplangParser::AssignablePrefixContext * /*ctx*/) override { }
+  virtual void exitAssignablePrefix(SmplangParser::AssignablePrefixContext * /*ctx*/) override { }
 
 
   virtual void enterEveryRule(antlr4::ParserRuleContext * /*ctx*/) override { }
