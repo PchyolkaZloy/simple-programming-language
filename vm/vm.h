@@ -223,7 +223,7 @@ struct LoadString: public BytecodeOpBase {
         stream.read(s.data(), size);
     }
     void Parse(const bytecode::Operation& op) override {
-        s = std::string(op.value_bytes.begin(), op.value_bytes.end());
+        s = std::string(op.value_bytes.begin() + 4, op.value_bytes.end());
     }
     void operator()(Frame& frame) override {
         frame.LoadString(&s);
@@ -329,7 +329,7 @@ struct DefineStruct: public BytecodeOpBase {
             offset = *reinterpret_cast<const int*>(op.value_bytes.data()); \
         }                                                                  \
         void operator()(Frame& frame) override {                           \
-            frame.Jump(offset);                                            \
+            frame.Name(offset);                                            \
         }                                                                  \
         ByteCodes GetByteCode() override {                                 \
             return ByteCodes::Name;                                        \
@@ -413,7 +413,7 @@ std::shared_ptr<BaseType> Frame::Run() {
             return ReturnValue;
         }
         if (Offset) {
-            cur_instruction -= *Offset;
+            cur_instruction += *Offset;
             Offset.reset();
         } else {
             cur_instruction += 1;
@@ -494,8 +494,9 @@ void Frame::LoadName() {
 }
 
 void Frame::StoreName() {
+    std::shared_ptr<BaseType> value = Pop();
     std::string& name = PopString();
-    Locals[name] = Pop();
+    Locals[name] = std::move(value);
 }
 
 void Frame::LoadSubscr() {
@@ -556,9 +557,14 @@ void Frame::UnaryOp(UnaryOps opCode) {
 }
 
 void Frame::BinaryOp(BinaryOps opCode) {
+    // TODO BUG -3
     auto right = Pop();
     auto left = Pop();
-    Push(BINARY_OPS[static_cast<char>(opCode)](*left, *right));
+    int idx = static_cast<char>(opCode);
+    if (idx > 3) {
+        idx -= 3;
+    }
+    Push(BINARY_OPS[idx](*left, *right));
 }
 
 void Frame::BuildArray(int count) {
@@ -685,7 +691,6 @@ struct VirtualMachine {
     }
 
     void Run(const std::vector<bytecode::Operation>& code) {
-        ByteCodes bytecode;
         for (const auto& c : code) {
             Code.push_back(CompilerBasedOpFactories[static_cast<char>(c.code)](c));
         }

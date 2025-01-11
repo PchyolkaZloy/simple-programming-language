@@ -1,9 +1,9 @@
 func int[] sieveOfEratosthenes(int n) {
-    bool[] isPrime = { };
+    bool[] isPrime;
     int i = 0;
 
     while (i <= n) {
-        isPrime[i] = true;
+        append(true);
         i = i + 1;
     }
 
@@ -23,14 +23,13 @@ func int[] sieveOfEratosthenes(int n) {
         p = p + 1;
     }
 
-    int[] primes = { };
+    int[] primes;
     int count = 0;
     i = 2;
 
     while (i <= n) {
         if (isPrime[i]) {
-            primes[count] = i;
-            count = count + 1;
+            append(primes, i);
         }
         i = i + 1;
     }
@@ -38,15 +37,7 @@ func int[] sieveOfEratosthenes(int n) {
     return primes;
 }
 
-func void printArray(int[] arr, int size) {
-    int i = 0;
-    while (i < size) {
-        print(arr[i]);
-        i = i + 1;
-    }
-}
-
 int n = 100000;
 int[] primes = sieveOfEratosthenes(n);
 
-printArray(primes, primes.length);
+print(primes);

@@ -29,7 +29,6 @@ std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramCo
 std::any bytecode::SmplangBytecodeVisitor::visitFunctionDecl(SmplangParser::FunctionDeclContext *ctx) {
     std::string func_name = ctx->ID()->getText();
     std::vector<Operation> result{};
-    result.push_back(loadString(func_name));
     auto parameter_ctxes = (ctx->parameterList()) ? ctx->parameterList()->parameter()
                                                   : std::decay_t<decltype(ctx->parameterList()->parameter())>{};
     size_t params_count = parameter_ctxes.size();
@@ -41,6 +40,8 @@ std::any bytecode::SmplangBytecodeVisitor::visitFunctionDecl(SmplangParser::Func
         auto load_param_name_code = loadString(parameter_ctx->ID()->getText());
         result.push_back(load_param_name_code);
     }
+
+    result.push_back(loadString(func_name));
 
     result.emplace_back(ByteCodes::MakeFunction,
                         std::vector<char>(1, static_cast<uint8_t >(params_count))); // NOLINT(*-narrowing-conversions)
@@ -498,7 +499,6 @@ std::vector<char> &bytecode::appendIntToCharVector(std::vector<char> &vector, co
     return insertIntToCharVector(vector, value, vector.size());
 }
 
-bytecode::Operation::Operation(bytecode::ByteCodes code, const std::vector<char> &valueBytes) : code(code), value_bytes(
-        valueBytes) {}
+bytecode::Operation::Operation(ByteCodes code, const std::vector<char> &valueBytes) : code(code), value_bytes(valueBytes) {}
 
-bytecode::Operation::Operation(bytecode::ByteCodes code) : code(code), value_bytes(std::vector<char>{}) {}
+bytecode::Operation::Operation(ByteCodes code) : code(code), value_bytes(std::vector<char>{}) {}
