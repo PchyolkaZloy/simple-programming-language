@@ -1,3 +1,5 @@
+#include "vm.h"
+
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include <iostream>
@@ -6,63 +8,16 @@
 
 using namespace std;
 
-enum class ByteCodes : char {
-    NullOp,
-    LoadInt,
-    LoadChar,
-    LoadBool,
-    LoadDouble,
-    LoadString,
-    LoadName,
-    StoreName,
-    StoreSubscr,
-    StoreMember,
-    MakeFunction,
-    Call,
-    Return,
-    UnaryOp,
-    BinaryOp,
-    BuildArray,
-    BuildStruct,
-    DefineStruct,
-    Jump,
-    JumpIfTrue,
-    JumpIfFalse,
-    Copy,
-    Pop,
-};
-
-enum class BinaryOps : char {
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Mod,
-    And,
-    Or,
-    RShift,
-    LShift,
-    Xor,
-    Eq,
-    NotEq,
-    Less,
-    Gr,
-    LessEq,
-    GrEq,
-};
-
-enum class UnaryOp : char {
-    Minus,
-    Not,
-};
-
 using cpp_int = boost::multiprecision::cpp_int;
 
 void LoadInt(std::ofstream& f, const cpp_int& exported) {
     f << static_cast<char>(ByteCodes::LoadInt);
     std::string v;
-    boost::multiprecision::export_bits(exported, std::back_inserter(v), 8);
+    boost::multiprecision::export_bits(exported, std::back_inserter(v), 7);
     int len = v.size();
+    if (exported < 0) {
+        len = -len;
+    }
     f.write(reinterpret_cast<char*>(&len), 4);
     f.write(v.c_str(), v.size());
 }
@@ -122,33 +77,26 @@ void Example1(std::ofstream& f) {
 }
 
 /*
-int abcdefgh = 2;
 (тут ! это не оператор и такое не должно компилироваться. Это простой пример для проверки что работает длинная арифметика)
 int xyz = 100!;
-Print(abcdefgh, xyz);
+Print(xyz);
 */
 void Example2(std::ofstream& f) {
-    cpp_int abcdefgh = 2;
-    cpp_int xyz = 1;
+    cpp_int xyz = -1;
     for (int i = 1; i <= 100; ++i) {
         xyz *= i;
     }
 
-    LoadInt(f, abcdefgh);
-    LoadString(f, "abcdefgh");
-    f << static_cast<char>(ByteCodes::StoreName);
+    cout << xyz;
 
     LoadInt(f, xyz);
     LoadString(f, "xyz");
     f << static_cast<char>(ByteCodes::StoreName);
 
-    LoadString(f, "abcdefgh");
-    f << static_cast<char>(ByteCodes::LoadName);
-
     LoadString(f, "xyz");
     f << static_cast<char>(ByteCodes::LoadName);
 
-    // on stack 2, 2 ** 100
+    // on stack 100!
     LoadString(f, "Print");
     f << static_cast<char>(ByteCodes::Call);
 }
@@ -201,7 +149,8 @@ void Example3(std::ofstream& f) {
 
 /*
 def function_name(int a, int b) {
-    Print(a, b);
+    Print(a);
+    Print(b);
     return 1;
 }
 
@@ -345,8 +294,6 @@ void Example6(std::ofstream& f) {
 
 int main() {
     ofstream f("basic_test.spl", std::ios::binary);
-    Example1(f);
-    int a = 1;
-    cout << a;
+    Example2(f);
     return 0;
 }

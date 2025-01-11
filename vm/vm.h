@@ -43,6 +43,7 @@ enum class ByteCodes : char {
     JumpIfFalse,
     Copy,
     Pop,
+    Incorrect, // ending op for counting size of ByteCodes
 };
 
 enum class BinaryOps : char {
@@ -53,9 +54,6 @@ enum class BinaryOps : char {
     Mod,
     And,
     Or,
-    RShift,
-    LShift,
-    Xor,
     Eq,
     NotEq,
     Less,
@@ -71,15 +69,99 @@ enum class UnaryOps : char {
 
 struct Frame;
 
-struct Function {
-    std::vector<std::string*> Params;
-    std::span<std::unique_ptr<BytecodeOpBase>> Code;
-};
-
 struct BytecodeOpBase {
     virtual void Parse(std::ifstream& stream) = 0;
     virtual void operator()(Frame& frame) = 0;
     virtual ByteCodes GetByteCode() = 0;
+};
+
+struct Function {
+    std::vector<std::string*> Params;
+    std::span<std::unique_ptr<BytecodeOpBase>> Code;
+    std::vector<std::unique_ptr<BytecodeOpBase>> JitCompiled;
+};
+
+struct Frame {
+    static constexpr std::array<std::shared_ptr<BaseType> (*)(const BaseType&, const BaseType&), 10> BINARY_OPS = {
+        [](const BaseType& x, const BaseType& y) { return x + y; },
+        [](const BaseType& x, const BaseType& y) { return x - y; },
+        [](const BaseType& x, const BaseType& y) { return x * y; },
+        [](const BaseType& x, const BaseType& y) { return x / y; },
+        // TODO
+        // [](const BaseType& x, const BaseType& y) { return x % y; },
+        // [](const BaseType& x, const BaseType& y) { return x & y; },
+        // [](const BaseType& x, const BaseType& y) { return x | y; },
+        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x == y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x != y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x < y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x > y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x <= y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x >= y); }};
+
+    static constexpr std::array<std::shared_ptr<BaseType> (*)(const BaseType&), 2> UNARY_OPS = {
+        // [](const BaseType& x) { return -x; }};
+        // [](const BaseType& x) { return !x; },
+    };
+
+    Frame(
+        std::span<std::unique_ptr<BytecodeOpBase>>& instructions,
+        std::unordered_map<std::string, std::shared_ptr<BaseType>>& builtins,
+        std::unordered_map<std::string, std::shared_ptr<BaseType>>& globals,
+        std::unordered_map<std::string, std::shared_ptr<BaseType>>& locals,
+        std::unordered_map<std::string, Function>& builtinFunctions,
+        Frame* parentFrame);
+
+    void ReadFunction(int& cur_instruction);
+    std::shared_ptr<BaseType> Run();
+    std::shared_ptr<BaseType>& Top();
+    std::string& PopString();
+    std::vector<std::shared_ptr<BaseType>> Popn(size_t n);
+    std::vector<std::string*> PopnStrings(size_t n);
+    void Push(std::shared_ptr<BaseType>&& value);
+    void Push(const std::shared_ptr<BaseType>& value);
+    void Push(std::string* value);
+    void LoadInt(BaseType::IntType* num);
+    void LoadChar(char* arg);
+    void LoadBool(bool* arg);
+    void LoadDouble(double* arg);
+    void LoadString(std::string* s);
+    void LoadName();
+    void StoreName();
+    void LoadSubscr();
+    void LoadMember();
+    void StoreSubscr();
+    void StoreMember();
+    void MakeFunction(int argc);
+    void Call();
+    void Return();
+    void UnaryOp(UnaryOps opCode);
+    void BinaryOp(BinaryOps opCode);
+    void BuildArray(int count);
+    void BuildStruct();
+    void DefineStruct(int fieldc);
+    void Jump(int offset);
+    void JumpIfTrue(int offset);
+    void JumpIfFalse(int offset);
+    void Copy();
+
+    template <std::derived_from<BaseType> T = BaseType>
+    std::shared_ptr<T> Pop() {
+        std::shared_ptr<T> ret = std::move(reinterpret_cast<std::shared_ptr<T>&>(Top()));
+        DataStack.pop_back();
+        return ret;
+    }
+
+    std::span<std::unique_ptr<BytecodeOpBase>>& Instructions;
+    std::unordered_map<std::string, std::shared_ptr<BaseType>> Builtins;
+    std::unordered_map<std::string, std::shared_ptr<BaseType>> Globals;
+    std::unordered_map<std::string, std::shared_ptr<BaseType>> Locals;
+    Frame* ParentFrame;
+    std::vector<std::variant<std::shared_ptr<BaseType>, std::string*>> DataStack;
+    std::shared_ptr<BaseType> ReturnValue;
+    bool ShouldReturn;
+    std::optional<int> Offset;
+    std::unordered_map<std::string, Function>& Functions;
+    Function* ReadingFunction;
 };
 
 struct NullOp: public BytecodeOpBase {
@@ -94,11 +176,15 @@ struct NullOp: public BytecodeOpBase {
 
 struct LoadInt: public BytecodeOpBase {
     void Parse(std::ifstream& stream) override {
+        // if size < 0, then cpp_int is negative
         int size = 0;
         stream.read(reinterpret_cast<char*>(&size), 4);
-        char* bytes = new char[size];
-        stream.read(bytes, size);
-        boost::multiprecision::import_bits(num, bytes, bytes + size);
+        char* bytes = new char[abs(size)];
+        stream.read(bytes, abs(size));
+        boost::multiprecision::import_bits(num, bytes, bytes + abs(size));
+        if (size < 0) {
+            num = -num;
+        }
     }
     void operator()(Frame& frame) override {
         frame.LoadInt(&num);
@@ -240,7 +326,7 @@ struct DefineStruct: public BytecodeOpBase {
 };
 
 #define DefJump(Name)                                         \
-    struct Name##: public BytecodeOpBase {                    \
+    struct Name: public BytecodeOpBase {                      \
         void Parse(std::ifstream& stream) override {          \
             stream.read(reinterpret_cast<char*>(&offset), 4); \
         }                                                     \
@@ -248,7 +334,7 @@ struct DefineStruct: public BytecodeOpBase {
             frame.Jump(offset);                               \
         }                                                     \
         ByteCodes GetByteCode() override {                    \
-            return ByteCodes::##Name;                         \
+            return ByteCodes::Name;                           \
         }                                                     \
         int offset = 0;                                       \
     }
@@ -258,14 +344,14 @@ DefJump(JumpIfTrue);
 DefJump(JumpIfFalse);
 
 #define DefOp(Name)                                  \
-    struct Name##: public BytecodeOpBase {           \
+    struct Name: public BytecodeOpBase {             \
         void Parse(std::ifstream& stream) override { \
         }                                            \
         void operator()(Frame& frame) override {     \
-            frame.##Name();                          \
+            frame.Name();                            \
         }                                            \
         ByteCodes GetByteCode() override {           \
-            return ByteCodes::##Name;                \
+            return ByteCodes::Name;                  \
         }                                            \
     }
 
@@ -281,270 +367,231 @@ DefOp(BuildStruct);
 DefOp(Copy);
 DefOp(Pop);
 
-struct Frame {
-    static constexpr std::array<std::shared_ptr<BaseType> (*)(const BaseType&, const BaseType&), 10> BINARY_OPS = {
-        [](const BaseType& x, const BaseType& y) { return x + y; },
-        [](const BaseType& x, const BaseType& y) { return x - y; },
-        [](const BaseType& x, const BaseType& y) { return x * y; },
-        [](const BaseType& x, const BaseType& y) { return x / y; },
-        // TODO
-        // [](const BaseType& x, const BaseType& y) { return x % y; },
-        // [](const BaseType& x, const BaseType& y) { return x & y; },
-        // [](const BaseType& x, const BaseType& y) { return x | y; },
-        // [](const BaseType& x, const BaseType& y) { return x << y; },
-        // [](const BaseType& x, const BaseType& y) { return x >> y; },
-        // [](const BaseType& x, const BaseType& y) { return x ^ y; }
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x == y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x != y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x < y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x > y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x <= y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x >= y); }};
+//// Frame definitions TODO make separate .cpp file
 
-    static constexpr std::array<std::shared_ptr<BaseType> (*)(const BaseType&), 2> UNARY_OPS = {
-        // [](const BaseType& x) { return -x; }};
-        // [](const BaseType& x) { return !x; },
-    };
+Frame::Frame(
+    std::span<std::unique_ptr<BytecodeOpBase>>& instructions,
+    std::unordered_map<std::string, std::shared_ptr<BaseType>>& builtins,
+    std::unordered_map<std::string, std::shared_ptr<BaseType>>& globals,
+    std::unordered_map<std::string, std::shared_ptr<BaseType>>& locals,
+    std::unordered_map<std::string, Function>& builtinFunctions,
+    Frame* parentFrame)
+    : Instructions(instructions)
+    , Builtins(builtins)
+    , Globals(globals)
+    , Locals(locals)
+    , ParentFrame(parentFrame)
+    , DataStack()
+    , ReturnValue()
+    , ShouldReturn()
+    , Offset()
+    , Functions(builtinFunctions)
+    , ReadingFunction(nullptr) {
+}
 
-    Frame(
-        std::span<std::unique_ptr<BytecodeOpBase>>& instructions,
-        std::unordered_map<std::string, std::shared_ptr<BaseType>>& builtins,
-        std::unordered_map<std::string, std::shared_ptr<BaseType>>& globals,
-        std::unordered_map<std::string, std::shared_ptr<BaseType>>& locals,
-        Frame* parentFrame)
-        : Instructions(instructions)
-        , Builtins(builtins)
-        , Globals(globals)
-        , Locals(locals)
-        , ParentFrame(parentFrame)
-        , DataStack()
-        , ReturnValue()
-        , ShouldReturn()
-        , Offset()
-        , Functions()
-        , ReadingFunction(nullptr) {
+void Frame::ReadFunction(int& cur_instruction) {
+    int fStart = cur_instruction;
+    while (Instructions[cur_instruction]->GetByteCode() != ByteCodes::NullOp) {
+        ++cur_instruction;
     }
+    ReadingFunction->Code = std::span<std::unique_ptr<BytecodeOpBase>>(
+        Instructions.begin() + fStart,
+        Instructions.begin() + cur_instruction);
+    ReadingFunction = nullptr;
+}
 
-    void ReadFunction(int& cur_instruction) {
-        int fStart = cur_instruction;
-        while (Instructions[cur_instruction]->GetByteCode() != ByteCodes::NullOp) {
-            ++cur_instruction;
-        }
-        ReadingFunction->Code = std::span<std::unique_ptr<BytecodeOpBase>>(
-            Instructions.begin() + fStart,
-            Instructions.begin() + cur_instruction);
-        ReadingFunction = nullptr;
-    }
-
-    std::shared_ptr<BaseType> Run() {
-        int cur_instruction = 0;
-        while (cur_instruction < Instructions.size()) {
-            if (ReadingFunction) {
-                ReadFunction(cur_instruction);
-            } else {
-                BytecodeOpBase& instruction = *Instructions[cur_instruction].get();
-                instruction(*this);
-            }
-            if (ShouldReturn) {
-                return ReturnValue;
-            }
-            if (Offset) {
-                cur_instruction -= *Offset;
-                Offset.reset();
-            } else {
-                cur_instruction += 1;
-            }
-        }
-        return ReturnValue;
-    }
-
-    std::shared_ptr<BaseType>& Top() {
-        return std::get<std::shared_ptr<BaseType>>(DataStack.back());
-    }
-
-    template <std::derived_from<BaseType> T = BaseType>
-    std::shared_ptr<T> Pop() {
-        std::shared_ptr<T> ret = std::move(static_cast<std::shared_ptr<T>&>(Top()));
-        DataStack.pop_back();
-        return ret;
-    }
-
-    std::string& PopString() {
-        std::string& ret = *std::get<std::string*>(DataStack.back());
-        DataStack.pop_back();
-        return ret;
-    }
-
-    std::vector<std::shared_ptr<BaseType>> Popn(size_t n) {
-        std::vector<std::shared_ptr<BaseType>> ret(n);
-        for (int i = 0; i < n; ++i) {
-            ret[i] = Pop();
-        }
-        return ret;
-    }
-
-    std::vector<std::string*> PopnStrings(size_t n) {
-        std::vector<std::string*> ret(n);
-        for (int i = 0; i < n; ++i) {
-            ret[i] = &PopString();
-        }
-        return ret;
-    }
-
-    void Push(std::shared_ptr<BaseType>&& value) {
-        DataStack.emplace_back(std::move(value));
-    }
-
-    void Push(const std::shared_ptr<BaseType>& value) {
-        DataStack.emplace_back(value);
-    }
-
-    void Push(std::string* value) {
-        DataStack.emplace_back(value);
-    }
-
-    void LoadInt(BaseType::IntType* num) {
-        Push(std::make_shared<Int>(num));
-    }
-
-    void LoadChar(char* arg) {
-        Push(std::make_shared<Char>(arg));
-    }
-
-    void LoadBool(bool* arg) {
-        Push(std::make_shared<Bool>(arg));
-    }
-
-    void LoadDouble(double* arg) {
-        Push(std::make_shared<Double>(arg));
-    }
-
-    void LoadString(std::string* s) {
-        Push(s);
-    }
-
-    void LoadName() {
-        std::string& name = PopString();
-        if (Locals.contains(name)) {
-            Push(Locals.at(name));
-        } else if (Globals.contains(name)) {
-            Push(Globals.at(name));
-        } else if (Builtins.contains(name)) {
-            Push(Builtins.at(name));
+std::shared_ptr<BaseType> Frame::Run() {
+    int cur_instruction = 0;
+    while (cur_instruction < Instructions.size()) {
+        if (ReadingFunction) {
+            ReadFunction(cur_instruction);
         } else {
-            throw std::invalid_argument(std::format("name '{}' is not defined", name));
+            BytecodeOpBase& instruction = *Instructions[cur_instruction].get();
+            instruction(*this);
+        }
+        if (ShouldReturn) {
+            return ReturnValue;
+        }
+        if (Offset) {
+            cur_instruction -= *Offset;
+            Offset.reset();
+        } else {
+            cur_instruction += 1;
         }
     }
+    return ReturnValue;
+}
 
-    void StoreName() {
-        std::string name = PopString();
-        Locals[name] = Pop();
+std::shared_ptr<BaseType>& Frame::Top() {
+    return std::get<std::shared_ptr<BaseType>>(DataStack.back());
+}
+
+std::string& Frame::PopString() {
+    std::string& ret = *std::get<std::string*>(DataStack.back());
+    DataStack.pop_back();
+    return ret;
+}
+
+std::vector<std::shared_ptr<BaseType>> Frame::Popn(size_t n) {
+    std::vector<std::shared_ptr<BaseType>> ret(n);
+    for (int i = 0; i < n; ++i) {
+        ret[i] = Pop();
     }
+    return ret;
+}
 
-    void LoadSubscr() {
-
+std::vector<std::string*> Frame::PopnStrings(size_t n) {
+    std::vector<std::string*> ret(n);
+    for (int i = 0; i < n; ++i) {
+        ret[i] = &PopString();
     }
+    return ret;
+}
 
-    void LoadMember() {
+void Frame::Push(std::shared_ptr<BaseType>&& value) {
+    DataStack.emplace_back(std::move(value));
+}
 
+void Frame::Push(const std::shared_ptr<BaseType>& value) {
+    DataStack.emplace_back(value);
+}
+
+void Frame::Push(std::string* value) {
+    DataStack.emplace_back(value);
+}
+
+void Frame::LoadInt(BaseType::IntType* num) {
+    Push(std::make_shared<Int>(num));
+}
+
+void Frame::LoadChar(char* arg) {
+    Push(std::make_shared<Char>(arg));
+}
+
+void Frame::LoadBool(bool* arg) {
+    Push(std::make_shared<Bool>(arg));
+}
+
+void Frame::LoadDouble(double* arg) {
+    Push(std::make_shared<Double>(arg));
+}
+
+void Frame::LoadString(std::string* s) {
+    Push(s);
+}
+
+void Frame::LoadName() {
+    std::string& name = PopString();
+    if (Locals.contains(name)) {
+        Push(Locals.at(name));
+    } else if (Globals.contains(name)) {
+        Push(Globals.at(name));
+    } else if (Builtins.contains(name)) {
+        Push(Builtins.at(name));
+    } else {
+        throw std::invalid_argument(std::format("name '{}' is not defined", name));
     }
+}
 
-    void StoreSubscr() {
-        std::shared_ptr<BaseType> value = Pop();
-        std::shared_ptr<Int> key = Pop<Int>();
-        std::shared_ptr<Array> container = Pop<Array>();
-        (*container)[*key.get()] = std::move(value);
-    }
+void Frame::StoreName() {
+    std::string& name = PopString();
+    Locals[name] = Pop();
+}
 
-    void StoreMember() {
-        std::string& name = PopString();
-        std::shared_ptr<Struct> obj = Pop<Struct>();
-        std::shared_ptr<BaseType> value = Pop();
-        obj->GetMap()[name] = value;
-    }
+void Frame::LoadSubscr() {
+}
 
-    void MakeFunction(int argc) {
-        auto code = Pop();
-        Function f;
-        std::string& fName = PopString();
-        f.Params = PopnStrings(argc);
-        Functions[fName] = std::move(f);
-        ReadingFunction = &Functions[fName];
-    }
+void Frame::LoadMember() {
+}
 
-    void Call() {
-        std::string& fName = PopString();
-        Function& f = Functions[fName];
-        int argc = f.Params.size();
-        std::vector<std::shared_ptr<BaseType>> args = Popn(argc);
-        std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
-        for (const auto& [name, value] : std::views::zip(f.Params, args)) {
-            locals[*name] = value;
-        }
-        auto frame = Frame(f.Code, Builtins, Globals, locals, this);
-        Push(frame.Run());
-    }
+void Frame::StoreSubscr() {
+    std::shared_ptr<BaseType> value = Pop();
+    std::shared_ptr<Int> key = Pop<Int>();
+    std::shared_ptr<Array> container = Pop<Array>();
+    (*container)[*key.get()] = std::move(value);
+}
 
-    void Return() {
-        ReturnValue = Pop();
-        ShouldReturn = true;
-    }
+void Frame::StoreMember() {
+    std::string& name = PopString();
+    std::shared_ptr<Struct> obj = Pop<Struct>();
+    std::shared_ptr<BaseType> value = Pop();
+    obj->GetMap()[name] = value;
+}
 
-    void UnaryOp(UnaryOps opCode) {
-        DataStack.back() = UNARY_OPS[static_cast<char>(opCode)](*Top());
-    }
+void Frame::MakeFunction(int argc) {
+    auto code = Pop();
+    Function f;
+    std::string& fName = PopString();
+    f.Params = PopnStrings(argc);
+    Functions[fName] = std::move(f);
+    ReadingFunction = &Functions[fName];
+}
 
-    void BinaryOp(BinaryOps opCode) {
-        auto right = Pop();
-        auto left = Pop();
-        Push(BINARY_OPS[static_cast<char>(opCode)](*left, *right));
+void Frame::Call() {
+    std::string& fName = PopString();
+    if (fName == "Print") {
+        std::shared_ptr<BaseType> arg = Pop();
+        arg->Print();
+        return;
     }
+    Function& f = Functions[fName];
+    int argc = f.Params.size();
+    std::vector<std::shared_ptr<BaseType>> args = Popn(argc);
+    std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
+    for (const auto& [name, value] : std::views::zip(f.Params, args)) {
+        locals[*name] = value;
+    }
+    auto frame = Frame(f.Code, Builtins, Globals, locals, Functions, this);
+    if (auto res = frame.Run()) {
+        Push(res);
+    }
+}
 
-    void BuildArray(int count) {
-        std::shared_ptr<Array> arr = std::make_shared<Array>(Popn(count));
-        Push(std::move(arr));
-    }
-    
-    void BuildStruct() {
-        
-    }
-    
-    void DefineStruct(int fieldc) {
+void Frame::Return() {
+    ReturnValue = Pop();
+    ShouldReturn = true;
+}
 
-    }
+void Frame::UnaryOp(UnaryOps opCode) {
+    DataStack.back() = UNARY_OPS[static_cast<char>(opCode)](*Top());
+}
 
-    void Jump(int offset) {
+void Frame::BinaryOp(BinaryOps opCode) {
+    auto right = Pop();
+    auto left = Pop();
+    Push(BINARY_OPS[static_cast<char>(opCode)](*left, *right));
+}
+
+void Frame::BuildArray(int count) {
+    std::shared_ptr<Array> arr = std::make_shared<Array>(Popn(count));
+    Push(std::move(arr));
+}
+
+void Frame::BuildStruct() {
+}
+
+void Frame::DefineStruct(int fieldc) {
+}
+
+void Frame::Jump(int offset) {
+    Offset = offset;
+}
+
+void Frame::JumpIfTrue(int offset) {
+    if (Pop()->BoolCast()) {
         Offset = offset;
     }
+}
 
-    void JumpIfTrue(int offset) {
-        if (Pop()->BoolCast()) {
-            Offset = offset;
-        }
+void Frame::JumpIfFalse(int offset) {
+    if (!Pop()->BoolCast()) {
+        Offset = offset;
     }
+}
 
-    void JumpIfFalse(int offset) {
-        if (!Pop()->BoolCast()) {
-            Offset = offset;
-        }
-    }
-
-    void Copy() {
-        throw std::invalid_argument("not implemented");
-    }
-
-    std::span<std::unique_ptr<BytecodeOpBase>>& Instructions;
-    std::unordered_map<std::string, std::shared_ptr<BaseType>> Builtins;
-    std::unordered_map<std::string, std::shared_ptr<BaseType>> Globals;
-    std::unordered_map<std::string, std::shared_ptr<BaseType>> Locals;
-    Frame* ParentFrame;
-    std::vector<std::variant<std::shared_ptr<BaseType>, std::string*>> DataStack;
-    std::shared_ptr<BaseType> ReturnValue;
-    bool ShouldReturn;
-    std::optional<int> Offset;
-    std::unordered_map<std::string, Function> Functions;
-    Function* ReadingFunction;
-};
+void Frame::Copy() {
+    throw std::invalid_argument("not implemented");
+}
 
 template <typename T>
 std::unique_ptr<BytecodeOpBase> BytecodeOpFactory(std::ifstream& code) {
@@ -554,7 +601,7 @@ std::unique_ptr<BytecodeOpBase> BytecodeOpFactory(std::ifstream& code) {
 }
 
 struct VirtualMachine {
-    static constexpr std::array<std::unique_ptr<BytecodeOpBase> (*)(std::ifstream&), 23> OpFactories = {
+    static constexpr std::array<std::unique_ptr<BytecodeOpBase> (*)(std::ifstream&), 25> OpFactories = {
         BytecodeOpFactory<NullOp>,
         BytecodeOpFactory<LoadInt>,
         BytecodeOpFactory<LoadChar>,
@@ -562,6 +609,8 @@ struct VirtualMachine {
         BytecodeOpFactory<LoadDouble>,
         BytecodeOpFactory<LoadString>,
         BytecodeOpFactory<LoadName>,
+        BytecodeOpFactory<LoadSubscr>,
+        BytecodeOpFactory<LoadMember>,
         BytecodeOpFactory<StoreName>,
         BytecodeOpFactory<StoreSubscr>,
         BytecodeOpFactory<StoreMember>,
@@ -580,6 +629,12 @@ struct VirtualMachine {
         BytecodeOpFactory<Pop>,
     };
 
+    static_assert(OpFactories.size() == static_cast<char>(ByteCodes::Incorrect));
+
+    std::unordered_map<std::string, Function> CreateBuiltinFunctions() {
+        return {};
+    }
+
     void Run(std::ifstream& code) {
         ByteCodes bytecode;
         while (code.read(reinterpret_cast<char*>(&bytecode), 1)) {
@@ -589,7 +644,8 @@ struct VirtualMachine {
         std::unordered_map<std::string, std::shared_ptr<BaseType>> globals{};
         std::unordered_map<std::string, std::shared_ptr<BaseType>> builtins{};
         std::span<std::unique_ptr<BytecodeOpBase>> instructions(Code.begin(), Code.end());
-        auto frame = Frame(instructions, builtins, globals, globals, nullptr);
+        std::unordered_map<std::string, Function> builtinFunctions = CreateBuiltinFunctions();
+        auto frame = Frame(instructions, builtins, globals, globals, builtinFunctions, nullptr);
         frame.Run();
     }
 
