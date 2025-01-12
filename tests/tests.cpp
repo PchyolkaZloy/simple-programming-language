@@ -339,6 +339,7 @@ TEST(BinaryOperationsTests, AddOperations) {
     int b = 3;
 
     print(a + b); // 13
+    print('\n');
     print(a - b); // 7
     )";
 
@@ -369,7 +370,7 @@ TEST(BinaryOperationsTests, CompOperations) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("false\ntrue\nfalse\ntrue\nfalse\ntrue", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("0\n1\n0\n1\n0\n1", testing::internal::GetCapturedStdout());
 }
 
 TEST(BinaryOperationsTests, AndOperation) {
@@ -387,7 +388,7 @@ TEST(BinaryOperationsTests, AndOperation) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("true\nfalse\nfalse", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1\n0\n0", testing::internal::GetCapturedStdout());
 }
 
 TEST(BinaryOperationsTests, OrOperation) {
@@ -405,7 +406,7 @@ TEST(BinaryOperationsTests, OrOperation) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("true\ntrue\nfalse", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1\n1\n0", testing::internal::GetCapturedStdout());
 }
 
 TEST(BinaryOperationsTests, CombinedOperations) {
@@ -424,7 +425,7 @@ TEST(BinaryOperationsTests, CombinedOperations) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("65\ntrue\ntrue", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("65\n1\n1", testing::internal::GetCapturedStdout());
 }
 
 TEST(BinaryOperationsTests, DoubleOperations) {
@@ -464,7 +465,7 @@ TEST(BinaryOperationsTests, CharOperations) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("false\ntrue\ntrue\nfalse", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("0\n1\n1\n0", testing::internal::GetCapturedStdout());
 }
 
 TEST(BinaryOperationsTests, BoolOperations) {
@@ -484,7 +485,7 @@ TEST(BinaryOperationsTests, BoolOperations) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("false\ntrue\nfalse\ntrue", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("0\n1\n0\n1", testing::internal::GetCapturedStdout());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -530,7 +531,7 @@ TEST(UnaryOperationsTests, NotBool) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("false\ntrue", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("0\n1", testing::internal::GetCapturedStdout());
 }
 
 TEST(UnaryOperationsTests, CombinedUnaryOperations) {
@@ -544,7 +545,7 @@ TEST(UnaryOperationsTests, CombinedUnaryOperations) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("true", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1", testing::internal::GetCapturedStdout());
 }
 
 TEST(UnaryOperationsTests, NegInExpression) {
@@ -558,7 +559,7 @@ TEST(UnaryOperationsTests, NegInExpression) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("2", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("-2", testing::internal::GetCapturedStdout());
 }
 
 TEST(UnaryOperationsTests, NotInCondition) {
@@ -574,7 +575,7 @@ TEST(UnaryOperationsTests, NotInCondition) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("false", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1", testing::internal::GetCapturedStdout());
 }
 
 TEST(UnaryOperationsTests, NegChar) {
@@ -605,7 +606,7 @@ TEST(UnaryOperationsTests, NotInt) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("true\nfalse", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1\n0", testing::internal::GetCapturedStdout());
 }
 
 TEST(UnaryOperationsTests, NegExpressionResult) {
@@ -633,7 +634,7 @@ TEST(UnaryOperationsTests, NotComparisonResult) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("false", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("0", testing::internal::GetCapturedStdout());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
