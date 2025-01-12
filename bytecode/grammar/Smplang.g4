@@ -94,7 +94,7 @@ CONTINUE: 'continue';
 BOOL: 'true' | 'false';
 INT: [0-9]+;
 DOUBLE: [0-9]+ DOT [0-9]*;
-CHAR: '\'' . '\'';
+CHAR: '\'' (~[\b\t\r\n'"\\]|'\\'['"\\anbrvt]) '\'';
 ID: [a-zA-Z_][a-zA-Z_0-9]*;
 
 NEG: '--';

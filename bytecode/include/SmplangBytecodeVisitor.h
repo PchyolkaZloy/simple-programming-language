@@ -82,6 +82,8 @@ namespace bytecode {
 
         static void appendLoadMember(std::vector<Operation> &code, antlr4::tree::TerminalNode *ID_ptr);
 
+        static char charFromEscapedString(std::string_view str);
+
     public:
         template<typename InputIterator>
         SmplangBytecodeVisitor(InputIterator void_typed_functions_begin, InputIterator void_typed_functions_end) :
@@ -126,12 +128,6 @@ namespace bytecode {
         std::any visitFunctionCall(SmplangParser::FunctionCallContext *ctx) override;
 
         std::any visitAssignablePrefix(SmplangParser::AssignablePrefixContext *ctx) override;
-
-        std::any visitIfBlock(SmplangParser::IfBlockContext *ctx) override;
-
-        std::any visitElifBlock(SmplangParser::ElifBlockContext *ctx) override;
-
-        std::any visitElseBlock(SmplangParser::ElseBlockContext *ctx) override;
 
     };
 

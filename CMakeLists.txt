@@ -10,7 +10,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_FLAGS "-fno-rtti")
 
 find_package(antlr4-runtime REQUIRED)
-include_directories(/opt/homebrew/Cellar/antlr4-cpp-runtime/4.13.2/include/antlr4-runtime)
+
+include_directories(${antlr4-runtime_INCLUDE_DIR})
+#include_directories(/opt/homebrew/Cellar/antlr4-cpp-runtime/4.13.2/include/antlr4-runtime)
+
 include_directories(libs/multiprecision-1.79/include)
 include_directories(bytecode/include)
 include_directories(vm)

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(Bytecode)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCES
@@ -34,7 +34,6 @@ set(HEADERS
         include/SmplangBytecodeVisitor.h
         include/eof_fix.h
 )
-
 # Ищем ANTLR4 runtime (с conan находим)
 find_package(antlr4-runtime REQUIRED)
 
@@ -50,4 +49,4 @@ target_include_directories(Bytecode PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_executable(SmplangBytecodeTest main.cpp)
 target_link_libraries(SmplangBytecodeTest Bytecode)
 target_link_libraries(SmplangBytecodeTest antlr4_static)
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+#set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")

@@ -321,7 +321,9 @@ TEST(BinaryOperationsTests, MultOperations) {
     int b = 3;
 
     print(a * b); // 30
+    print('\n');
     print(a / b); // 3
+    print('\n');
     print(a % b); // 1
     )";
 

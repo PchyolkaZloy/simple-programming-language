@@ -22,6 +22,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramCo
         auto statement_decl_code = vec_cast(visitStatement(statement_ctx));
         program_code.insert(program_code.end(), statement_decl_code.begin(), statement_decl_code.end());
     }
+//    std::cout << ' ';
     return std::any{program_code};
 }
 
@@ -175,8 +176,6 @@ std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfSta
     int left_size = 0;
     std::vector<std::vector<Operation>> if_bodies{};
     std::vector<std::vector<Operation>> if_conditions{};
-//    std::vector<int> if_bodies_op_count;
-//    std::vector<int> if_conditions_op_count;
     std::vector<Operation> else_body{};
     std::vector<Operation> result{};
     if (ctx->elseBlock()) {
@@ -185,10 +184,8 @@ std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfSta
             else_body = vec_cast(visitStatement(ctx->elseBlock()->statement()));
         else
             else_body = vec_cast(visitBlock(else_ctx->block()));
-        left_size += else_body.size();
+        left_size += static_cast<int>(else_body.size());
     }
-
-//    int else_body_op_count = static_cast<int>(else_body.size());
 
 
     auto *if_ctx = ctx->ifBlock();
@@ -197,8 +194,8 @@ std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfSta
     else
         if_bodies.push_back(vec_cast(visitBlock(if_ctx->block())));
     if_conditions.push_back(vec_cast(visitExpression(if_ctx->expression())));
-    left_size += if_conditions.back().size() + 1;
-    left_size += if_bodies.back().size() + 1;
+    left_size += static_cast<int>(if_conditions.back().size()) + 1;
+    left_size += static_cast<int>(if_bodies.back().size()) + 1;
 
 //    if_bodies_op_count.push_back(if_bodies[0].size());
 //    if_conditions_op_count.push_back(if_conditions[0].size());
@@ -206,50 +203,54 @@ std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfSta
 
     for (auto *elif_ctx: ctx->elifBlock()) {
         if_conditions.push_back(vec_cast(visitExpression(elif_ctx->expression())));
-        left_size += if_conditions.back().size() + 1;
-//        if_conditions_op_count.push_back(if_conditions.back().size());
         if (elif_ctx->statement())
             if_bodies.push_back(vec_cast(visitStatement(elif_ctx->statement())));
         else
             if_bodies.push_back(vec_cast(visitBlock(elif_ctx->block())));
-//        if_bodies_op_count.push_back(if_bodies.back().size());
-        left_size += if_bodies.back().size() + 1;
+        left_size += static_cast<int>(if_conditions.back().size()) + 1;
+        left_size += static_cast<int>(if_bodies.back().size()) + 1;
     }
-    --left_size;
+//    no need in last jump if else is not present
+    if (!ctx->elseBlock())
+        --left_size;
+//    left size is total if chain size now
 
     for (size_t i = 0; i + 1 < if_conditions.size(); ++i) {
+//        if condition
         result.insert(result.end(), if_conditions[i].begin(), if_conditions[i].end());
+//        then goes jump
         result.emplace_back(ByteCodes::JumpIfFalse);
-        appendToCharVector<int>(result.back().value_bytes, if_bodies[i].size() + 2);
+//        jumping to pos after unconditional jump (hence (n + 1) + 1 where n is body size)
+        appendToCharVector<int>(result.back().value_bytes, static_cast<int>(if_bodies[i].size() + 2));
+//        body
         result.insert(result.end(), if_bodies[i].begin(), if_bodies[i].end());
-        left_size -= (if_conditions[i].size() + if_bodies[i].size() + 2);
+//        unconditional jump
         result.emplace_back(ByteCodes::Jump);
-        appendToCharVector<int>(result.back().value_bytes, left_size);
+//        we added k (condition), n (body), 2 jumps
+        left_size -= static_cast<int>((if_conditions[i].size() + if_bodies[i].size() + 2));
+//        now left size is size of the block after our unconditional jump, jumping over it (hence size + 1)
+        appendToCharVector<int>(result.back().value_bytes, left_size + 1);
     }
 
+//    last if now
     result.insert(result.end(), if_conditions.back().begin(), if_conditions.back().end());
     result.emplace_back(ByteCodes::JumpIfFalse);
-    appendToCharVector<int>(result.back().value_bytes, if_bodies.back().size() + 2);
-    result.insert(result.end(), if_bodies.back().begin(), if_bodies.back().end());
-    left_size -= (if_conditions.back().size() + if_bodies.back().size() + 2);
     if (ctx->elseBlock()) {
+//        else statement is present -> it is the very case of prev jump(s)
+        appendToCharVector<int>(result.back().value_bytes, static_cast<int>(if_bodies.back().size() + 2));
+        result.insert(result.end(), if_bodies.back().begin(), if_bodies.back().end());
         result.emplace_back(ByteCodes::Jump);
-        appendToCharVector<int>(result.back().value_bytes, left_size);
+        left_size -= static_cast<int>((if_conditions.back().size() + if_bodies.back().size() + 2));
+        appendToCharVector<int>(result.back().value_bytes, left_size + 1);
+//        add else block
+        result.insert(result.end(), else_body.begin(), else_body.end());
+    } else {
+//        it's the last if -> unconditional jump at the end is absent
+//        no need in last size anymore -> no need to change it
+        appendToCharVector<int>(result.back().value_bytes, static_cast<int>(if_bodies.back().size() + 1));
+        result.insert(result.end(), if_bodies.back().begin(), if_bodies.back().end());
     }
-    result.insert(result.end(), else_body.begin(), else_body.end());
     return std::any{result};
-}
-
-std::any bytecode::SmplangBytecodeVisitor::visitIfBlock(SmplangParser::IfBlockContext *ctx) {
-    return SmplangBaseVisitor::visitIfBlock(ctx);
-}
-
-std::any bytecode::SmplangBytecodeVisitor::visitElifBlock(SmplangParser::ElifBlockContext *ctx) {
-    return SmplangBaseVisitor::visitElifBlock(ctx);
-}
-
-std::any bytecode::SmplangBytecodeVisitor::visitElseBlock(SmplangParser::ElseBlockContext *ctx) {
-    return SmplangBaseVisitor::visitElseBlock(ctx);
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitWhileStatement(SmplangParser::WhileStatementContext *ctx) {
@@ -349,8 +350,15 @@ std::any bytecode::SmplangBytecodeVisitor::visitPrimaryExpression(SmplangParser:
         return std::any{std::vector(1, loadBool(value))};
     }
     if (ctx->CHAR()) {
-//        text ~= "\'[symbol]\'";
-        char value = ctx->getText()[1];
+        char value;
+        std::string char_str = ctx->CHAR()->getText();
+//        text ~= "\'[symbol]\'"
+        if (char_str.size() == 3)
+            value = char_str[1];
+        else {
+            value = charFromEscapedString(char_str);
+        }
+//        else if(ctx->)
         return std::any{std::vector(1, loadChar(value))};
     }
     if (ctx->DOUBLE()) {
@@ -484,6 +492,7 @@ void bytecode::SmplangBytecodeVisitor::appendLoadMember(std::vector<bytecode::Op
 
 std::vector<char> &bytecode::insertIntToCharVector(std::vector<char> &vector, const cpp_int &value, size_t position) {
     std::vector<char> v;
+//    std::cout << value << '\n';
     boost::multiprecision::export_bits(value, std::back_inserter(v), 7);
     int size = static_cast<int>(v.size());
     if (value < 0)
@@ -497,6 +506,31 @@ std::vector<char> &bytecode::appendIntToCharVector(std::vector<char> &vector, co
     return insertIntToCharVector(vector, value, vector.size());
 }
 
-bytecode::Operation::Operation(ByteCodes code, const std::vector<char> &valueBytes) : code(code), value_bytes(valueBytes) {}
+bytecode::Operation::Operation(ByteCodes code, const std::vector<char> &valueBytes) : code(code),
+                                                                                      value_bytes(valueBytes) {}
 
 bytecode::Operation::Operation(ByteCodes code) : code(code), value_bytes(std::vector<char>{}) {}
+
+char bytecode::SmplangBytecodeVisitor::charFromEscapedString(std::string_view str) {
+//    ['"\\anbrvt]
+    switch (str[2]) {
+        case '\'':
+        case '\"':
+        case '\\':
+            return str[2];
+        case 'n':
+            return '\n';
+        case 'a':
+            return '\a';
+        case 'b':
+            return '\b';
+        case 'v':
+            return '\v';
+        case 'r':
+            return '\r';
+        case 't':
+            return '\t';
+        default:
+            return 0;
+    }
+}
