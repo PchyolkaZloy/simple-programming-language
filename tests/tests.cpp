@@ -354,10 +354,15 @@ TEST(BinaryOperationsTests, CompOperations) {
     int b = 3;
 
     print(a == b); // false
+    print('\n');
     print(a != b); // true
+    print('\n');
     print(a < b);  // false
+    print('\n');
     print(a > b);  // true
+    print('\n');
     print(a <= b); // false
+    print('\n');
     print(a >= b); // true
     )";
 
@@ -373,7 +378,9 @@ TEST(BinaryOperationsTests, AndOperation) {
     bool b = false;
 
     print(a && a); // true
+    print('\n');
     print(a && b); // false
+    print('\n');
     print(b && b); // false
     )";
 
@@ -389,7 +396,9 @@ TEST(BinaryOperationsTests, OrOperation) {
     bool b = false;
 
     print(a || a); // true
+    print('\n');
     print(a || b); // true
+    print('\n');
     print(b || b); // false
     )";
 
@@ -406,7 +415,9 @@ TEST(BinaryOperationsTests, CombinedOperations) {
     int c = 5;
 
     print((a + b) * c); // 65
+    print('\n');
     print(a > b && b < c); // true
+    print('\n');
     print(a == b || b != c); // true
     )";
 
@@ -422,8 +433,11 @@ TEST(BinaryOperationsTests, DoubleOperations) {
     double b = 3.2;
 
     print(a + b); // 13.7
+    print('\n');
     print(a - b); // 7.3
+    print('\n');
     print(a * b); // 33.6
+    print('\n');
     print(a / b); // 3.28125
     )";
 
@@ -439,8 +453,11 @@ TEST(BinaryOperationsTests, CharOperations) {
     char b = 'B';
 
     print(a == b); // false
+    print('\n');
     print(a != b); // true
+    print('\n');
     print(a < b);  // true
+    print('\n');
     print(a > b);  // false
     )";
 
@@ -456,8 +473,11 @@ TEST(BinaryOperationsTests, BoolOperations) {
     bool b = false;
 
     print(a == b); // false
+    print('\n');
     print(a != b); // true
+    print('\n');
     print(a && b); // false
+    print('\n');
     print(a || b); // true
     )";
 
@@ -500,6 +520,7 @@ TEST(UnaryOperationsTests, NotBool) {
     bool a = true;
     bool b = !a;
     print(b);
+    print('\n');
 
     bool c = false;
     bool d = !c;
@@ -544,16 +565,16 @@ TEST(UnaryOperationsTests, NotInCondition) {
     const std::string program = R"(
     bool a = true;
     if (!a) {
-        print("A is false");
+        print(false);
     } else {
-        print("A is true");
+        print(true);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("A is true", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("false", testing::internal::GetCapturedStdout());
 }
 
 TEST(UnaryOperationsTests, NegChar) {
@@ -574,6 +595,7 @@ TEST(UnaryOperationsTests, NotInt) {
     int a = 0;
     bool b = !a;
     print(b);
+    print('\n');
 
     int c = 10;
     bool d = !c;
@@ -620,48 +642,48 @@ TEST(IfStatementTests, SimpleIf) {
     const std::string program = R"(
     int x = 10;
     if (x > 5) {
-        print("x is greater than 5");
+        print(1);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("x is greater than 5", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1", testing::internal::GetCapturedStdout());
 }
 
 TEST(IfStatementTests, IfElse) {
     const std::string program = R"(
     int x = 3;
     if (x > 5) {
-        print("x is greater than 5");
+        print(1);
     } else {
-        print("x is less than or equal to 5");
+        print(3);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("x is less than or equal to 5", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("3", testing::internal::GetCapturedStdout());
 }
 
 TEST(IfStatementTests, IfElifElse) {
     const std::string program = R"(
     int x = 7;
     if (x > 10) {
-        print("x is greater than 10");
+        print(10);
     } elif (x > 5) {
-        print("x is greater than 5 but less than or equal to 10");
+        print(5);
     } else {
-        print("x is less than or equal to 5");
+        print(1);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("x is greater than 5 but less than or equal to 10", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("5", testing::internal::GetCapturedStdout());
 }
 
 TEST(IfStatementTests, NestedIf) {
@@ -670,7 +692,7 @@ TEST(IfStatementTests, NestedIf) {
     int y = 5;
     if (x > 5) {
         if (y > 2) {
-            print("Both conditions are true");
+            print(123);
         }
     }
     )";
@@ -678,7 +700,7 @@ TEST(IfStatementTests, NestedIf) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("Both conditions are true", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("123", testing::internal::GetCapturedStdout());
 }
 
 TEST(IfStatementTests, IfWithLogicalOperators) {
@@ -686,90 +708,90 @@ TEST(IfStatementTests, IfWithLogicalOperators) {
     int x = 10;
     int y = 3;
     if (x > 5 && y < 5) {
-        print("Both conditions are true");
+        print(123);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("Both conditions are true", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("123", testing::internal::GetCapturedStdout());
 }
 
 TEST(IfStatementTests, MultipleElif) {
     const std::string program = R"(
     int x = 7;
     if (x > 10) {
-        print("x is greater than 10");
+        print(10);
     } elif (x > 5) {
-        print("x is greater than 5 but less than or equal to 10");
+        print(5);
     } elif (x > 0) {
-        print("x is greater than 0 but less than or equal to 5");
+        print(0);
     } else {
-        print("x is less than or equal to 0");
+        print(1);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("x is greater than 5 but less than or equal to 10", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("5", testing::internal::GetCapturedStdout());
 }
 
 TEST(IfStatementTests, IfElseNoConditionMet) {
     const std::string program = R"(
     int x = 3;
     if (x > 10) {
-        print("x is greater than 10");
+        print(10);
     } elif (x > 5) {
-        print("x is greater than 5 but less than or equal to 10");
+        print(5);
     } else {
-        print("x is less than or equal to 5");
+        print(1);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("x is less than or equal to 5", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1", testing::internal::GetCapturedStdout());
 }
 
 TEST(IfStatementTests, IfElifElseAllFalse) {
     const std::string program = R"(
     int x = -1;
     if (x > 10) {
-        print("x is greater than 10");
+        print(10);
     } elif (x > 5) {
-        print("x is greater than 5 but less than or equal to 10");
+        print(5);
     } elif (x > 0) {
-        print("x is greater than 0 but less than or equal to 5");
+        print(0);
     } else {
-        print("x is less than or equal to 0");
+        print(1);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("x is less than or equal to 0", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1", testing::internal::GetCapturedStdout());
 }
 
 TEST(IfStatementTests, IfElifFirstTrue) {
     const std::string program = R"(
     int x = 15;
     if (x > 10) {
-        print("x is greater than 10");
+        print(10);
     } elif (x > 5) {
-        print("x is greater than 5 but less than or equal to 10");
+        print(5);
     } else {
-        print("x is less than or equal to 5");
+        print(1);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("x is greater than 10", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("10", testing::internal::GetCapturedStdout());
 }
 
 
@@ -777,18 +799,18 @@ TEST(IfStatementTests, IfElifSecondTrue) {
     const std::string program = R"(
     int x = 7;
     if (x > 10) {
-        print("x is greater than 10");
+        print(10);
     } elif (x > 5) {
-        print("x is greater than 5 but less than or equal to 10");
+        print(5);
     } else {
-        print("x is less than or equal to 5");
+        print(1);
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("x is greater than 5 but less than or equal to 10", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("5", testing::internal::GetCapturedStdout());
 }
 ////////////////////////////////////////////////////////////////////////////////////
 /// ARRAY
@@ -1054,14 +1076,16 @@ TEST(ArrayTests, IntArrAtIndexPrint) {
     append(arr, 3);
 
     print(arr[0]);
+    print('\n');
     print(arr[1]);
+    print('\n');
     print(arr[2]);
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("1\n2\n3\n", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1\n2\n3", testing::internal::GetCapturedStdout());
 }
 
 TEST(ArrayTests, CharArrAtIndexPrint) {
@@ -1073,14 +1097,16 @@ TEST(ArrayTests, CharArrAtIndexPrint) {
     append(arr, 'c');
 
     print(arr[0]);
+    print('\n');
     print(arr[1]);
+    print('\n');
     print(arr[2]);
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("a\nb\nc\n", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("a\nb\nc", testing::internal::GetCapturedStdout());
 }
 
 TEST(ArrayTests, DoubleArrAtIndexPrint) {
@@ -1092,14 +1118,16 @@ TEST(ArrayTests, DoubleArrAtIndexPrint) {
     append(arr, 3.125);
 
     print(arr[0]);
+    print('\n');
     print(arr[1]);
+    print('\n');
     print(arr[2]);
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("1.5\n2.75\n3.125\n", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1.5\n2.75\n3.125", testing::internal::GetCapturedStdout());
 }
 
 TEST(ArrayTests, BoolArrAtIndexPrint) {
@@ -1111,14 +1139,16 @@ TEST(ArrayTests, BoolArrAtIndexPrint) {
     append(arr, true);
 
     print(arr[0]);
+    print('\n');
     print(arr[1]);
+    print('\n');
     print(arr[2]);
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("true\nfalse\ntrue\n", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("true\nfalse\ntrue", testing::internal::GetCapturedStdout());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1282,6 +1312,7 @@ TEST(WhileLoopTests, SimpleIntCondition) {
     int x = 5;
     while (x > 0) {
         print(x);
+        print('\n');
         x = x - 1;
     }
     )";
@@ -1289,7 +1320,7 @@ TEST(WhileLoopTests, SimpleIntCondition) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("5\n4\n3\n2\n1", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("5\n4\n3\n2\n1\n", testing::internal::GetCapturedStdout());
 }
 
 TEST(WhileLoopTests, BoolCondition) {
@@ -1302,13 +1333,14 @@ TEST(WhileLoopTests, BoolCondition) {
             flag = false;
         }
         print(count);
+        print('\n');
     }
     )";
 
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("1\n2\n3", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1\n2\n3\n", testing::internal::GetCapturedStdout());
 }
 
 TEST(WhileLoopTests, ArrayModification) {
@@ -1324,6 +1356,7 @@ TEST(WhileLoopTests, ArrayModification) {
     while (i < 5) {
         arr[i] = arr[i] * 2;
         print(arr[i]);
+        print('\n');
         i = i + 1;
     }
     )";
@@ -1331,7 +1364,7 @@ TEST(WhileLoopTests, ArrayModification) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("2\n4\n6\n8\n10", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("2\n4\n6\n8\n10\n", testing::internal::GetCapturedStdout());
 }
 
 TEST(WhileLoopTests, NestedWhileLoops) {
@@ -1340,7 +1373,10 @@ TEST(WhileLoopTests, NestedWhileLoops) {
     while (i < 3) {
         int j = 0;
         while (j < 2) {
-            print(i, j);
+            print(i);
+            print(' ');
+            print(j);
+            print('\n');
             j = j + 1;
         }
         i = i + 1;
@@ -1358,6 +1394,7 @@ TEST(WhileLoopTests, DoubleCondition) {
     double x = 1.5;
     while (x > 0) {
         print(x);
+        print('\n');
         x = x - 0.5;
     }
     )";
@@ -1365,7 +1402,7 @@ TEST(WhileLoopTests, DoubleCondition) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("1.5\n1.0\n0.5", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1.5\n1.0\n0.5\n", testing::internal::GetCapturedStdout());
 }
 
 TEST(WhileLoopTests, StructCondition) {
@@ -1378,6 +1415,7 @@ TEST(WhileLoopTests, StructCondition) {
     c.value = 3;
     while (c.value > 0) {
         print(c.value);
+        print('\n');
         c.value = c.value - 1;
     }
     )";
@@ -1385,7 +1423,7 @@ TEST(WhileLoopTests, StructCondition) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("3\n2\n1", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("3\n2\n1\n", testing::internal::GetCapturedStdout());
 }
 
 TEST(WhileLoopTests, LogicalOperatorsInCondition) {
@@ -1393,7 +1431,10 @@ TEST(WhileLoopTests, LogicalOperatorsInCondition) {
     int x = 0;
     int y = 5;
     while (x < 3 && y > 0) {
-        print(x, y);
+        print(x);
+        print(' ');
+        print(y);
+        print('\n');
         x = x + 1;
         y = y - 1;
     }
@@ -1402,7 +1443,7 @@ TEST(WhileLoopTests, LogicalOperatorsInCondition) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("0 5\n1 4\n2 3", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("0 5\n1 4\n2 3\n", testing::internal::GetCapturedStdout());
 }
 
 TEST(WhileLoopTests, ModifyConditionInsideLoop) {
@@ -1410,8 +1451,9 @@ TEST(WhileLoopTests, ModifyConditionInsideLoop) {
     int x = 5;
     while (x > 0) {
         print(x);
+        print('\n');
         if (x == 3) {
-            x = 0; // Прерываем цикл
+            x = 0;
         } else {
             x = x - 1;
         }
@@ -1421,7 +1463,7 @@ TEST(WhileLoopTests, ModifyConditionInsideLoop) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("5\n4\n3", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("5\n4\n3\n", testing::internal::GetCapturedStdout());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1687,6 +1729,7 @@ TEST(FunctionTests, ReturnStructFromFunction) {
 
     Point p = createPoint(10, 20);
     print(p.x);
+    print('\n');
     print(p.y);
     )";
 
@@ -1749,7 +1792,11 @@ TEST(FunctionTests, NestedStructs) {
     }
 
     func void printPerson(Person p) {
-        print(p.id, p.addr.houseNumber, p.addr.street);
+        print(p.id);
+        print(' ');
+        print(p.addr.houseNumber);
+        print(' ');
+        print(p.addr.street);
     }
 
     Person p;
