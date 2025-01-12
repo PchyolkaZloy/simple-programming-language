@@ -22,7 +22,6 @@ std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramCo
         auto statement_decl_code = vec_cast(visitStatement(statement_ctx));
         program_code.insert(program_code.end(), statement_decl_code.begin(), statement_decl_code.end());
     }
-    std::cout << ' ';
     return std::any{program_code};
 }
 
@@ -485,7 +484,6 @@ void bytecode::SmplangBytecodeVisitor::appendLoadMember(std::vector<bytecode::Op
 
 std::vector<char> &bytecode::insertIntToCharVector(std::vector<char> &vector, const cpp_int &value, size_t position) {
     std::vector<char> v;
-    std::cout << value << '\n';
     boost::multiprecision::export_bits(value, std::back_inserter(v), 7);
     int size = static_cast<int>(v.size());
     if (value < 0)

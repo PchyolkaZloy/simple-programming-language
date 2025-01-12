@@ -16,6 +16,7 @@ include_directories(bytecode/include)
 include_directories(vm)
 
 add_subdirectory(libs)
+add_subdirectory(tests)
 
 add_subdirectory(bytecode)
 #add_subdirectory(compiler)
@@ -23,6 +24,4 @@ add_subdirectory(gc)
 add_subdirectory(vm)
 
 add_executable(main main.cpp)
-target_link_libraries(main boost_multiprecision)
-target_link_libraries(main antlr4_static)
-target_link_libraries(main Bytecode)
+target_link_libraries(main boost_multiprecision antlr4_static Bytecode vm)
