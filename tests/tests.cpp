@@ -564,9 +564,230 @@ TEST(UnaryOperationsTests, NegChar) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("-65\n", testing::internal::GetCapturedStdout()); // ASCII-код 'A' равен 65
+    ASSERT_EQ("-65", testing::internal::GetCapturedStdout());
 }
 
+TEST(UnaryOperationsTests, NotInt) {
+    const std::string program = R"(
+    int a = 0;
+    bool b = !a;
+    print(b);
+
+    int c = 10;
+    bool d = !c;
+    print(d);
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("true\nfalse", testing::internal::GetCapturedStdout());
+}
+
+TEST(UnaryOperationsTests, NegExpressionResult) {
+    const std::string program = R"(
+    int a = 10;
+    int b = 3;
+    int c = --(a * b);
+    print(c);
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("-30", testing::internal::GetCapturedStdout());
+}
+
+TEST(UnaryOperationsTests, NotComparisonResult) {
+    const std::string program = R"(
+    int a = 10;
+    int b = 3;
+    bool c = !(a > b);
+    print(c);
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("false", testing::internal::GetCapturedStdout());
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+/// IF STATEMENT
+TEST(IfStatementTests, SimpleIf) {
+    const std::string program = R"(
+    int x = 10;
+    if (x > 5) {
+        print("x is greater than 5");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("x is greater than 5", testing::internal::GetCapturedStdout());
+}
+
+TEST(IfStatementTests, IfElse) {
+    const std::string program = R"(
+    int x = 3;
+    if (x > 5) {
+        print("x is greater than 5");
+    } else {
+        print("x is less than or equal to 5");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("x is less than or equal to 5", testing::internal::GetCapturedStdout());
+}
+
+TEST(IfStatementTests, IfElifElse) {
+    const std::string program = R"(
+    int x = 7;
+    if (x > 10) {
+        print("x is greater than 10");
+    } elif (x > 5) {
+        print("x is greater than 5 but less than or equal to 10");
+    } else {
+        print("x is less than or equal to 5");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("x is greater than 5 but less than or equal to 10", testing::internal::GetCapturedStdout());
+}
+
+TEST(IfStatementTests, NestedIf) {
+    const std::string program = R"(
+    int x = 10;
+    int y = 5;
+    if (x > 5) {
+        if (y > 2) {
+            print("Both conditions are true");
+        }
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("Both conditions are true", testing::internal::GetCapturedStdout());
+}
+
+TEST(IfStatementTests, IfWithLogicalOperators) {
+    const std::string program = R"(
+    int x = 10;
+    int y = 3;
+    if (x > 5 && y < 5) {
+        print("Both conditions are true");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("Both conditions are true", testing::internal::GetCapturedStdout());
+}
+
+TEST(IfStatementTests, MultipleElif) {
+    const std::string program = R"(
+    int x = 7;
+    if (x > 10) {
+        print("x is greater than 10");
+    } elif (x > 5) {
+        print("x is greater than 5 but less than or equal to 10");
+    } elif (x > 0) {
+        print("x is greater than 0 but less than or equal to 5");
+    } else {
+        print("x is less than or equal to 0");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("x is greater than 5 but less than or equal to 10", testing::internal::GetCapturedStdout());
+}
+
+TEST(IfStatementTests, IfElseNoConditionMet) {
+    const std::string program = R"(
+    int x = 3;
+    if (x > 10) {
+        print("x is greater than 10");
+    } elif (x > 5) {
+        print("x is greater than 5 but less than or equal to 10");
+    } else {
+        print("x is less than or equal to 5");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("x is less than or equal to 5", testing::internal::GetCapturedStdout());
+}
+
+TEST(IfStatementTests, IfElifElseAllFalse) {
+    const std::string program = R"(
+    int x = -1;
+    if (x > 10) {
+        print("x is greater than 10");
+    } elif (x > 5) {
+        print("x is greater than 5 but less than or equal to 10");
+    } elif (x > 0) {
+        print("x is greater than 0 but less than or equal to 5");
+    } else {
+        print("x is less than or equal to 0");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("x is less than or equal to 0", testing::internal::GetCapturedStdout());
+}
+
+TEST(IfStatementTests, IfElifFirstTrue) {
+    const std::string program = R"(
+    int x = 15;
+    if (x > 10) {
+        print("x is greater than 10");
+    } elif (x > 5) {
+        print("x is greater than 5 but less than or equal to 10");
+    } else {
+        print("x is less than or equal to 5");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("x is greater than 10", testing::internal::GetCapturedStdout());
+}
+
+
+TEST(IfStatementTests, IfElifSecondTrue) {
+    const std::string program = R"(
+    int x = 7;
+    if (x > 10) {
+        print("x is greater than 10");
+    } elif (x > 5) {
+        print("x is greater than 5 but less than or equal to 10");
+    } else {
+        print("x is less than or equal to 5");
+    }
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("x is greater than 5 but less than or equal to 10", testing::internal::GetCapturedStdout());
+}
 ////////////////////////////////////////////////////////////////////////////////////
 /// ARRAY
 TEST(ArrayTests, IntArrDecl) {
