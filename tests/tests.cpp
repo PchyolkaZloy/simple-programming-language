@@ -919,6 +919,19 @@ TEST(ArrayTests, BoolArrAppend) {
     ASSERT_EQ("", testing::internal::GetCapturedStdout());
 }
 
+TEST(ArrayTests, IntArrInitWithOutput) {
+    const std::string program = R"(
+    int[] arr = {1,2,3};
+
+    print(arr);
+    )";
+
+    testing::internal::CaptureStdout();
+    InterpreteCode(program);
+
+    ASSERT_EQ("{1, 2, 3}", testing::internal::GetCapturedStdout());
+}
+
 TEST(ArrayTests, IntArrAppendWithOutput) {
     const std::string program = R"(
     int[] arr;
