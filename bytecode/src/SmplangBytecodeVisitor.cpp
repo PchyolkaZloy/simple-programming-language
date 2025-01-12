@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <limits>
 #include <string>
+#include "variables_util.h"
 
 std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramContext *ctx) {
     std::vector<Operation> program_code{};
@@ -136,6 +137,20 @@ std::any bytecode::SmplangBytecodeVisitor::visitStatement(SmplangParser::Stateme
 std::any bytecode::SmplangBytecodeVisitor::visitVarDecl(SmplangParser::VarDeclContext *ctx) {
     std::vector<Operation> result{};
     if (!ctx->expression()) {
+        if (ctx->type()->ARRAYTYPE()) {
+            result.push_back(loadString(ctx->ID()->getText()));
+            result.emplace_back(ByteCodes::BuildArray);
+//            array of 0 size
+            appendToCharVector<int>(result.back().value_bytes, 0);
+            result.emplace_back(ByteCodes::StoreName);
+            return std::any{result};
+        }
+
+        if (ctx->type()->structType()) {
+            result.push_back(loadString(ctx->ID()->getText()));
+            result.emplace_back(ByteCodes::BuildStruct);
+            return std::any{result};
+        }
         return std::any{result};
     }
     result.push_back(loadString(ctx->ID()->getText()));
@@ -399,9 +414,16 @@ std::any bytecode::SmplangBytecodeVisitor::visitPrimaryExpression(SmplangParser:
     throw ASTException("unknown AST child node");
 }
 
-// пока что скип
 std::any bytecode::SmplangBytecodeVisitor::visitArrayInit(SmplangParser::ArrayInitContext *ctx) {
-    return SmplangBaseVisitor::visitArrayInit(ctx);
+    std::vector<Operation> result;
+    size_t elements_count = ctx->expression().size();
+    for (auto *arg_expr_ctx: ctx->expression()) {
+        auto expr_code = vec_cast(visitExpression(arg_expr_ctx));
+        result.insert(result.end(), expr_code.begin(), expr_code.end());
+    }
+    result.emplace_back(ByteCodes::BuildArray);
+    appendToCharVector<int>(result.back().value_bytes, static_cast<int>(elements_count));
+    return std::any{result};
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitArgumentList(SmplangParser::ArgumentListContext *ctx) {
