@@ -759,7 +759,7 @@ TEST(IfStatementTests, IfElseNoConditionMet) {
 
 TEST(IfStatementTests, IfElifElseAllFalse) {
     const std::string program = R"(
-    int x = -1;
+    int x = --1;
     if (x > 10) {
         print(10);
     } elif (x > 5) {
