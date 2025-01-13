@@ -10,6 +10,9 @@
 #include "variables_util.h"
 
 std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramContext *ctx) {
+//    first thing to do is to fetch void typed funcs names
+    void_typed_program_functions_ = string_set_cast(
+            SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor().visitProgram(ctx));
     std::vector<Operation> program_code{};
     for (auto *struct_decl_ctx: ctx->structDecl()) {
         auto struct_decl_code = vec_cast(visitStructDecl(struct_decl_ctx));
@@ -124,7 +127,8 @@ std::any bytecode::SmplangBytecodeVisitor::visitStatement(SmplangParser::Stateme
             Operation load_func_name_op = result[result.size() - 2];
             std::string func_name(load_func_name_op.value_bytes.begin() + sizeof(int),
                                   load_func_name_op.value_bytes.end());
-            if (void_typed_functions_.find(func_name) != void_typed_functions_.end()) {
+            if (void_typed_builtin_functions_.find(func_name) != void_typed_builtin_functions_.end() ||
+                void_typed_program_functions_.find(func_name) != void_typed_builtin_functions_.end()) {
                 return std::any{result};
             }
         }
@@ -556,4 +560,16 @@ char bytecode::SmplangBytecodeVisitor::charFromEscapedString(std::string_view st
         default:
             return 0;
     }
+}
+
+std::any
+bytecode::SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor::visitProgram(SmplangParser::ProgramContext *ctx) {
+    std::unordered_set<std::string> void_typed_function_names = {};
+    for (auto func_decl_ctx: ctx->functionDecl()) {
+        auto type_ctx = func_decl_ctx->returnType();
+        if (type_ctx->VOID()) {
+            void_typed_function_names.insert(func_decl_ctx->ID()->getText());
+        }
+    }
+    return std::any{void_typed_function_names};
 }

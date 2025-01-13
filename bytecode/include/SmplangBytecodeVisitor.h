@@ -48,6 +48,10 @@ namespace bytecode {
         return std::any_cast<std::vector<Operation>>(any);
     }
 
+    [[nodiscard]] inline decltype(auto) string_set_cast(std::any &&any) {
+        return std::any_cast<std::unordered_set<std::string>>(any);
+    }
+
     template<typename T>
     std::vector<char> &insertToCharVector(std::vector<char> &vector, const T &value, size_t position) {
         const char *value_ptr = reinterpret_cast<const char *>(&value);
@@ -66,7 +70,14 @@ namespace bytecode {
 
     class SmplangBytecodeVisitor : public SmplangBaseVisitor {
     private:
-        std::unordered_set<std::string> void_typed_functions_;
+        class SmplangVoidFunctionsVisitor : public SmplangBaseVisitor {
+        public:
+            std::any visitProgram(SmplangParser::ProgramContext *ctx) override;
+
+        };
+
+        std::unordered_set<std::string> void_typed_builtin_functions_;
+        std::unordered_set<std::string> void_typed_program_functions_ = {};
 
         static Operation loadInt(const cpp_int &value);
 
@@ -87,7 +98,8 @@ namespace bytecode {
     public:
         template<typename InputIterator>
         SmplangBytecodeVisitor(InputIterator void_typed_functions_begin, InputIterator void_typed_functions_end) :
-                SmplangBaseVisitor(), void_typed_functions_(void_typed_functions_begin, void_typed_functions_end) {}
+                SmplangBaseVisitor(),
+                void_typed_builtin_functions_(void_typed_functions_begin, void_typed_functions_end) {}
 
         std::any visitProgram(SmplangParser::ProgramContext *ctx) override;
 
