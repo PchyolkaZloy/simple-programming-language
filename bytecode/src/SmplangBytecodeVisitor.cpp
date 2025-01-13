@@ -62,7 +62,6 @@ std::any bytecode::SmplangBytecodeVisitor::visitReturnType(SmplangParser::Return
 std::any bytecode::SmplangBytecodeVisitor::visitStructDecl(SmplangParser::StructDeclContext *ctx) {
     std::string struct_type = ctx->structType()->ID()->getText();
     std::vector<Operation> result{};
-    result.push_back(loadString(struct_type));
     size_t field_count = ctx->fieldDecl().size();
     if (field_count > std::numeric_limits<uint8_t>::max())
         throw ASTException(std::format("{0} fields are not allowed ({1} max)", field_count,
@@ -71,6 +70,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitStructDecl(SmplangParser::Struct
         auto load_field_str_code = loadString(field_decl_ptr->ID()->getText());
         result.push_back(load_field_str_code);
     }
+    result.push_back(loadString(struct_type));
     //    checking limit above ^^^
     result.emplace_back(ByteCodes::DefineStruct,
                         std::vector<char>(1, static_cast<uint8_t>(field_count))); // NOLINT(*-narrowing-conversions)
@@ -148,10 +148,11 @@ std::any bytecode::SmplangBytecodeVisitor::visitVarDecl(SmplangParser::VarDeclCo
 
         if (ctx->type()->structType()) {
             result.push_back(loadString(ctx->ID()->getText()));
+            result.push_back(loadString(ctx->type()->structType()->getText()));
             result.emplace_back(ByteCodes::BuildStruct);
+            result.emplace_back(ByteCodes::StoreName);
             return std::any{result};
         }
-        return std::any{result};
     }
     result.push_back(loadString(ctx->ID()->getText()));
     auto expr_code = vec_cast(visitExpression(ctx->expression()));

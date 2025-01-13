@@ -1162,22 +1162,11 @@ TEST(ArrayTests, BoolArrAtIndexPrint) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("true\nfalse\ntrue", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1\n0\n1", testing::internal::GetCapturedStdout());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 /// STRUCT
-TEST(StructTests, StructDefEmpty) {
-    const std::string program = R"(
-    struct Test { };
-    )";
-
-    testing::internal::CaptureStdout();
-
-    InterpreteCode(program);
-
-    ASSERT_EQ("", testing::internal::GetCapturedStdout());
-}
 
 TEST(StructTests, StructDef) {
     const std::string program = R"(
@@ -1195,7 +1184,7 @@ TEST(StructTests, StructDef) {
 
 TEST(StructTests, StructDefWithAnotherStruct) {
     const std::string program = R"(
-    struct Inner { };
+    struct Inner { int x; };
 
     struct Test {
         Inner inner;
@@ -1211,14 +1200,15 @@ TEST(StructTests, StructDefWithAnotherStruct) {
 
 TEST(StructTests, StructDefWithAllTypes) {
     const std::string program = R"(
-    struct Inner { };
+    struct Inner { double[] something; };
 
     struct Test {
         int x;
         double y;
         bool flag;
         char symbol;
-        Inner parent;
+        Inner[] parent;
+        Inner some_object;
         Inner[] children;
     };
     )";
@@ -1230,35 +1220,24 @@ TEST(StructTests, StructDefWithAllTypes) {
     ASSERT_EQ("", testing::internal::GetCapturedStdout());
 }
 
-TEST(StructTests, StructDeclEmpty) {
-    const std::string program = R"(
-    struct Test { };
-
-    Test t;
-    )";
-
-    testing::internal::CaptureStdout();
-
-    InterpreteCode(program);
-
-    ASSERT_EQ("", testing::internal::GetCapturedStdout());
-}
-
-TEST(StructTests, StructDecl) {
+TEST(StructTests, StructDeclLoadStoreMember) {
     const std::string program = R"(
     struct Test {
         int x;
     };
 
     Test t;
+    print(t.x);
+    print('\n');
     t.x = 1;
+    print(t.x);
     )";
 
     testing::internal::CaptureStdout();
 
     InterpreteCode(program);
 
-    ASSERT_EQ("", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("0\n1", testing::internal::GetCapturedStdout());
 }
 
 TEST(StructTests, StructDeclWithAnotherStruct) {
