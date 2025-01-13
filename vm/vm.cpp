@@ -141,9 +141,15 @@ void Frame::StoreName() {
 }
 
 void Frame::LoadSubscr() {
+    std::shared_ptr<Int> key = Pop<Int>();
+    std::shared_ptr<Array> container = Pop<Array>();
+    Push((*container)[*key.get()]);
 }
 
 void Frame::LoadMember() {
+    std::string& name = PopString();
+    std::shared_ptr<Struct> obj = Pop<Struct>();
+    Push(obj->GetMap()[name]);
 }
 
 void Frame::StoreSubscr() {
@@ -154,9 +160,9 @@ void Frame::StoreSubscr() {
 }
 
 void Frame::StoreMember() {
+    std::shared_ptr<BaseType> value = Pop();
     std::string& name = PopString();
     std::shared_ptr<Struct> obj = Pop<Struct>();
-    std::shared_ptr<BaseType> value = Pop();
     obj->GetMap()[name] = value;
 }
 
@@ -223,9 +229,13 @@ void Frame::BuildArray(int count) {
 }
 
 void Frame::BuildStruct() {
+    std::string& name = PopString();
+    Push(std::make_shared<Struct>());
 }
 
 void Frame::DefineStruct(int fieldc) {
+    std::string& name = PopString();
+    StructInfo[name] = PopnStrings(fieldc);
 }
 
 void Frame::Jump(int offset) {

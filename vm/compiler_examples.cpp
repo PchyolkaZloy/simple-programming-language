@@ -217,6 +217,7 @@ namespace {
     void Example5(std::ofstream& f) {
         // объявление структуры
         LoadString(f, "x");
+        LoadString(f, "y");
         LoadString(f, "MyStruct");
         f << static_cast<char>(ByteCodes::DefineStruct);
         uint8_t fieldc = 2;

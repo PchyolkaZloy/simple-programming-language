@@ -122,6 +122,7 @@ struct Frame {
     Function* ReadingFunction;
     bool Verbose;
     std::stringstream Output;
+    std::unordered_map<std::string, std::vector<std::string*>> StructInfo;
 };
 
 struct NullOp: public BytecodeOpBase {
