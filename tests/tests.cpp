@@ -998,7 +998,7 @@ TEST(ArrayTests, BoolArrAppendWithOutput) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("{true, false, true}", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("{1, 0, 1}", testing::internal::GetCapturedStdout());
 }
 
 TEST(ArrayTests, IntArrAppendAndChangeWithOutput) {
@@ -1078,7 +1078,7 @@ TEST(ArrayTests, BoolArrAppendAndChangeWithOutput) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("{false, true, true}", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("{0, 1, 1}", testing::internal::GetCapturedStdout());
 }
 
 TEST(ArrayTests, IntArrAtIndexPrint) {

@@ -177,7 +177,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitAssignment(SmplangParser::Assign
             result.insert(result.end(), expr_code.begin(), expr_code.end());
             result.emplace_back(ByteCodes::StoreMember);
         } else if (assignable_ctx->LBRACK() && assignable_ctx->RBRACK()) {
-            auto index_code = vec_cast(visitExpression(ctx->expression()));
+            auto index_code = vec_cast(visitExpression(assignable_ctx->expression()));
             result.insert(result.end(), index_code.begin(), index_code.end());
             auto expr_code = vec_cast(visitExpression(ctx->expression()));
             result.insert(result.end(), expr_code.begin(), expr_code.end());
