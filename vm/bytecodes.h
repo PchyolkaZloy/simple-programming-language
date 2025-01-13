@@ -7,6 +7,7 @@ enum class ByteCodes : char {
     LoadBool,
     LoadDouble,
     LoadString,
+    LoadType,
     LoadName,
     LoadSubscr,
     LoadMember,

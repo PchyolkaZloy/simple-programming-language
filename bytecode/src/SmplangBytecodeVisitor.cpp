@@ -2,11 +2,12 @@
 
 #include "SmplangBytecodeVisitor.h"
 #include "bytecodes.h"
-#include "type_index.h"
 #include "smplang_common.h"
 #include <sstream>
 #include <type_traits>
 #include <limits>
+#include <unordered_set>
+#include <unordered_map>
 #include <string>
 #include "variables_util.h"
 
@@ -15,6 +16,8 @@ std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramCo
     void_typed_program_functions_ = string_set_cast(
             SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor().visitProgram(ctx));
     std::vector<Operation> program_code{};
+    struct_type_codes_ = string_uint16_t_map_cast(
+            SmplangBytecodeVisitor::SmplangStructTypeCodesVisitor().visitProgram(ctx));
     for (auto *struct_decl_ctx: ctx->structDecl()) {
         auto struct_decl_code = vec_cast(visitStructDecl(struct_decl_ctx));
         program_code.insert(program_code.end(), struct_decl_code.begin(), struct_decl_code.end());
@@ -70,15 +73,31 @@ std::any bytecode::SmplangBytecodeVisitor::visitStructDecl(SmplangParser::Struct
     if (field_count > std::numeric_limits<uint8_t>::max())
         throw ASTException(std::format("{0} fields are not allowed ({1} max)", field_count,
                                        std::numeric_limits<uint8_t>::max()));
-    for (auto *field_decl_ptr: ctx->fieldDecl()) {
-        auto load_field_str_code = loadString(field_decl_ptr->ID()->getText());
-        result.push_back(load_field_str_code);
+    for (auto *field_decl_ctx: ctx->fieldDecl()) {
+        auto field_type_ctx = field_decl_ctx->type();
+        uint16_t type_code;
+        if (field_type_ctx->primitiveType()) {
+            auto type_ctx = field_type_ctx->primitiveType();
+            if (type_ctx->getText() == "int")
+                type_code = static_cast<uint16_t>(TypeIndex::Int);
+            else if (type_ctx->getText() == "double")
+                type_code = static_cast<uint16_t>(TypeIndex::Double);
+            else if (type_ctx->getText() == "char")
+                type_code = static_cast<uint16_t>(TypeIndex::Char);
+            else if (type_ctx->getText() == "bool")
+                type_code = static_cast<uint16_t>(TypeIndex::Bool);
+        } else if (field_type_ctx->ARRAYTYPE()) {
+            type_code = static_cast<uint16_t>(TypeIndex::Array);
+        } else {
+            type_code = struct_type_codes_[field_type_ctx->structType()->getText()];
+        }
+        auto load_field_code = loadField(field_decl_ctx->ID()->getText(), type_code);
+        result.insert(result.end(), load_field_code.begin(), load_field_code.end());
     }
     result.push_back(loadString(struct_type));
     //    checking limit above ^^^
     result.emplace_back(ByteCodes::DefineStruct,
                         std::vector<char>(1, static_cast<uint8_t>(field_count))); // NOLINT(*-narrowing-conversions)
-
     return std::any{result};
 }
 
@@ -505,6 +524,14 @@ bytecode::Operation bytecode::SmplangBytecodeVisitor::loadString(std::string_vie
     return op;
 }
 
+std::vector<bytecode::Operation>
+bytecode::SmplangBytecodeVisitor::loadField(std::string_view field_name, uint16_t type_code) {
+    std::vector result{1, loadString(field_name)};
+    result.emplace_back(ByteCodes::LoadType);
+    appendToCharVector<uint16_t>(result.back().value_bytes, type_code);
+    return result;
+}
+
 std::vector<bytecode::Operation> bytecode::SmplangBytecodeVisitor::loadStringThenName(std::string_view name) {
     std::vector result{1, loadString(name)};
     result.emplace_back(ByteCodes::LoadName);
@@ -564,6 +591,7 @@ char bytecode::SmplangBytecodeVisitor::charFromEscapedString(std::string_view st
     }
 }
 
+
 std::any
 bytecode::SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor::visitProgram(SmplangParser::ProgramContext *ctx) {
     std::unordered_set<std::string> void_typed_function_names = {};
@@ -574,4 +602,15 @@ bytecode::SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor::visitProgram(Smpl
         }
     }
     return std::any{void_typed_function_names};
+}
+
+std::any
+bytecode::SmplangBytecodeVisitor::SmplangStructTypeCodesVisitor::visitProgram(SmplangParser::ProgramContext *ctx) {
+    std::unordered_map<std::string, uint16_t> struct_type_codes = {};
+    uint16_t prev_code = SmplangStructTypeCodesVisitor::defaultTypeMaxCode_;
+    for (auto struct_decl_ctx: ctx->structDecl()) {
+        auto struct_name = struct_decl_ctx->structType()->getText();
+        struct_type_codes[struct_name] = ++prev_code;
+    }
+    return std::any{struct_type_codes};
 }

@@ -7,6 +7,7 @@
 #include <ostream>
 #include "eof_fix.h"
 #include "bytecodes.h"
+#include "type_index.h"
 #include <boost/multiprecision/cpp_int.hpp>
 
 using cpp_int = boost::multiprecision::cpp_int;
@@ -52,6 +53,10 @@ namespace bytecode {
         return std::any_cast<std::unordered_set<std::string>>(any);
     }
 
+    [[nodiscard]] inline decltype(auto) string_uint16_t_map_cast(std::any &&any) {
+        return std::any_cast<std::unordered_map<std::string, uint16_t>>(any);
+    }
+
     template<typename T>
     std::vector<char> &insertToCharVector(std::vector<char> &vector, const T &value, size_t position) {
         const char *value_ptr = reinterpret_cast<const char *>(&value);
@@ -76,8 +81,16 @@ namespace bytecode {
 
         };
 
+        class SmplangStructTypeCodesVisitor : public SmplangBaseVisitor {
+        private:
+            static constexpr uint16_t defaultTypeMaxCode_ = static_cast<uint16_t>(TypeIndex::Null);
+        public:
+            std::any visitProgram(SmplangParser::ProgramContext *ctx) override;
+        };
+
         std::unordered_set<std::string> void_typed_builtin_functions_;
         std::unordered_set<std::string> void_typed_program_functions_ = {};
+        std::unordered_map<std::string, uint16_t> struct_type_codes_ = {};
 
         static Operation loadInt(const cpp_int &value);
 
@@ -88,6 +101,8 @@ namespace bytecode {
         static Operation loadDouble(double value);
 
         static Operation loadString(std::string_view s);
+
+        static std::vector<bytecode::Operation> loadField(std::string_view field_name, uint16_t type_code);
 
         static std::vector<Operation> loadStringThenName(std::string_view name);
 
