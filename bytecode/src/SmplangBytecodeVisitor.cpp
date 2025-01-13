@@ -2,6 +2,7 @@
 
 #include "SmplangBytecodeVisitor.h"
 #include "bytecodes.h"
+#include "type_index.h"
 #include "smplang_common.h"
 #include <sstream>
 #include <type_traits>
@@ -157,6 +158,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitVarDecl(SmplangParser::VarDeclCo
             result.emplace_back(ByteCodes::StoreName);
             return std::any{result};
         }
+        return std::any{result};
     }
     result.push_back(loadString(ctx->ID()->getText()));
     auto expr_code = vec_cast(visitExpression(ctx->expression()));
