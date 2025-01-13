@@ -13,6 +13,15 @@ std::shared_ptr<BaseType> Int::IntOperatorTemplate(const BaseType& other, cpp_in
     return {};
 }
 
+std::shared_ptr<BaseType> Int::BoolOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const {
+    if (other.Type != TypeIndex::Struct) { // struct is the only type not castable to bool
+        BoolType l = BoolCast();
+        BoolType r = other.BoolCast();
+        return std::make_shared<Bool>(new BoolType(op(l, r)));
+    }
+    return {};
+}
+
 std::shared_ptr<BaseType> Int::DoubleOperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const {
     if (other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
@@ -20,6 +29,13 @@ std::shared_ptr<BaseType> Int::DoubleOperatorTemplate(const BaseType& other, Dou
         return std::make_shared<Double>(new DoubleType(op(l, r)));
     }
     return nullptr;
+}
+
+std::shared_ptr<BaseType> Int::operator%(const BaseType& other) const {
+    if (auto res = IntOperatorTemplate(other, [](const IntType& l, const IntType& r) { return IntType(l % r); })) {
+        return res;
+    }
+    throw std::invalid_argument(std::string("invalid operator ") + "%" + "\n");
 }
 
 #define DefIntOperator(op)                                                                                                             \
@@ -93,18 +109,6 @@ DefIntCompareOperator(>);
 DefIntCompareOperator(<);
 DefIntCompareOperator(>=);
 DefIntCompareOperator(<=);
-
-#define DefPureIntOperator(op)                                                                                             \
-    std::shared_ptr<BaseType> Int::operator op(const BaseType & other) const {                                             \
-        if (auto res = IntOperatorTemplate(other, [](const IntType& l, const IntType& r) -> IntType { return l op r; })) { \
-            return res;                                                                                                    \
-        }                                                                                                                  \
-        throw std::invalid_argument(std::string("invalid operator ") + #op + "\n");                                        \
-    }
-
-DefPureIntOperator(%);
-DefPureIntOperator(&);
-DefPureIntOperator(|);
 
 /// Double
 

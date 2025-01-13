@@ -19,6 +19,7 @@
 #include <format>
 
 #include "boost/multiprecision/cpp_int.hpp"
+#include "magic_enum/magic_enum.hpp"
 
 using cpp_int = boost::multiprecision::cpp_int;
 
@@ -29,6 +30,7 @@ struct BytecodeOpBase {
     virtual void Parse(const bytecode::Operation& op) = 0;
     virtual void operator()(Frame& frame) = 0;
     virtual ByteCodes GetByteCode() = 0;
+    virtual std::string Str() const = 0;
     virtual ~BytecodeOpBase() = default;
 };
 
@@ -45,19 +47,18 @@ struct Frame {
         [](const BaseType& x, const BaseType& y) { return x * y; },
         [](const BaseType& x, const BaseType& y) { return x / y; },
         [](const BaseType& x, const BaseType& y) { return x % y; },
-        [](const BaseType& x, const BaseType& y) { return x & y; },
-        [](const BaseType& x, const BaseType& y) { return x | y; },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x == y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x != y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x < y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x > y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x <= y); },
-        [](const BaseType& x, const BaseType& y) { return static_cast<std::shared_ptr<BaseType>>(x >= y); }};
+        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x && y); },
+        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x || y); },
+        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x == y); },
+        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x != y); },
+        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x < y); },
+        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x > y); },
+        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x <= y); },
+        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x >= y); }};
 
     static constexpr std::array<std::shared_ptr<BaseType> (*)(const BaseType&), 2> UNARY_OPS = {
         [](const BaseType& x) { return -x; },
-        [](const BaseType& x) { return static_cast<std::shared_ptr<BaseType>>(!x); }
-    };
+        [](const BaseType& x) { return static_cast<std::shared_ptr<BaseType>>(!x); }};
 
     Frame(
         std::span<std::unique_ptr<BytecodeOpBase>>& instructions,
@@ -65,7 +66,8 @@ struct Frame {
         std::unordered_map<std::string, std::shared_ptr<BaseType>>& globals,
         std::unordered_map<std::string, std::shared_ptr<BaseType>>& locals,
         std::unordered_map<std::string, Function>& builtinFunctions,
-        Frame* parentFrame);
+        Frame* parentFrame,
+        bool verbose);
 
     void ReadFunction(int& cur_instruction);
     std::shared_ptr<BaseType> Run();
@@ -102,7 +104,7 @@ struct Frame {
 
     template <std::derived_from<BaseType> T = BaseType>
     std::shared_ptr<T> Pop() {
-        std::shared_ptr<T> ret = std::move(reinterpret_cast<std::shared_ptr<T>&>(Top()));
+        std::shared_ptr<T> ret = std::move(std::static_pointer_cast<T>(Top()));
         DataStack.pop_back();
         return ret;
     }
@@ -118,6 +120,8 @@ struct Frame {
     std::optional<int> Offset;
     std::unordered_map<std::string, Function>& Functions;
     Function* ReadingFunction;
+    bool Verbose;
+    std::stringstream Output;
 };
 
 struct NullOp: public BytecodeOpBase {
@@ -127,6 +131,9 @@ struct NullOp: public BytecodeOpBase {
     }
     void operator()(Frame& frame) override {
     }
+    virtual std::string Str() const override {
+        return "NullOp";
+    }
     ByteCodes GetByteCode() override {
         return ByteCodes::NullOp;
     }
@@ -135,18 +142,17 @@ struct NullOp: public BytecodeOpBase {
 struct LoadInt: public BytecodeOpBase {
     void Parse(std::ifstream& stream) override {
         // if size < 0, then cpp_int is negative
-        int size = 0;
         stream.read(reinterpret_cast<char*>(&size), 4);
-        char* bytes = new char[abs(size)];
-        stream.read(bytes, abs(size));
-        boost::multiprecision::import_bits(num, bytes, bytes + abs(size));
+        std::string bytes(std::abs(size), '\0');
+        stream.read(bytes.data(), std::abs(size));
+        boost::multiprecision::import_bits(num, bytes.begin(), bytes.end());
         if (size < 0) {
             num = -num;
         }
     }
     void Parse(const bytecode::Operation& op) override {
         // if size < 0, then cpp_int is negative
-        int size = *reinterpret_cast<const int*>(op.value_bytes.data());
+        size = *reinterpret_cast<const int*>(op.value_bytes.data());
         const std::vector<char>& bytes = op.value_bytes;
         boost::multiprecision::import_bits(num, bytes.begin() + 4, bytes.end());
         if (size < 0) {
@@ -156,10 +162,14 @@ struct LoadInt: public BytecodeOpBase {
     void operator()(Frame& frame) override {
         frame.LoadInt(&num);
     }
+    std::string Str() const override {
+        return std::format("LoadInt {} {}", size, num.str());
+    }
     ByteCodes GetByteCode() override {
         return ByteCodes::LoadInt;
     }
 
+    int size;
     cpp_int num;
 };
 
@@ -172,6 +182,13 @@ struct LoadChar: public BytecodeOpBase {
     }
     void operator()(Frame& frame) override {
         frame.LoadChar(&c);
+    }
+    std::string Str() const override {
+        std::string out = {c};
+        if (c == '\n') {
+            out = "\\n";
+        }
+        return std::format("LoadChar '{}'", out);
     }
     ByteCodes GetByteCode() override {
         return ByteCodes::LoadChar;
@@ -190,6 +207,9 @@ struct LoadBool: public BytecodeOpBase {
     void operator()(Frame& frame) override {
         frame.LoadBool(&b);
     }
+    std::string Str() const override {
+        return std::format("LoadBool {}", b);
+    }
     ByteCodes GetByteCode() override {
         return ByteCodes::LoadBool;
     }
@@ -207,6 +227,9 @@ struct LoadDouble: public BytecodeOpBase {
     void operator()(Frame& frame) override {
         frame.LoadDouble(&d);
     }
+    std::string Str() const override {
+        return std::format("LoadDouble {}", d);
+    }
     ByteCodes GetByteCode() override {
         return ByteCodes::LoadDouble;
     }
@@ -216,21 +239,25 @@ struct LoadDouble: public BytecodeOpBase {
 
 struct LoadString: public BytecodeOpBase {
     void Parse(std::ifstream& stream) override {
-        int size = 0;
         stream.read(reinterpret_cast<char*>(&size), 4);
         s.resize(size);
         stream.read(s.data(), size);
     }
     void Parse(const bytecode::Operation& op) override {
+        size = *reinterpret_cast<const int*>(op.value_bytes.data());
         s = std::string(op.value_bytes.begin() + 4, op.value_bytes.end());
     }
     void operator()(Frame& frame) override {
         frame.LoadString(&s);
     }
+    std::string Str() const override {
+        return std::format("LoadString {} {}", size, s);
+    }
     ByteCodes GetByteCode() override {
         return ByteCodes::LoadString;
     }
 
+    int size;
     std::string s;
 };
 
@@ -243,6 +270,9 @@ struct MakeFunction: public BytecodeOpBase {
     }
     void operator()(Frame& frame) override {
         frame.MakeFunction(argc);
+    }
+    std::string Str() const override {
+        return std::format("MakeFunction");
     }
     ByteCodes GetByteCode() override {
         return ByteCodes::MakeFunction;
@@ -257,6 +287,9 @@ struct UnaryOp: public BytecodeOpBase {
     }
     void Parse(const bytecode::Operation& op) override {
         this->op = UnaryOps(op.value_bytes[0]);
+    }
+    std::string Str() const override {
+        return std::format("UnaryOp {}", magic_enum::enum_name(op));
     }
     void operator()(Frame& frame) override {
         frame.UnaryOp(op);
@@ -278,6 +311,9 @@ struct BinaryOp: public BytecodeOpBase {
     void operator()(Frame& frame) override {
         frame.BinaryOp(op);
     }
+    std::string Str() const override {
+        return std::format("BinaryOp {}", magic_enum::enum_name(op));
+    }
     ByteCodes GetByteCode() override {
         return ByteCodes::BinaryOp;
     }
@@ -295,6 +331,9 @@ struct BuildArray: public BytecodeOpBase {
     void operator()(Frame& frame) override {
         frame.BuildArray(cnt);
     }
+    std::string Str() const override {
+        return std::format("BuildArray {}", cnt);
+    }
     ByteCodes GetByteCode() override {
         return ByteCodes::BuildArray;
     }
@@ -311,6 +350,9 @@ struct DefineStruct: public BytecodeOpBase {
     }
     void operator()(Frame& frame) override {
         frame.DefineStruct(fieldc);
+    }
+    std::string Str() const override {
+        return std::format("DefineStruct {}", fieldc);
     }
     ByteCodes GetByteCode() override {
         return ByteCodes::DefineStruct;
@@ -330,6 +372,9 @@ struct DefineStruct: public BytecodeOpBase {
         void operator()(Frame& frame) override {                           \
             frame.Name(offset);                                            \
         }                                                                  \
+        std::string Str() const override {                                 \
+            return std::format("{} {}", #Name, offset);                    \
+        }                                                                  \
         ByteCodes GetByteCode() override {                                 \
             return ByteCodes::Name;                                        \
         }                                                                  \
@@ -348,6 +393,9 @@ DefJump(JumpIfFalse);
         }                                                    \
         void operator()(Frame& frame) override {             \
             frame.Name();                                    \
+        }                                                    \
+        std::string Str() const override {                   \
+            return std::format("{}", #Name);                 \
         }                                                    \
         ByteCodes GetByteCode() override {                   \
             return ByteCodes::Name;                          \
@@ -444,30 +492,43 @@ struct VirtualMachine {
         return {};
     }
 
-    void Run(std::ifstream& code) {
+    void IfVerbose(bool verbose) {
+        if (verbose) {
+            std::cout << "Bytecode:" << std::endl;
+            for (const auto& op : Code) {
+                std::cout << op->Str() << std::endl;
+            }
+            std::cout << "\n----------------------------------------\n" << std::endl;
+            std::cout << "Execution:" << std::endl;
+        }
+    }
+
+    void Run(std::ifstream& code, bool verbose = false) {
         ByteCodes bytecode;
         while (code.read(reinterpret_cast<char*>(&bytecode), 1)) {
             Code.push_back(IfstreamBasedOpFactories[static_cast<char>(bytecode)](code));
         }
+        IfVerbose(verbose);
 
         std::unordered_map<std::string, std::shared_ptr<BaseType>> globals{};
         std::unordered_map<std::string, std::shared_ptr<BaseType>> builtins{};
         std::span<std::unique_ptr<BytecodeOpBase>> instructions(Code.begin(), Code.end());
         std::unordered_map<std::string, Function> builtinFunctions = CreateBuiltinFunctions();
-        auto frame = Frame(instructions, builtins, globals, globals, builtinFunctions, nullptr);
+        auto frame = Frame(instructions, builtins, globals, globals, builtinFunctions, nullptr, verbose);
         frame.Run();
     }
 
-    void Run(const std::vector<bytecode::Operation>& code) {
+    void Run(const std::vector<bytecode::Operation>& code, bool verbose = false) {
         for (const auto& c : code) {
             Code.push_back(CompilerBasedOpFactories[static_cast<char>(c.code)](c));
         }
+        IfVerbose(verbose);
 
         std::unordered_map<std::string, std::shared_ptr<BaseType>> globals{};
         std::unordered_map<std::string, std::shared_ptr<BaseType>> builtins{};
         std::span<std::unique_ptr<BytecodeOpBase>> instructions(Code.begin(), Code.end());
         std::unordered_map<std::string, Function> builtinFunctions = CreateBuiltinFunctions();
-        auto frame = Frame(instructions, builtins, globals, globals, builtinFunctions, nullptr);
+        auto frame = Frame(instructions, builtins, globals, globals, builtinFunctions, nullptr, verbose);
         frame.Run();
     }
 

@@ -43,20 +43,28 @@ struct BaseType {
     virtual DoubleType DoubleCast() const = 0;
     virtual BoolType BoolCast() const = 0;
 
-    virtual void Print() const = 0;
+    virtual void Print(std::ostream& stream) const = 0;
 
     virtual std::shared_ptr<BaseType> operator+(const BaseType& other) const = 0;
     virtual std::shared_ptr<BaseType> operator-(const BaseType& other) const = 0;
     virtual std::shared_ptr<BaseType> operator*(const BaseType& other) const = 0;
     virtual std::shared_ptr<BaseType> operator/(const BaseType& other) const = 0;
     virtual std::shared_ptr<BaseType> operator%(const BaseType& other) const = 0;
-    virtual std::shared_ptr<BaseType> operator&(const BaseType& other) const = 0;
-    virtual std::shared_ptr<BaseType> operator|(const BaseType& other) const = 0;
+
+#define DefBoolOperator(op)                                                   \
+    virtual std::shared_ptr<Bool> operator op(const BaseType & other) const { \
+        BoolType l = BoolCast();                                              \
+        BoolType r = other.BoolCast();                                        \
+        return std::make_shared<Bool>(new BoolType(l op r));                  \
+    }
+
+    DefBoolOperator(&&);
+    DefBoolOperator(||);
 
     virtual std::shared_ptr<Bool> operator!() const {
         return std::make_shared<Bool>(new BoolType(!BoolCast()));
     }
-    virtual std::shared_ptr<BaseType> operator-() const =0;
+    virtual std::shared_ptr<BaseType> operator-() const = 0;
 
     virtual std::shared_ptr<Bool> operator==(const BaseType& other) const = 0;
     virtual std::shared_ptr<Bool> operator!=(const BaseType& other) const = 0;
@@ -93,20 +101,19 @@ struct Int: public BaseType {
         return IntCast() != 0;
     }
 
-    void Print() const override {
-        std::cout << IntCast();
+    void Print(std::ostream& stream) const override {
+        stream << IntCast();
     }
 
     std::shared_ptr<BaseType> IntOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const;
     std::shared_ptr<BaseType> DoubleOperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const;
+    std::shared_ptr<BaseType> BoolOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const;
 
     std::shared_ptr<BaseType> operator+(const BaseType& other) const override;
     std::shared_ptr<BaseType> operator-(const BaseType& other) const override;
     std::shared_ptr<BaseType> operator*(const BaseType& other) const override;
     std::shared_ptr<BaseType> operator/(const BaseType& other) const override;
     std::shared_ptr<BaseType> operator%(const BaseType& other) const override;
-    std::shared_ptr<BaseType> operator&(const BaseType& other) const override;
-    std::shared_ptr<BaseType> operator|(const BaseType& other) const override;
 
     std::shared_ptr<BaseType> operator-() const override {
         return std::make_shared<Int>(new IntType(-IntCast()));
@@ -141,8 +148,8 @@ struct Bool: public Int {
         return *reinterpret_cast<BoolType*>(Value);
     }
 
-    void Print() const override {
-        std::cout << BoolCast();
+    void Print(std::ostream& stream) const override {
+        stream << BoolCast();
     }
 
     std::shared_ptr<Bool> operator!() {
@@ -165,8 +172,8 @@ struct Char: public Int {
         return v;
     }
 
-    void Print() const override {
-        std::cout << *reinterpret_cast<char*>(Value);
+    void Print(std::ostream& stream) const override {
+        stream << *reinterpret_cast<char*>(Value);
     }
 };
 
@@ -189,8 +196,8 @@ struct Double: public BaseType {
         return BoolType(DoubleCast());
     }
 
-    void Print() const override {
-        std::cout << DoubleCast();
+    void Print(std::ostream& stream) const override {
+        stream << DoubleCast();
     }
 
     std::shared_ptr<BaseType> OperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const;
@@ -209,8 +216,6 @@ struct Double: public BaseType {
     DefDoubleOperator(/);
 
     DefInvalidOperator(%, BaseType);
-    DefInvalidOperator(&, BaseType);
-    DefInvalidOperator(|, BaseType);
 
     std::shared_ptr<BaseType> operator-() const override {
         return std::make_shared<Double>(new DoubleType(-DoubleCast()));
@@ -275,14 +280,16 @@ struct Struct: public BaseType {
         throw std::invalid_argument("struct is not convertible to bool\n");
     }
 
-    void Print() const override {
-        std::cout << "{";
+    void Print(std::ostream& stream) const override {
+        stream << "{";
+        std::string_view sep = "";
         for (const auto& [k, v] : GetMap()) {
-            std::cout << k << ": ";
-            v->Print();
-            std::cout << ", ";
+            stream << sep;
+            stream << k << ": ";
+            v->Print(stream);
+            sep = ", ";
         }
-        std::cout << "}";
+        stream << "}";
     }
 
     DefInvalidOperator(+, BaseType);
@@ -290,8 +297,8 @@ struct Struct: public BaseType {
     DefInvalidOperator(*, BaseType);
     DefInvalidOperator(/, BaseType);
     DefInvalidOperator(%, BaseType);
-    DefInvalidOperator(&, BaseType);
-    DefInvalidOperator(|, BaseType);
+    DefInvalidOperator(&&, Bool);
+    DefInvalidOperator(||, Bool);
     DefInvalidOperator(>, Bool);
     DefInvalidOperator(<, Bool);
     DefInvalidOperator(>=, Bool);
@@ -362,13 +369,15 @@ struct Array: public BaseType {
         return *reinterpret_cast<ValueType*>(Value);
     }
 
-    void Print() const override {
-        std::cout << "{";
+    void Print(std::ostream& stream) const override {
+        stream << "{";
+        std::string_view sep = "";
         for (const auto& i : GetArray()) {
-            i->Print();
-            std::cout << ", ";
+            stream << sep;
+            i->Print(stream);
+            sep = ", ";
         }
-        std::cout << "}";
+        stream << "}";
     }
 
     std::shared_ptr<BaseType> operator+(const BaseType& other) const override;
@@ -377,8 +386,6 @@ struct Array: public BaseType {
     DefInvalidOperator(*, BaseType);
     DefInvalidOperator(/, BaseType);
     DefInvalidOperator(%, BaseType);
-    DefInvalidOperator(&, BaseType);
-    DefInvalidOperator(|, BaseType);
     DefInvalidOperator(>, Bool);
     DefInvalidOperator(<, Bool);
     DefInvalidOperator(>=, Bool);

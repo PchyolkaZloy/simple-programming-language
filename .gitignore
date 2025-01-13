@@ -59,3 +59,6 @@ bytecode/cmake-build*
 #vscode
 .vscode
 build
+
+#macos
+**/.DS_Store

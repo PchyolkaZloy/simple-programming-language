@@ -6,7 +6,8 @@ Frame::Frame(
     std::unordered_map<std::string, std::shared_ptr<BaseType>>& globals,
     std::unordered_map<std::string, std::shared_ptr<BaseType>>& locals,
     std::unordered_map<std::string, Function>& builtinFunctions,
-    Frame* parentFrame)
+    Frame* parentFrame,
+    bool verbose)
     : Instructions(instructions)
     , Builtins(builtins)
     , Globals(globals)
@@ -17,7 +18,8 @@ Frame::Frame(
     , ShouldReturn()
     , Offset()
     , Functions(builtinFunctions)
-    , ReadingFunction(nullptr) {
+    , ReadingFunction(nullptr)
+    , Verbose(verbose) {
 }
 
 void Frame::ReadFunction(int& cur_instruction) {
@@ -38,6 +40,9 @@ std::shared_ptr<BaseType> Frame::Run() {
             ReadFunction(cur_instruction);
         } else {
             BytecodeOpBase& instruction = *Instructions[cur_instruction].get();
+            if (Verbose) {
+                std::cout << instruction.Str() << std::endl;
+            }
             instruction(*this);
         }
         if (ShouldReturn) {
@@ -49,6 +54,11 @@ std::shared_ptr<BaseType> Frame::Run() {
         } else {
             cur_instruction += 1;
         }
+    }
+    if (Verbose) {
+        std::cout << "\n----------------------------------------\n" << std::endl;
+        std::cout << "Program output:" << std::endl;
+        std::cout << Output.str();
     }
     return ReturnValue;
 }
@@ -65,7 +75,7 @@ std::string& Frame::PopString() {
 
 std::vector<std::shared_ptr<BaseType>> Frame::Popn(size_t n) {
     std::vector<std::shared_ptr<BaseType>> ret(n);
-    for (int i = 0; i < n; ++i) {
+    for (int i = n - 1; i >= 0; --i) {
         ret[i] = Pop();
     }
     return ret;
@@ -73,7 +83,7 @@ std::vector<std::shared_ptr<BaseType>> Frame::Popn(size_t n) {
 
 std::vector<std::string*> Frame::PopnStrings(size_t n) {
     std::vector<std::string*> ret(n);
-    for (int i = 0; i < n; ++i) {
+    for (int i = n - 1; i >= 0; --i) {
         ret[i] = &PopString();
     }
     return ret;
@@ -158,11 +168,25 @@ void Frame::MakeFunction(int argc) {
     ReadingFunction = &Functions[fName];
 }
 
+std::map<std::string, void (*)(Frame&)> BuiltinFunctions = {
+    {"print", [](Frame& frame) {
+        std::shared_ptr<BaseType> arg = frame.Pop();
+        arg->Print(frame.Verbose ? frame.Output : std::cout);
+    }},
+    {"append", [](Frame& frame) {
+        std::shared_ptr<BaseType> arg = frame.Pop();
+        std::shared_ptr<Array> arr = frame.Pop<Array>();
+        arr->Append(arg);
+    }},
+    {"len", [](Frame& frame) {
+        std::shared_ptr<Array> arr = frame.Pop<Array>();
+        frame.Push(std::make_shared<Int>(new BaseType::IntType(arr->Size())));
+    }},
+};
 void Frame::Call() {
     std::string& fName = PopString();
-    if (fName == "print") {
-        std::shared_ptr<BaseType> arg = Pop();
-        arg->Print();
+    if (BuiltinFunctions.contains(fName)) {
+        BuiltinFunctions[fName](*this);
         return;
     }
     Function& f = Functions[fName];
@@ -172,7 +196,7 @@ void Frame::Call() {
     for (const auto& [name, value] : std::views::zip(f.Params, args)) {
         locals[*name] = value;
     }
-    auto frame = Frame(f.Code, Builtins, Globals, locals, Functions, this);
+    auto frame = Frame(f.Code, Builtins, Globals, locals, Functions, this, Verbose);
     if (auto res = frame.Run()) {
         Push(res);
     }
