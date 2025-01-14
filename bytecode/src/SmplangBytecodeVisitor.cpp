@@ -11,40 +11,41 @@
 #include <string>
 #include "variables_util.h"
 
-std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramContext *ctx) {
-//    first thing to do is to fetch void typed funcs names
+std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramContext* ctx) {
+    // first thing to do is to fetch void typed funcs names
     void_typed_program_functions_ = string_set_cast(
-            SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor().visitProgram(ctx));
+        SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor().visitProgram(ctx));
     std::vector<Operation> program_code{};
     struct_type_codes_ = string_uint16_t_map_cast(
-            SmplangBytecodeVisitor::SmplangStructTypeCodesVisitor().visitProgram(ctx));
-    for (auto *struct_decl_ctx: ctx->structDecl()) {
+        SmplangBytecodeVisitor::SmplangStructTypeCodesVisitor().visitProgram(ctx));
+    for (auto* struct_decl_ctx : ctx->structDecl()) {
         auto struct_decl_code = vec_cast(visitStructDecl(struct_decl_ctx));
         program_code.insert(program_code.end(), struct_decl_code.begin(), struct_decl_code.end());
     }
-    for (auto *func_decl_ctx: ctx->functionDecl()) {
+    for (auto* func_decl_ctx : ctx->functionDecl()) {
         auto func_decl_code = vec_cast(visitFunctionDecl(func_decl_ctx));
         program_code.insert(program_code.end(), func_decl_code.begin(), func_decl_code.end());
     }
-    for (auto *statement_ctx: ctx->statement()) {
+    for (auto* statement_ctx : ctx->statement()) {
         auto statement_decl_code = vec_cast(visitStatement(statement_ctx));
         program_code.insert(program_code.end(), statement_decl_code.begin(), statement_decl_code.end());
     }
-//    std::cout << ' ';
+    // std::cout << ' ';
     return std::any{program_code};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitFunctionDecl(SmplangParser::FunctionDeclContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitFunctionDecl(SmplangParser::FunctionDeclContext* ctx) {
     std::string func_name = ctx->ID()->getText();
     std::vector<Operation> result{};
     auto parameter_ctxes = (ctx->parameterList()) ? ctx->parameterList()->parameter()
                                                   : std::decay_t<decltype(ctx->parameterList()->parameter())>{};
     size_t params_count = parameter_ctxes.size();
 
-    if (params_count > std::numeric_limits<uint8_t>::max())
+    if (params_count > std::numeric_limits<uint8_t>::max()) {
         throw ASTException(std::format("{0} parameters are not allowed ({1} max)", params_count,
                                        std::numeric_limits<uint8_t>::max()));
-    for (auto *parameter_ctx: parameter_ctxes) {
+    }
+    for (auto* parameter_ctx : parameter_ctxes) {
         auto load_param_name_code = loadString(parameter_ctx->ID()->getText());
         result.push_back(load_param_name_code);
     }
@@ -52,7 +53,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitFunctionDecl(SmplangParser::Func
     result.push_back(loadString(func_name));
 
     result.emplace_back(ByteCodes::MakeFunction,
-                        std::vector<char>(1, static_cast<uint8_t >(params_count))); // NOLINT(*-narrowing-conversions)
+                        std::vector<char>(1, static_cast<uint8_t>(params_count))); // NOLINT(*-narrowing-conversions)
 
     auto block_code = vec_cast(visitBlock(ctx->block()));
 
@@ -62,30 +63,32 @@ std::any bytecode::SmplangBytecodeVisitor::visitFunctionDecl(SmplangParser::Func
     return result;
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitReturnType(SmplangParser::ReturnTypeContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitReturnType(SmplangParser::ReturnTypeContext* ctx) {
     return SmplangBaseVisitor::visitReturnType(ctx);
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitStructDecl(SmplangParser::StructDeclContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitStructDecl(SmplangParser::StructDeclContext* ctx) {
     std::string struct_type = ctx->structType()->ID()->getText();
     std::vector<Operation> result{};
     size_t field_count = ctx->fieldDecl().size();
-    if (field_count > std::numeric_limits<uint8_t>::max())
+    if (field_count > std::numeric_limits<uint8_t>::max()) {
         throw ASTException(std::format("{0} fields are not allowed ({1} max)", field_count,
                                        std::numeric_limits<uint8_t>::max()));
-    for (auto *field_decl_ctx: ctx->fieldDecl()) {
+    }
+    for (auto* field_decl_ctx : ctx->fieldDecl()) {
         auto field_type_ctx = field_decl_ctx->type();
         uint16_t type_code;
         if (field_type_ctx->primitiveType()) {
             auto type_ctx = field_type_ctx->primitiveType();
-            if (type_ctx->getText() == "int")
+            if (type_ctx->getText() == "int") {
                 type_code = static_cast<uint16_t>(TypeIndex::Int);
-            else if (type_ctx->getText() == "double")
+            } else if (type_ctx->getText() == "double") {
                 type_code = static_cast<uint16_t>(TypeIndex::Double);
-            else if (type_ctx->getText() == "char")
+            } else if (type_ctx->getText() == "char") {
                 type_code = static_cast<uint16_t>(TypeIndex::Char);
-            else if (type_ctx->getText() == "bool")
+            } else if (type_ctx->getText() == "bool") {
                 type_code = static_cast<uint16_t>(TypeIndex::Bool);
+            }
         } else if (field_type_ctx->ARRAYTYPE()) {
             type_code = static_cast<uint16_t>(TypeIndex::Array);
         } else {
@@ -95,36 +98,35 @@ std::any bytecode::SmplangBytecodeVisitor::visitStructDecl(SmplangParser::Struct
         result.insert(result.end(), load_field_code.begin(), load_field_code.end());
     }
     result.push_back(loadString(struct_type));
-    //    checking limit above ^^^
+    // checking limit above ^^^
     result.emplace_back(ByteCodes::DefineStruct,
                         std::vector<char>(1, static_cast<uint8_t>(field_count))); // NOLINT(*-narrowing-conversions)
     return std::any{result};
 }
 
-
-std::any bytecode::SmplangBytecodeVisitor::visitType(SmplangParser::TypeContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitType(SmplangParser::TypeContext* ctx) {
     return SmplangBaseVisitor::visitType(ctx);
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitPrimitiveType(SmplangParser::PrimitiveTypeContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitPrimitiveType(SmplangParser::PrimitiveTypeContext* ctx) {
     return SmplangBaseVisitor::visitPrimitiveType(ctx);
 }
 
 // скип
-std::any bytecode::SmplangBytecodeVisitor::visitStructType(SmplangParser::StructTypeContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitStructType(SmplangParser::StructTypeContext* ctx) {
     return SmplangBaseVisitor::visitStructType(ctx);
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitBlock(SmplangParser::BlockContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitBlock(SmplangParser::BlockContext* ctx) {
     std::vector<Operation> result{};
-    for (auto *statement_ctx: ctx->statement()) {
+    for (auto* statement_ctx : ctx->statement()) {
         auto statement_code = vec_cast(visitStatement(statement_ctx));
         result.insert(result.end(), statement_code.begin(), statement_code.end());
     }
     return std::any{result};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitStatement(SmplangParser::StatementContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitStatement(SmplangParser::StatementContext* ctx) {
     if (ctx->varDecl()) {
         return visitVarDecl(ctx->varDecl());
     }
@@ -142,7 +144,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitStatement(SmplangParser::Stateme
     }
     if (ctx->expression()) {
         auto result = vec_cast(visitExpression(ctx->expression()));
-        const auto &last_op = result.back();
+        const auto& last_op = result.back();
         if (last_op.code == ByteCodes::Call) {
             Operation load_func_name_op = result[result.size() - 2];
             std::string func_name(load_func_name_op.value_bytes.begin() + sizeof(int),
@@ -155,16 +157,16 @@ std::any bytecode::SmplangBytecodeVisitor::visitStatement(SmplangParser::Stateme
         result.emplace_back(ByteCodes::Pop);
         return std::any{result};
     }
-//    TODO: throw
+    // TODO: throw
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitVarDecl(SmplangParser::VarDeclContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitVarDecl(SmplangParser::VarDeclContext* ctx) {
     std::vector<Operation> result{};
     if (!ctx->expression()) {
         if (ctx->type()->ARRAYTYPE()) {
             result.push_back(loadString(ctx->ID()->getText()));
             result.emplace_back(ByteCodes::BuildArray);
-//            array of 0 size
+            // array of 0 size
             appendToCharVector<int>(result.back().value_bytes, 0);
             result.emplace_back(ByteCodes::StoreName);
             return std::any{result};
@@ -186,8 +188,8 @@ std::any bytecode::SmplangBytecodeVisitor::visitVarDecl(SmplangParser::VarDeclCo
     return std::any{result};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitAssignment(SmplangParser::AssignmentContext *ctx) {
-    auto *assignable_ctx = ctx->assignable();
+std::any bytecode::SmplangBytecodeVisitor::visitAssignment(SmplangParser::AssignmentContext* ctx) {
+    auto* assignable_ctx = ctx->assignable();
     std::vector<Operation> result{};
     if (!assignable_ctx->assignablePrefix()) {
         result.push_back(loadString(assignable_ctx->ID()->getText()));
@@ -213,106 +215,106 @@ std::any bytecode::SmplangBytecodeVisitor::visitAssignment(SmplangParser::Assign
     return std::any{result};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfStatementContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitIfStatement(SmplangParser::IfStatementContext* ctx) {
     int left_size = 0;
     std::vector<std::vector<Operation>> if_bodies{};
     std::vector<std::vector<Operation>> if_conditions{};
     std::vector<Operation> else_body{};
     std::vector<Operation> result{};
     if (ctx->elseBlock()) {
-        auto *else_ctx = ctx->elseBlock();
-        if (else_ctx->statement())
+        auto* else_ctx = ctx->elseBlock();
+        if (else_ctx->statement()) {
             else_body = vec_cast(visitStatement(ctx->elseBlock()->statement()));
-        else
+        } else {
             else_body = vec_cast(visitBlock(else_ctx->block()));
+        }
         left_size += static_cast<int>(else_body.size());
     }
 
-
-    auto *if_ctx = ctx->ifBlock();
-    if (if_ctx->statement())
+    auto* if_ctx = ctx->ifBlock();
+    if (if_ctx->statement()) {
         if_bodies.push_back(vec_cast(visitStatement(if_ctx->statement())));
-    else
+    } else {
         if_bodies.push_back(vec_cast(visitBlock(if_ctx->block())));
+    }
     if_conditions.push_back(vec_cast(visitExpression(if_ctx->expression())));
     left_size += static_cast<int>(if_conditions.back().size()) + 1;
     left_size += static_cast<int>(if_bodies.back().size()) + 1;
 
-//    if_bodies_op_count.push_back(if_bodies[0].size());
-//    if_conditions_op_count.push_back(if_conditions[0].size());
+    // if_bodies_op_count.push_back(if_bodies[0].size());
+    // if_conditions_op_count.push_back(if_conditions[0].size());
 
-
-    for (auto *elif_ctx: ctx->elifBlock()) {
+    for (auto* elif_ctx : ctx->elifBlock()) {
         if_conditions.push_back(vec_cast(visitExpression(elif_ctx->expression())));
-        if (elif_ctx->statement())
+        if (elif_ctx->statement()) {
             if_bodies.push_back(vec_cast(visitStatement(elif_ctx->statement())));
-        else
+        } else {
             if_bodies.push_back(vec_cast(visitBlock(elif_ctx->block())));
+        }
         left_size += static_cast<int>(if_conditions.back().size()) + 1;
         left_size += static_cast<int>(if_bodies.back().size()) + 1;
     }
-//    no need in last jump if else is not present
-    if (!ctx->elseBlock())
+    // no need in last jump if else is not present
+    if (!ctx->elseBlock()) {
         --left_size;
-//    left size is total if chain size now
+    }
+    // left size is total if chain size now
 
     for (size_t i = 0; i + 1 < if_conditions.size(); ++i) {
-//        if condition
+        // if condition
         result.insert(result.end(), if_conditions[i].begin(), if_conditions[i].end());
-//        then goes jump
+        // then goes jump
         result.emplace_back(ByteCodes::JumpIfFalse);
-//        jumping to pos after unconditional jump (hence (n + 1) + 1 where n is body size)
+        // jumping to pos after unconditional jump (hence (n + 1) + 1 where n is body size)
         appendToCharVector<int>(result.back().value_bytes, static_cast<int>(if_bodies[i].size() + 2));
-//        body
+        // body
         result.insert(result.end(), if_bodies[i].begin(), if_bodies[i].end());
-//        unconditional jump
+        // unconditional jump
         result.emplace_back(ByteCodes::Jump);
-//        we added k (condition), n (body), 2 jumps
+        // we added k (condition), n (body), 2 jumps
         left_size -= static_cast<int>((if_conditions[i].size() + if_bodies[i].size() + 2));
-//        now left size is size of the block after our unconditional jump, jumping over it (hence size + 1)
+        // now left size is size of the block after our unconditional jump, jumping over it (hence size + 1)
         appendToCharVector<int>(result.back().value_bytes, left_size + 1);
     }
 
-//    last if now
+    // last if now
     result.insert(result.end(), if_conditions.back().begin(), if_conditions.back().end());
     result.emplace_back(ByteCodes::JumpIfFalse);
     if (ctx->elseBlock()) {
-//        else statement is present -> it is the very case of prev jump(s)
+        // else statement is present -> it is the very case of prev jump(s)
         appendToCharVector<int>(result.back().value_bytes, static_cast<int>(if_bodies.back().size() + 2));
         result.insert(result.end(), if_bodies.back().begin(), if_bodies.back().end());
         result.emplace_back(ByteCodes::Jump);
         left_size -= static_cast<int>((if_conditions.back().size() + if_bodies.back().size() + 2));
         appendToCharVector<int>(result.back().value_bytes, left_size + 1);
-//        add else block
+        // add else block
         result.insert(result.end(), else_body.begin(), else_body.end());
     } else {
-//        it's the last if -> unconditional jump at the end is absent
-//        no need in last size anymore -> no need to change it
+        // it's the last if -> unconditional jump at the end is absent
+        // no need in last size anymore -> no need to change it
         appendToCharVector<int>(result.back().value_bytes, static_cast<int>(if_bodies.back().size() + 1));
         result.insert(result.end(), if_bodies.back().begin(), if_bodies.back().end());
     }
     return std::any{result};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitWhileStatement(SmplangParser::WhileStatementContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitWhileStatement(SmplangParser::WhileStatementContext* ctx) {
     auto loop_condition_expr = vec_cast(visitExpression(ctx->expression()));
-    auto loop_body = (ctx->block()) ?
-                     vec_cast(visitBlock(ctx->block())) :
-                     vec_cast(visitStatement(ctx->statement()));
+    auto loop_body = (ctx->block()) ? vec_cast(visitBlock(ctx->block())) : vec_cast(visitStatement(ctx->statement()));
     int condition_ops_count = static_cast<int>(loop_condition_expr.size());
     int body_ops_count = static_cast<int>(loop_body.size());
     auto result = std::move(loop_condition_expr);
     result.emplace_back(ByteCodes::JumpIfFalse);
-//    to be after unconditional jump
+    // to be after unconditional jump
     appendToCharVector<int>(result.back().value_bytes, body_ops_count + 2);
     result.insert(result.end(), loop_body.begin(), loop_body.end());
     result.emplace_back(ByteCodes::Jump);
-//    to be at condition start
+    // to be at condition start
     appendToCharVector<int>(result.back().value_bytes, -(body_ops_count + condition_ops_count + 1));
     return std::any{result};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitReturnStatement(SmplangParser::ReturnStatementContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitReturnStatement(SmplangParser::ReturnStatementContext* ctx) {
     std::vector<Operation> result{};
     if (ctx->expression()) {
         result = vec_cast(visitExpression(ctx->expression()));
@@ -321,7 +323,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitReturnStatement(SmplangParser::R
     return result;
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitExpression(SmplangParser::ExpressionContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitExpression(SmplangParser::ExpressionContext* ctx) {
     if (ctx->primaryExpression()) {
         return visitPrimaryExpression(ctx->primaryExpression());
     }
@@ -332,12 +334,12 @@ std::any bytecode::SmplangBytecodeVisitor::visitExpression(SmplangParser::Expres
         auto operand = vec_cast(visitExpression(ctx->expression(0)));
         auto result = std::move(operand);
         result.emplace_back(ByteCodes::UnaryOp);
-        if (ctx->NEG())
+        if (ctx->NEG()) {
             result.back().value_bytes.push_back(static_cast<char>(UnaryOps::Minus));
-        else if (ctx->NOT())
+        } else if (ctx->NOT()) {
             result.back().value_bytes.push_back(static_cast<char>(UnaryOps::Not));
+        }
         return std::any{result};
-
     }
     auto first_operand = vec_cast(visitExpression(ctx->expression(0)));
     auto result = std::move(first_operand);
@@ -345,43 +347,46 @@ std::any bytecode::SmplangBytecodeVisitor::visitExpression(SmplangParser::Expres
     result.insert(result.end(), second_operand.begin(), second_operand.end());
     result.emplace_back(ByteCodes::BinaryOp);
 
-    if (ctx->AND())
+    if (ctx->AND()) {
         result.back().value_bytes.push_back(static_cast<char>(BinaryOps::And));
-    else if (ctx->OR())
+    } else if (ctx->OR()) {
         result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Or));
-    else if (ctx->MULT()) {
+    } else if (ctx->MULT()) {
         std::string op = ctx->MULT()->getText();
-        if (op == "*")
+        if (op == "*") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Mul));
-        else if (op == "/")
+        } else if (op == "/") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Div));
-        else if (op == "%")
+        } else if (op == "%") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Mod));
+        }
     } else if (ctx->ADD()) {
         std::string op = ctx->ADD()->getText();
-        if (op == "+")
+        if (op == "+") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Add));
-        else if (op == "-")
+        } else if (op == "-") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Sub));
+        }
     } else if (ctx->COMPOP()) {
         std::string op = ctx->COMPOP()->getText();
-        if (op == "==")
+        if (op == "==") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Eq));
-        else if (op == "!=")
+        } else if (op == "!=") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::NotEq));
-        else if (op == "<")
+        } else if (op == "<") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Less));
-        else if (op == ">")
+        } else if (op == ">") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::Gr));
-        else if (op == "<=")
+        } else if (op == "<=") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::LessEq));
-        else if (op == ">=")
+        } else if (op == ">=") {
             result.back().value_bytes.push_back(static_cast<char>(BinaryOps::GrEq));
+        }
     }
     return std::any{result};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitPrimaryExpression(SmplangParser::PrimaryExpressionContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitPrimaryExpression(SmplangParser::PrimaryExpressionContext* ctx) {
     if (ctx->INT()) {
         cpp_int value(ctx->INT()->getText());
         return std::any{std::vector(1, loadInt(value))};
@@ -393,36 +398,36 @@ std::any bytecode::SmplangBytecodeVisitor::visitPrimaryExpression(SmplangParser:
     if (ctx->CHAR()) {
         char value;
         std::string char_str = ctx->CHAR()->getText();
-//        text ~= "\'[symbol]\'"
-        if (char_str.size() == 3)
+        // text ~= "\'[symbol]\'"
+        if (char_str.size() == 3) {
             value = char_str[1];
-        else {
+        } else {
             value = charFromEscapedString(char_str);
         }
-//        else if(ctx->)
+        // else if(ctx->)
         return std::any{std::vector(1, loadChar(value))};
     }
     if (ctx->DOUBLE()) {
         double value = std::stod(ctx->DOUBLE()->getText());
         return std::any{std::vector(1, loadDouble(value))};
     }
-//    struct.field
+    // struct.field
     if (ctx->DOT()) {
         auto struct_expression = vec_cast(visitPrimaryExpression(ctx->primaryExpression()));
         auto result = std::move(struct_expression);
         appendLoadMember(result, ctx->ID());
         return std::any{result};
     }
-//    IMPORTANT: after if DOT
-//    just variable
+    // IMPORTANT: after if DOT
+    // just variable
     if (ctx->ID()) {
         return std::any{loadStringThenName(ctx->ID()->getText())};
     }
-//    (...)
+    // (...)
     if (ctx->LPAREN() && ctx->RPAREN()) {
         return visitExpression(ctx->expression());
     }
-//    array[...]
+    // array[...]
     if (ctx->LBRACK() && ctx->RBRACK()) {
         auto array_code = vec_cast(visitPrimaryExpression(ctx->primaryExpression()));
         auto result = std::move(array_code);
@@ -440,10 +445,10 @@ std::any bytecode::SmplangBytecodeVisitor::visitPrimaryExpression(SmplangParser:
     throw ASTException("unknown AST child node");
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitArrayInit(SmplangParser::ArrayInitContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitArrayInit(SmplangParser::ArrayInitContext* ctx) {
     std::vector<Operation> result;
     size_t elements_count = ctx->expression().size();
-    for (auto *arg_expr_ctx: ctx->expression()) {
+    for (auto* arg_expr_ctx : ctx->expression()) {
         auto expr_code = vec_cast(visitExpression(arg_expr_ctx));
         result.insert(result.end(), expr_code.begin(), expr_code.end());
     }
@@ -452,16 +457,16 @@ std::any bytecode::SmplangBytecodeVisitor::visitArrayInit(SmplangParser::ArrayIn
     return std::any{result};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitArgumentList(SmplangParser::ArgumentListContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitArgumentList(SmplangParser::ArgumentListContext* ctx) {
     std::vector<Operation> result;
-    for (auto *arg_expr_ctx: ctx->expression()) {
+    for (auto* arg_expr_ctx : ctx->expression()) {
         auto expr_code = vec_cast(visitExpression(arg_expr_ctx));
         result.insert(result.end(), expr_code.begin(), expr_code.end());
     }
     return std::any{result};
 }
 
-std::any bytecode::SmplangBytecodeVisitor::visitFunctionCall(SmplangParser::FunctionCallContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitFunctionCall(SmplangParser::FunctionCallContext* ctx) {
     std::vector<Operation> result = vec_cast(visitArgumentList(ctx->argumentList()));
     Operation load_func_name = loadString(ctx->ID()->getText());
     result.push_back(load_func_name);
@@ -469,8 +474,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitFunctionCall(SmplangParser::Func
     return std::any{result};
 }
 
-
-std::any bytecode::SmplangBytecodeVisitor::visitAssignablePrefix(SmplangParser::AssignablePrefixContext *ctx) {
+std::any bytecode::SmplangBytecodeVisitor::visitAssignablePrefix(SmplangParser::AssignablePrefixContext* ctx) {
     if (!ctx->assignablePrefix()) {
         std::vector<Operation> result = loadStringThenName(ctx->ID()->getText());
         return result;
@@ -492,7 +496,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitAssignablePrefix(SmplangParser::
     throw ASTException("");
 }
 
-bytecode::Operation bytecode::SmplangBytecodeVisitor::loadInt(const cpp_int &value) {
+bytecode::Operation bytecode::SmplangBytecodeVisitor::loadInt(const cpp_int& value) {
     Operation op(ByteCodes::LoadInt);
     appendIntToCharVector(op.value_bytes, value);
     return op;
@@ -538,37 +542,42 @@ std::vector<bytecode::Operation> bytecode::SmplangBytecodeVisitor::loadStringThe
     return result;
 }
 
-void bytecode::SmplangBytecodeVisitor::appendLoadMember(std::vector<bytecode::Operation> &code,
-                                                        antlr4::tree::TerminalNode *ID_ptr) {
+void bytecode::SmplangBytecodeVisitor::appendLoadMember(std::vector<bytecode::Operation>& code,
+                                                        antlr4::tree::TerminalNode* ID_ptr) {
     auto load_field_name = loadString(ID_ptr->getText());
     code.push_back(load_field_name);
     code.emplace_back(ByteCodes::LoadMember);
 }
 
-
-std::vector<char> &bytecode::insertIntToCharVector(std::vector<char> &vector, const cpp_int &value, size_t position) {
+std::vector<char>& bytecode::insertIntToCharVector(std::vector<char>& vector, const cpp_int& value, size_t position) {
     std::vector<char> v;
-//    std::cout << value << '\n';
+    // std::cout << value << '\n';
     boost::multiprecision::export_bits(value, std::back_inserter(v), 7);
     int size = static_cast<int>(v.size());
-    if (value < 0)
+    if (value < 0) {
         size = -size;
+    }
     insertToCharVector<int>(vector, size, position);
     vector.insert(vector.begin() + position + 4, v.begin(), v.end());
     return vector;
 }
 
-std::vector<char> &bytecode::appendIntToCharVector(std::vector<char> &vector, const cpp_int &value) {
+std::vector<char>& bytecode::appendIntToCharVector(std::vector<char>& vector, const cpp_int& value) {
     return insertIntToCharVector(vector, value, vector.size());
 }
 
-bytecode::Operation::Operation(ByteCodes code, const std::vector<char> &valueBytes) : code(code),
-                                                                                      value_bytes(valueBytes) {}
+bytecode::Operation::Operation(ByteCodes code, const std::vector<char>& valueBytes)
+    : code(code)
+    , value_bytes(valueBytes) {
+}
 
-bytecode::Operation::Operation(ByteCodes code) : code(code), value_bytes(std::vector<char>{}) {}
+bytecode::Operation::Operation(ByteCodes code)
+    : code(code)
+    , value_bytes(std::vector<char>{}) {
+}
 
 char bytecode::SmplangBytecodeVisitor::charFromEscapedString(std::string_view str) {
-//    ['"\\anbrvt]
+    // ['"\\anbrvt]
     switch (str[2]) {
         case '\'':
         case '\"':
@@ -591,11 +600,10 @@ char bytecode::SmplangBytecodeVisitor::charFromEscapedString(std::string_view st
     }
 }
 
-
 std::any
-bytecode::SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor::visitProgram(SmplangParser::ProgramContext *ctx) {
+bytecode::SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor::visitProgram(SmplangParser::ProgramContext* ctx) {
     std::unordered_set<std::string> void_typed_function_names = {};
-    for (auto func_decl_ctx: ctx->functionDecl()) {
+    for (auto func_decl_ctx : ctx->functionDecl()) {
         auto type_ctx = func_decl_ctx->returnType();
         if (type_ctx->VOID()) {
             void_typed_function_names.insert(func_decl_ctx->ID()->getText());
@@ -605,10 +613,10 @@ bytecode::SmplangBytecodeVisitor::SmplangVoidFunctionsVisitor::visitProgram(Smpl
 }
 
 std::any
-bytecode::SmplangBytecodeVisitor::SmplangStructTypeCodesVisitor::visitProgram(SmplangParser::ProgramContext *ctx) {
+bytecode::SmplangBytecodeVisitor::SmplangStructTypeCodesVisitor::visitProgram(SmplangParser::ProgramContext* ctx) {
     std::unordered_map<std::string, uint16_t> struct_type_codes = {};
     uint16_t prev_code = SmplangStructTypeCodesVisitor::defaultTypeMaxCode_;
-    for (auto struct_decl_ctx: ctx->structDecl()) {
+    for (auto struct_decl_ctx : ctx->structDecl()) {
         auto struct_name = struct_decl_ctx->structType()->getText();
         struct_type_codes[struct_name] = ++prev_code;
     }
