@@ -26,11 +26,22 @@ std::any bytecode::SmplangBytecodeVisitor::visitProgram(SmplangParser::ProgramCo
         auto func_decl_code = vec_cast(visitFunctionDecl(func_decl_ctx));
         program_code.insert(program_code.end(), func_decl_code.begin(), func_decl_code.end());
     }
+    // program body is main function with 0 params
+    program_code.push_back(loadString("main"));
+    program_code.emplace_back(ByteCodes::MakeFunction,
+                              std::vector<char>(1, static_cast<uint8_t>(0)));
+
     for (auto* statement_ctx : ctx->statement()) {
         auto statement_decl_code = vec_cast(visitStatement(statement_ctx));
         program_code.insert(program_code.end(), statement_decl_code.begin(), statement_decl_code.end());
     }
-    // std::cout << ' ';
+
+    // end of main func
+    program_code.emplace_back(ByteCodes::NullOp);
+    // call main
+    program_code.push_back(loadString("main"));
+    program_code.emplace_back(ByteCodes::Call);
+
     return std::any{program_code};
 }
 
@@ -568,7 +579,6 @@ void bytecode::SmplangBytecodeVisitor::appendLoadMember(std::vector<bytecode::Op
 
 std::vector<char>& bytecode::insertIntToCharVector(std::vector<char>& vector, const cpp_int& value, size_t position) {
     std::vector<char> v;
-    // std::cout << value << '\n';
     boost::multiprecision::export_bits(value, std::back_inserter(v), 7);
     int size = static_cast<int>(v.size());
     if (value < 0) {
