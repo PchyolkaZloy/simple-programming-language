@@ -6,7 +6,7 @@ func int factorial(int n) {
     return n * factorial(n - 1);
 }
 
-int n = 20;
+int n = 2000;
 int fact = factorial(n);
 
 print(fact);

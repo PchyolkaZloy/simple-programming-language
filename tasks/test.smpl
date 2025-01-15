@@ -1,0 +1,7 @@
+bool[] isPrime;
+append(isPrime, true);
+int p = 0;
+if (isPrime[p]) {
+    print(1);
+}
+

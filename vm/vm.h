@@ -577,20 +577,17 @@ struct VirtualMachine {
 
     void IfVerbose(bool verbose) {
         if (verbose) {
-            std::cout << "Bytecode:" << std::endl;
-            for (const auto& op : Code) {
-                std::cout << op->Str() << std::endl;
-            }
-            std::cout << "\n----------------------------------------\n"
-                      << std::endl;
+            std::cout << "\n----------------------------------------" << std::endl;
             std::cout << "Execution:" << std::endl;
         }
     }
 
     void Run(std::ifstream& code, bool jit = false, bool verbose = false) {
         ByteCodes bytecode;
+        std::cout << "Bytecode:" << std::endl;
         while (code.read(reinterpret_cast<char*>(&bytecode), 1)) {
             Code.push_back(IfstreamBasedOpFactories[static_cast<char>(bytecode)](code));
+            std::cout << Code.back()->Str() << std::endl;
         }
         IfVerbose(verbose);
 
@@ -611,8 +608,10 @@ struct VirtualMachine {
     }
 
     void Run(const std::vector<bytecode::Operation>& code, bool jit = false, bool verbose = false) {
+        std::cout << "Bytecode:" << std::endl;
         for (const auto& c : code) {
             Code.push_back(CompilerBasedOpFactories[static_cast<char>(c.code)](c));
+            std::cout << Code.back()->Str() << std::endl;
         }
         IfVerbose(verbose);
 
