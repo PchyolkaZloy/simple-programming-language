@@ -593,16 +593,6 @@ std::vector<char>& bytecode::appendIntToCharVector(std::vector<char>& vector, co
     return insertIntToCharVector(vector, value, vector.size());
 }
 
-bytecode::Operation::Operation(ByteCodes code, const std::vector<char>& valueBytes)
-    : code(code)
-    , value_bytes(valueBytes) {
-}
-
-bytecode::Operation::Operation(ByteCodes code)
-    : code(code)
-    , value_bytes(std::vector<char>{}) {
-}
-
 char bytecode::SmplangBytecodeVisitor::charFromEscapedString(std::string_view str) {
     // ['"\\anbrvt]
     switch (str[2]) {
