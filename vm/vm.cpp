@@ -1,33 +1,14 @@
 #include "vm.h"
 
-Frame::Frame(
-    std::span<std::unique_ptr<BytecodeOpBase>>& instructions,
-    std::unordered_map<std::string, std::shared_ptr<BaseType>>& builtins,
-    std::unordered_map<std::string, std::shared_ptr<BaseType>>& globals,
-    std::unordered_map<std::string, std::shared_ptr<BaseType>>& locals,
-    std::unordered_map<std::string, Function>& builtinFunctions,
-    Frame* parentFrame,
-    bool verbose)
-    : Instructions(instructions)
-    , Builtins(builtins)
-    , Globals(globals)
-    , Locals(locals)
-    , ParentFrame(parentFrame)
-    , DataStack()
-    , ReturnValue()
-    , ShouldReturn()
-    , Offset()
-    , Functions(builtinFunctions)
-    , ReadingFunction(nullptr)
-    , Verbose(verbose) {
-}
+#include <ranges>
+#include <memory>
 
 void Frame::ReadFunction(int& cur_instruction) {
     int fStart = cur_instruction;
     while (Instructions[cur_instruction]->GetByteCode() != ByteCodes::NullOp) {
         ++cur_instruction;
     }
-    ReadingFunction->Code = std::span<std::unique_ptr<BytecodeOpBase>>(
+    ReadingFunction->Code = std::span<std::shared_ptr<BytecodeOpBase>>(
         Instructions.begin() + fStart,
         Instructions.begin() + cur_instruction);
     ReadingFunction = nullptr;
@@ -56,21 +37,15 @@ std::shared_ptr<BaseType> Frame::Run() {
         }
     }
     if (Verbose) {
-        std::cout << "\n----------------------------------------\n" << std::endl;
+        std::cout << "\n----------------------------------------" << std::endl;
         std::cout << "Program output:" << std::endl;
-        std::cout << Output.str();
+        std::cout << Output.str() << std::endl;
     }
     return ReturnValue;
 }
 
 std::shared_ptr<BaseType>& Frame::Top() {
     return std::get<std::shared_ptr<BaseType>>(DataStack.back());
-}
-
-std::string& Frame::PopString() {
-    std::string& ret = *std::get<std::string*>(DataStack.back());
-    DataStack.pop_back();
-    return ret;
 }
 
 std::vector<std::shared_ptr<BaseType>> Frame::Popn(size_t n) {
@@ -84,7 +59,7 @@ std::vector<std::shared_ptr<BaseType>> Frame::Popn(size_t n) {
 std::vector<std::string*> Frame::PopnStrings(size_t n) {
     std::vector<std::string*> ret(n);
     for (int i = n - 1; i >= 0; --i) {
-        ret[i] = &PopString();
+        ret[i] = &Pop<std::string>();
     }
     return ret;
 }
@@ -98,6 +73,10 @@ void Frame::Push(const std::shared_ptr<BaseType>& value) {
 }
 
 void Frame::Push(std::string* value) {
+    DataStack.emplace_back(value);
+}
+
+void Frame::Push(TypeIndex* value) {
     DataStack.emplace_back(value);
 }
 
@@ -121,12 +100,14 @@ void Frame::LoadString(std::string* s) {
     Push(s);
 }
 
+void Frame::LoadType(TypeIndex* type) {
+    Push(type);
+}
+
 void Frame::LoadName() {
-    std::string& name = PopString();
+    std::string& name = Pop<std::string>();
     if (Locals.contains(name)) {
         Push(Locals.at(name));
-    } else if (Globals.contains(name)) {
-        Push(Globals.at(name));
     } else if (Builtins.contains(name)) {
         Push(Builtins.at(name));
     } else {
@@ -134,10 +115,8 @@ void Frame::LoadName() {
     }
 }
 
-void Frame::StoreName() {
-    std::shared_ptr<BaseType> value = Pop();
-    std::string& name = PopString();
-    Locals[name] = std::move(value);
+void Frame::LoadVarByIndex(int idx) {
+    Push(JitIndexToVariable[idx]);
 }
 
 void Frame::LoadSubscr() {
@@ -147,28 +126,38 @@ void Frame::LoadSubscr() {
 }
 
 void Frame::LoadMember() {
-    std::string& name = PopString();
+    std::string& name = Pop<std::string>();
     std::shared_ptr<Struct> obj = Pop<Struct>();
     Push(obj->GetMap()[name]);
 }
 
-void Frame::StoreSubscr() {
+void Frame::StoreName() {
+    std::string& name = Pop<std::string>();
     std::shared_ptr<BaseType> value = Pop();
+    Locals[name] = std::move(value);
+}
+
+void Frame::StoreSubscr() {
     std::shared_ptr<Int> key = Pop<Int>();
     std::shared_ptr<Array> container = Pop<Array>();
+    std::shared_ptr<BaseType> value = Pop();
     (*container)[*key.get()] = std::move(value);
 }
 
 void Frame::StoreMember() {
-    std::shared_ptr<BaseType> value = Pop();
-    std::string& name = PopString();
+    std::string& name = Pop<std::string>();
     std::shared_ptr<Struct> obj = Pop<Struct>();
+    std::shared_ptr<BaseType> value = Pop();
     obj->GetMap()[name] = value;
+}
+
+void Frame::StoreVarByIndex(int idx) {
+    JitIndexToVariable[idx] = Pop();
 }
 
 void Frame::MakeFunction(int argc) {
     Function f;
-    std::string& fName = PopString();
+    std::string& fName = Pop<std::string>();
     f.Params = PopnStrings(argc);
     Functions[fName] = std::move(f);
     ReadingFunction = &Functions[fName];
@@ -176,21 +165,22 @@ void Frame::MakeFunction(int argc) {
 
 std::map<std::string, void (*)(Frame&)> BuiltinFunctions = {
     {"print", [](Frame& frame) {
-        std::shared_ptr<BaseType> arg = frame.Pop();
-        arg->Print(frame.Verbose ? frame.Output : std::cout);
-    }},
+         std::shared_ptr<BaseType> arg = frame.Pop();
+         arg->Print(frame.Verbose ? frame.Output : std::cout);
+     }},
     {"append", [](Frame& frame) {
-        std::shared_ptr<BaseType> arg = frame.Pop();
-        std::shared_ptr<Array> arr = frame.Pop<Array>();
-        arr->Append(arg);
-    }},
+         std::shared_ptr<BaseType> arg = frame.Pop();
+         std::shared_ptr<Array> arr = frame.Pop<Array>();
+         arr->Append(arg);
+     }},
     {"len", [](Frame& frame) {
-        std::shared_ptr<Array> arr = frame.Pop<Array>();
-        frame.Push(std::make_shared<Int>(new BaseType::IntType(arr->Size())));
-    }},
+         std::shared_ptr<Array> arr = frame.Pop<Array>();
+         frame.Push(std::make_shared<Int>(new BaseType::IntType(arr->Size())));
+     }},
 };
+
 void Frame::Call() {
-    std::string& fName = PopString();
+    std::string& fName = Pop<std::string>();
     if (BuiltinFunctions.contains(fName)) {
         BuiltinFunctions[fName](*this);
         return;
@@ -198,11 +188,29 @@ void Frame::Call() {
     Function& f = Functions[fName];
     int argc = f.Params.size();
     std::vector<std::shared_ptr<BaseType>> args = Popn(argc);
-    std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
-    for (const auto& [name, value] : std::views::zip(f.Params, args)) {
-        locals[*name] = value;
+    if (Jit && f.JitCompiled.empty()) {
+        JitCompile(f);
     }
-    auto frame = Frame(f.Code, Builtins, Globals, locals, Functions, this, Verbose);
+    std::vector<std::shared_ptr<BaseType>> jutLocals{};
+    std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
+
+    if (Jit) {
+        args.resize(JitIndexToName.size());
+    } else {
+        for (auto&& [name, value] : std::views::zip(f.Params, args)) {
+            locals[*name] = std::move(value);
+        }
+    }
+    auto frame = Frame{
+        .Instructions = f.Code,
+        .Builtins = Builtins,
+        .Locals = locals,
+        .JitLocals = args,
+        .Functions = Functions,
+        .Jit = Jit,
+        .Verbose = Verbose,
+        .ParentFrame = this,
+        .JitIndexToName = f.JitIndexToName};
     if (auto res = frame.Run()) {
         Push(res);
     }
@@ -229,12 +237,12 @@ void Frame::BuildArray(int count) {
 }
 
 void Frame::BuildStruct() {
-    std::string& name = PopString();
+    std::string& name = Pop<std::string>();
     Push(std::make_shared<Struct>());
 }
 
 void Frame::DefineStruct(int fieldc) {
-    std::string& name = PopString();
+    std::string& name = Pop<std::string>();
     StructInfo[name] = PopnStrings(fieldc);
 }
 
@@ -256,4 +264,32 @@ void Frame::JumpIfFalse(int offset) {
 
 void Frame::Copy() {
     throw std::invalid_argument("not implemented");
+}
+
+void JitCompile(Function& func) {
+    std::unordered_map<std::string, int> nameToJitIndex;
+    for (int i = 0; i < func.Params.size(); ++i) {
+        nameToJitIndex[*func.Params[i]] = i;
+    }
+    auto& code = func.Code;
+
+    for (int i = 1; i < code.size(); ++i) {
+        if (code[i - 1]->GetByteCode() != ByteCodes::LoadString) {
+            func.JitCompiled.push_back(code[i - 1]);
+            continue;
+        }
+        if (code[i]->GetByteCode() != ByteCodes::StoreName && code[i]->GetByteCode() != ByteCodes::LoadName) {
+            continue;
+        }
+        std::shared_ptr<LoadString>& op = reinterpret_cast<std::shared_ptr<LoadString>&>(code[i - 1]);
+        auto it = nameToJitIndex.find(op->s);
+        if (it == nameToJitIndex.end()) {
+            it = nameToJitIndex.insert({op->s, nameToJitIndex.size()}).first;
+        }
+        if (code[i]->GetByteCode() == ByteCodes::StoreName) {
+            func.JitCompiled.emplace_back(std::make_shared<StoreVarByIndex>(it->second));
+        } else if (code[i]->GetByteCode() == ByteCodes::LoadName) {
+            func.JitCompiled.emplace_back(std::make_shared<StoreVarByIndex>(it->second));
+        }
+    }
 }

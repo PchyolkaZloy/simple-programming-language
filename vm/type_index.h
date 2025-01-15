@@ -1,5 +1,8 @@
 #pragma once
-enum class TypeIndex {
+
+#include <cstdint>
+
+enum class TypeIndex : uint16_t {
     Bool,
     Char,
     Int,

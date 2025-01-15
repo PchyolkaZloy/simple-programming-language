@@ -39,15 +39,15 @@ std::vector<bytecode::Operation> GenerateByteCode(std::istream& input) {
     return std::any_cast<std::vector<bytecode::Operation>>(ret);
 }
 
-void InterpreteCode(std::ifstream& input, bool verbose = false) {
+void InterpreteCode(std::ifstream& input, bool jit = false, bool verbose = false) {
     auto code = GenerateByteCode(input);
     VirtualMachine vm;
-    vm.Run(code, verbose);
+    vm.Run(code, jit, verbose);
 }
 
-void InterpreteCode(const std::string& input, bool verbose = false) {
+void InterpreteCode(const std::string& input, bool jit = false, bool verbose = false) {
     std::stringstream ss(input);
     auto code = GenerateByteCode(ss);
     VirtualMachine vm;
-    vm.Run(code, verbose);
+    vm.Run(code, jit, verbose);
 }

@@ -11,9 +11,11 @@ enum class ByteCodes : char {
     LoadName,
     LoadSubscr,
     LoadMember,
+    LoadVarByIndex, // for jit compiled code
     StoreName,
     StoreSubscr,
     StoreMember,
+    StoreVarByIndex, // for jit compiled code
     MakeFunction,
     Call,
     Return,
