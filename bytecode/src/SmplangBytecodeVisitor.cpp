@@ -495,7 +495,10 @@ std::any bytecode::SmplangBytecodeVisitor::visitArgumentList(SmplangParser::Argu
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitFunctionCall(SmplangParser::FunctionCallContext* ctx) {
-    std::vector<Operation> result = vec_cast(visitArgumentList(ctx->argumentList()));
+    std::vector<Operation> result{};
+    if (ctx->argumentList()) {
+        result = vec_cast(visitArgumentList(ctx->argumentList()));
+    }
     Operation load_func_name = loadString(ctx->ID()->getText());
     result.push_back(load_func_name);
     result.emplace_back(ByteCodes::Call);
