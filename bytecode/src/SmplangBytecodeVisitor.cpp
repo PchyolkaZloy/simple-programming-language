@@ -98,6 +98,8 @@ std::any bytecode::SmplangBytecodeVisitor::visitStructDecl(SmplangParser::Struct
         result.insert(result.end(), load_field_code.begin(), load_field_code.end());
     }
     result.push_back(loadString(struct_type));
+    result.emplace_back(ByteCodes::LoadType);
+    appendToCharVector<uint16_t>(result.back().value_bytes, struct_type_codes_[struct_type]);
     // checking limit above ^^^
     result.emplace_back(ByteCodes::DefineStruct,
                         std::vector<char>(1, static_cast<uint8_t>(field_count))); // NOLINT(*-narrowing-conversions)
@@ -164,26 +166,28 @@ std::any bytecode::SmplangBytecodeVisitor::visitVarDecl(SmplangParser::VarDeclCo
     std::vector<Operation> result{};
     if (!ctx->expression()) {
         if (ctx->type()->ARRAYTYPE()) {
-            result.push_back(loadString(ctx->ID()->getText()));
             result.emplace_back(ByteCodes::BuildArray);
             // array of 0 size
             appendToCharVector<int>(result.back().value_bytes, 0);
+            result.push_back(loadString(ctx->ID()->getText()));
             result.emplace_back(ByteCodes::StoreName);
             return std::any{result};
         }
 
         if (ctx->type()->structType()) {
-            result.push_back(loadString(ctx->ID()->getText()));
-            result.push_back(loadString(ctx->type()->structType()->getText()));
+            std::string struct_type = ctx->type()->structType()->ID()->getText();
+            result.emplace_back(ByteCodes::LoadType);
+            appendToCharVector<uint16_t>(result.back().value_bytes, struct_type_codes_[struct_type]);
             result.emplace_back(ByteCodes::BuildStruct);
+            result.push_back(loadString(ctx->ID()->getText()));
             result.emplace_back(ByteCodes::StoreName);
             return std::any{result};
         }
         return std::any{result};
     }
-    result.push_back(loadString(ctx->ID()->getText()));
     auto expr_code = vec_cast(visitExpression(ctx->expression()));
     result.insert(result.end(), expr_code.begin(), expr_code.end());
+    result.push_back(loadString(ctx->ID()->getText()));
     result.emplace_back(ByteCodes::StoreName);
     return std::any{result};
 }
@@ -192,9 +196,9 @@ std::any bytecode::SmplangBytecodeVisitor::visitAssignment(SmplangParser::Assign
     auto* assignable_ctx = ctx->assignable();
     std::vector<Operation> result{};
     if (!assignable_ctx->assignablePrefix()) {
-        result.push_back(loadString(assignable_ctx->ID()->getText()));
         auto expr_code = vec_cast(visitExpression(ctx->expression()));
         result.insert(result.end(), expr_code.begin(), expr_code.end());
+        result.push_back(loadString(assignable_ctx->ID()->getText()));
         result.emplace_back(ByteCodes::StoreName);
     } else {
         result = vec_cast(visitAssignablePrefix(assignable_ctx->assignablePrefix()));
