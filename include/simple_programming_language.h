@@ -5,6 +5,7 @@
 #include "SmplangStructFuncNamePositionVisitor.h"
 #include "smplang_common.h"
 #include "SmplangBytecodeVisitor.h"
+#include "constant_folding.h"
 
 #include <iostream>
 #include <array>

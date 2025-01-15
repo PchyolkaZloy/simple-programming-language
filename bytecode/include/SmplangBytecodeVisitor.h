@@ -8,31 +8,12 @@
 #include "eof_fix.h"
 #include "bytecodes.h"
 #include "type_index.h"
+#include "operation.h"
 #include <boost/multiprecision/cpp_int.hpp>
 
 using cpp_int = boost::multiprecision::cpp_int;
 
 namespace bytecode {
-
-    struct Operation {
-    public:
-        Operation(ByteCodes code, const std::vector<char>& valueBytes);
-
-        Operation(const Operation& other) = default;
-
-        Operation(Operation&& other) = default;
-
-        Operation() = default;
-
-        explicit Operation(ByteCodes code);
-
-        Operation& operator=(const Operation& other) = default;
-
-        Operation& operator=(Operation&& other) = default;
-
-        ByteCodes code;
-        std::vector<char> value_bytes;
-    };
 
     template <typename InputIterator>
     void writeByteCode(InputIterator byte_code_begin, InputIterator byte_code_end, std::ostream& out_stream) {
@@ -71,6 +52,11 @@ namespace bytecode {
 
     std::vector<char>& appendIntToCharVector(std::vector<char>& vector, const cpp_int& value);
 
+    Operation loadInt(const cpp_int& value);
+    Operation loadBool(bool value);
+    Operation loadChar(char value);
+    Operation loadDouble(double value);
+
     class SmplangBytecodeVisitor: public SmplangBaseVisitor {
     private:
         class SmplangVoidFunctionsVisitor: public SmplangBaseVisitor {
@@ -89,14 +75,6 @@ namespace bytecode {
         std::unordered_set<std::string> void_typed_builtin_functions_;
         std::unordered_set<std::string> void_typed_program_functions_ = {};
         std::unordered_map<std::string, uint16_t> struct_type_codes_ = {};
-
-        static Operation loadInt(const cpp_int& value);
-
-        static Operation loadBool(bool value);
-
-        static Operation loadChar(char value);
-
-        static Operation loadDouble(double value);
 
         static Operation loadString(std::string_view s);
 

@@ -513,25 +513,25 @@ std::any bytecode::SmplangBytecodeVisitor::visitAssignablePrefix(SmplangParser::
     throw ASTException("");
 }
 
-bytecode::Operation bytecode::SmplangBytecodeVisitor::loadInt(const cpp_int& value) {
+bytecode::Operation bytecode::loadInt(const cpp_int& value) {
     Operation op(ByteCodes::LoadInt);
     appendIntToCharVector(op.value_bytes, value);
     return op;
 }
 
-bytecode::Operation bytecode::SmplangBytecodeVisitor::loadBool(bool value) {
+bytecode::Operation bytecode::loadBool(bool value) {
     Operation op(ByteCodes::LoadBool);
     appendToCharVector(op.value_bytes, value);
     return op;
 }
 
-bytecode::Operation bytecode::SmplangBytecodeVisitor::loadChar(char value) {
+bytecode::Operation bytecode::loadChar(char value) {
     Operation op(ByteCodes::LoadChar);
     appendToCharVector(op.value_bytes, value);
     return op;
 }
 
-bytecode::Operation bytecode::SmplangBytecodeVisitor::loadDouble(double value) {
+bytecode::Operation bytecode::loadDouble(double value) {
     Operation op(ByteCodes::LoadDouble);
     appendToCharVector<double>(op.value_bytes, value);
     return op;

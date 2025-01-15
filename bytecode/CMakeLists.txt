@@ -15,6 +15,7 @@ set(SOURCES
         src/SmplangStructFuncNamePositionVisitor.cpp
         #        src/SmplangStructDeclVisitor.cpp
         src/SmplangBytecodeVisitor.cpp
+        src/constant_folding.cpp
 )
 
 set(HEADERS
@@ -33,6 +34,7 @@ set(HEADERS
         #        include/SmplangStructDeclVisitor.h
         include/SmplangBytecodeVisitor.h
         include/eof_fix.h
+        include/constant_folding.h
 )
 # Ищем ANTLR4 runtime (с conan находим)
 find_package(antlr4-runtime REQUIRED)
