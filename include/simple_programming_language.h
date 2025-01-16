@@ -42,15 +42,21 @@ std::vector<bytecode::Operation> GenerateByteCode(std::istream& input) {
     return std::any_cast<std::vector<bytecode::Operation>>(ret);
 }
 
-void InterpreteCode(std::ifstream& input, bool jit = false, bool verbose = false) {
+void InterpreteCode(std::ifstream& input, bool jit = false, bool verbose = false, bool const_folding = false) {
     auto code = GenerateByteCode(input);
+    if (const_folding) {
+        code = bytecode::foldConstants(code);
+    }
     VirtualMachine vm;
     vm.Run(code, jit, verbose);
 }
 
-void InterpreteCode(const std::string& input, bool jit = true, bool verbose = false) {
+void InterpreteCode(const std::string& input, bool jit = true, bool verbose = false, bool const_folding = true) {
     std::stringstream ss(input);
     auto code = GenerateByteCode(ss);
+    if (const_folding) {
+        code = bytecode::foldConstants(code);
+    }
     VirtualMachine vm;
     vm.Run(code, jit, verbose);
 }

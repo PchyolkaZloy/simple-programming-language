@@ -448,11 +448,11 @@ public:
     antlr4::tree::TerminalNode *NEG();
     antlr4::tree::TerminalNode *NOT();
     PrimaryExpressionContext *primaryExpression();
-    antlr4::tree::TerminalNode *AND();
-    antlr4::tree::TerminalNode *OR();
     antlr4::tree::TerminalNode *MULT();
     antlr4::tree::TerminalNode *ADD();
     antlr4::tree::TerminalNode *COMPOP();
+    antlr4::tree::TerminalNode *AND();
+    antlr4::tree::TerminalNode *OR();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

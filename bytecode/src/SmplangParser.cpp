@@ -151,10 +151,10 @@ void smplangParserInitialize() {
   	208,209,3,40,20,0,209,210,5,30,0,0,210,217,1,0,0,0,211,212,5,21,0,0,212,
   	217,3,40,20,8,213,214,5,25,0,0,214,217,3,40,20,7,215,217,3,42,21,0,216,
   	206,1,0,0,0,216,211,1,0,0,0,216,213,1,0,0,0,216,215,1,0,0,0,217,235,1,
-  	0,0,0,218,219,10,6,0,0,219,220,5,26,0,0,220,234,3,40,20,7,221,222,10,
-  	5,0,0,222,223,5,27,0,0,223,234,3,40,20,6,224,225,10,4,0,0,225,226,5,22,
-  	0,0,226,234,3,40,20,5,227,228,10,3,0,0,228,229,5,23,0,0,229,234,3,40,
-  	20,4,230,231,10,2,0,0,231,232,5,24,0,0,232,234,3,40,20,3,233,218,1,0,
+  	0,0,0,218,219,10,6,0,0,219,220,5,22,0,0,220,234,3,40,20,7,221,222,10,
+  	5,0,0,222,223,5,23,0,0,223,234,3,40,20,6,224,225,10,4,0,0,225,226,5,24,
+  	0,0,226,234,3,40,20,5,227,228,10,3,0,0,228,229,5,26,0,0,229,234,3,40,
+  	20,4,230,231,10,2,0,0,231,232,5,27,0,0,232,234,3,40,20,3,233,218,1,0,
   	0,0,233,221,1,0,0,0,233,224,1,0,0,0,233,227,1,0,0,0,233,230,1,0,0,0,234,
   	237,1,0,0,0,235,233,1,0,0,0,235,236,1,0,0,0,236,41,1,0,0,0,237,235,1,
   	0,0,0,238,239,6,21,-1,0,239,251,5,20,0,0,240,251,3,48,24,0,241,251,5,
@@ -2109,14 +2109,6 @@ SmplangParser::PrimaryExpressionContext* SmplangParser::ExpressionContext::prima
   return getRuleContext<SmplangParser::PrimaryExpressionContext>(0);
 }
 
-tree::TerminalNode* SmplangParser::ExpressionContext::AND() {
-  return getToken(SmplangParser::AND, 0);
-}
-
-tree::TerminalNode* SmplangParser::ExpressionContext::OR() {
-  return getToken(SmplangParser::OR, 0);
-}
-
 tree::TerminalNode* SmplangParser::ExpressionContext::MULT() {
   return getToken(SmplangParser::MULT, 0);
 }
@@ -2127,6 +2119,14 @@ tree::TerminalNode* SmplangParser::ExpressionContext::ADD() {
 
 tree::TerminalNode* SmplangParser::ExpressionContext::COMPOP() {
   return getToken(SmplangParser::COMPOP, 0);
+}
+
+tree::TerminalNode* SmplangParser::ExpressionContext::AND() {
+  return getToken(SmplangParser::AND, 0);
+}
+
+tree::TerminalNode* SmplangParser::ExpressionContext::OR() {
+  return getToken(SmplangParser::OR, 0);
 }
 
 
@@ -2237,7 +2237,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
 
           if (!(precpred(_ctx, 6))) throw FailedPredicateException(this, "precpred(_ctx, 6)");
           setState(219);
-          match(SmplangParser::AND);
+          match(SmplangParser::MULT);
           setState(220);
           expression(7);
           break;
@@ -2250,7 +2250,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
 
           if (!(precpred(_ctx, 5))) throw FailedPredicateException(this, "precpred(_ctx, 5)");
           setState(222);
-          match(SmplangParser::OR);
+          match(SmplangParser::ADD);
           setState(223);
           expression(6);
           break;
@@ -2263,7 +2263,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
 
           if (!(precpred(_ctx, 4))) throw FailedPredicateException(this, "precpred(_ctx, 4)");
           setState(225);
-          match(SmplangParser::MULT);
+          match(SmplangParser::COMPOP);
           setState(226);
           expression(5);
           break;
@@ -2276,7 +2276,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
 
           if (!(precpred(_ctx, 3))) throw FailedPredicateException(this, "precpred(_ctx, 3)");
           setState(228);
-          match(SmplangParser::ADD);
+          match(SmplangParser::AND);
           setState(229);
           expression(4);
           break;
@@ -2289,7 +2289,7 @@ SmplangParser::ExpressionContext* SmplangParser::expression(int precedence) {
 
           if (!(precpred(_ctx, 2))) throw FailedPredicateException(this, "precpred(_ctx, 2)");
           setState(231);
-          match(SmplangParser::COMPOP);
+          match(SmplangParser::OR);
           setState(232);
           expression(3);
           break;

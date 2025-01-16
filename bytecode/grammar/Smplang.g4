@@ -45,11 +45,11 @@ expression:
       LPAREN expression RPAREN
     | NEG expression
     | NOT expression
-    | expression AND expression
-    | expression OR expression
     | expression MULT expression
     | expression ADD expression
     | expression COMPOP expression
+    | expression AND expression
+    | expression OR expression
     | primaryExpression;
 
 primaryExpression:

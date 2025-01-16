@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <variant>
 #include <memory>
 
 #include <boost/multiprecision/cpp_int.hpp>

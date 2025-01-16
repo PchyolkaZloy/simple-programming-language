@@ -13,9 +13,7 @@ set(SOURCES
         src/SmplangListener.cpp
         src/SmplangThrowingErrorListener.cpp
         src/SmplangStructFuncNamePositionVisitor.cpp
-        #        src/SmplangStructDeclVisitor.cpp
         src/SmplangBytecodeVisitor.cpp
-        src/constant_folding.cpp
 )
 
 set(HEADERS
@@ -26,15 +24,8 @@ set(HEADERS
         include/SmplangBaseListener.h
         include/SmplangListener.h
         include/SmplangThrowingErrorListener.h
-        include/smplang_common.h
-        include/variables_util.h
-        include/type_inference.h
-        include/operators.h
         include/SmplangStructFuncNamePositionVisitor.h
-        #        include/SmplangStructDeclVisitor.h
         include/SmplangBytecodeVisitor.h
-        include/eof_fix.h
-        include/constant_folding.h
 )
 # Ищем ANTLR4 runtime (с conan находим)
 find_package(antlr4-runtime REQUIRED)
@@ -46,9 +37,3 @@ add_library(Bytecode STATIC ${SOURCES} ${HEADERS})
 target_link_libraries(Bytecode PUBLIC antlr4_static boost_multiprecision)
 # Указываем, где искать заголовочные файлы
 target_include_directories(Bytecode PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# main.cpp для тестирования
-add_executable(SmplangBytecodeTest main.cpp)
-target_link_libraries(SmplangBytecodeTest Bytecode)
-target_link_libraries(SmplangBytecodeTest antlr4_static)
-#set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
