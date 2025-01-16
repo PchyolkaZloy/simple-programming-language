@@ -37,7 +37,10 @@ func int[] sieveOfEratosthenes(int n) {
     return primes;
 }
 
-int n = 100000;
+int n = 1000000;
 int[] primes = sieveOfEratosthenes(n);
 
 print(primes);
+print('\n');
+print('\n');
+print(len(primes));

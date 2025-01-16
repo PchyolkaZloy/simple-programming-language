@@ -163,7 +163,7 @@ std::any bytecode::SmplangBytecodeVisitor::visitStatement(SmplangParser::Stateme
             std::string func_name(load_func_name_op.value_bytes.begin() + sizeof(int),
                                   load_func_name_op.value_bytes.end());
             if (void_typed_builtin_functions_.find(func_name) != void_typed_builtin_functions_.end() ||
-                void_typed_program_functions_.find(func_name) != void_typed_builtin_functions_.end()) {
+                void_typed_program_functions_.find(func_name) != void_typed_program_functions_.end()) {
                 return std::any{result};
             }
         }

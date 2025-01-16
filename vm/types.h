@@ -22,10 +22,23 @@ struct BaseType {
     using DoubleType = double;
     using BoolType = bool;
     using CharType = char;
+    using ArrayType = std::vector<std::shared_ptr<BaseType>>;
+    using StructType = std::map<std::string, std::shared_ptr<BaseType>>;
 
-    BaseType(TypeIndex type, void* value)
+    // optimize heap allocations
+    static std::shared_ptr<Bool> FALSE;
+    static std::shared_ptr<Bool> TRUE;
+
+    template <typename T>
+    BaseType(TypeIndex type, const T& value)
         : Type(type)
         , Value(value) {
+    }
+
+    template <typename T>
+    BaseType(TypeIndex type, T&& value)
+        : Type(type)
+        , Value(std::move(value)) {
     }
 
     virtual ~BaseType() = default;
@@ -46,14 +59,14 @@ struct BaseType {
     virtual std::shared_ptr<Bool> operator op(const BaseType & other) const { \
         BoolType l = BoolCast();                                              \
         BoolType r = other.BoolCast();                                        \
-        return std::make_shared<Bool>(new BoolType(l op r));                  \
+        return l op r ? TRUE : FALSE;                                         \
     }
 
     DefBoolOperator(&&);
     DefBoolOperator(||);
 
     virtual std::shared_ptr<Bool> operator!() const {
-        return std::make_shared<Bool>(new BoolType(!BoolCast()));
+        return !BoolCast() ? TRUE : FALSE;
     }
     virtual std::shared_ptr<BaseType> operator-() const = 0;
 
@@ -65,7 +78,7 @@ struct BaseType {
     virtual std::shared_ptr<Bool> operator<=(const BaseType& other) const = 0;
 
     TypeIndex Type = TypeIndex::Null;
-    void* Value = nullptr;
+    std::variant<IntType, BoolType, CharType, DoubleType, StructType, ArrayType> Value;
 };
 
 #define DefInvalidOperator(op, ret)                                                 \
@@ -74,14 +87,22 @@ struct BaseType {
     }
 
 struct Int: public BaseType {
-    Int(IntType* value)
+    Int()
+        : BaseType(TypeIndex::Int, 0) {
+    }
+
+    Int(const IntType& value)
         : BaseType(TypeIndex::Int, value) {
+    }
+
+    Int(IntType&& value)
+        : BaseType(TypeIndex::Int, std::move(value)) {
     }
 
     virtual ~Int() = default;
 
     IntType IntCast() const override {
-        return *reinterpret_cast<cpp_int*>(Value);
+        return std::get<IntType>(Value);
     }
 
     DoubleType DoubleCast() const override {
@@ -107,7 +128,7 @@ struct Int: public BaseType {
     std::shared_ptr<BaseType> operator%(const BaseType& other) const override;
 
     std::shared_ptr<BaseType> operator-() const override {
-        return std::make_shared<Int>(new IntType(-IntCast()));
+        return std::make_shared<Int>(-IntCast());
     }
 
     std::shared_ptr<Bool> IntCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const IntType&, const IntType&)) const;
@@ -122,8 +143,7 @@ struct Int: public BaseType {
 };
 
 struct Bool: public Int {
-    Bool(BoolType* value)
-        : Int(nullptr) {
+    Bool(const BoolType& value) {
         Type = TypeIndex::Bool;
         Value = value;
     }
@@ -131,12 +151,11 @@ struct Bool: public Int {
     virtual ~Bool() = default;
 
     IntType IntCast() const override {
-        BoolType v = *reinterpret_cast<BoolType*>(Value);
-        return v;
+        return BoolCast();
     }
 
     BoolType BoolCast() const override {
-        return *reinterpret_cast<BoolType*>(Value);
+        return std::get<BoolType>(Value);
     }
 
     void Print(std::ostream& stream) const override {
@@ -144,14 +163,12 @@ struct Bool: public Int {
     }
 
     std::shared_ptr<Bool> operator!() {
-        BoolType cur = *static_cast<BoolType*>(Value);
-        return std::make_shared<Bool>(new BoolType(!cur));
+        return !BoolCast() ? TRUE : FALSE;
     }
 };
 
 struct Char: public Int {
-    Char(char* value)
-        : Int(nullptr) {
+    Char(const CharType& value) {
         Type = TypeIndex::Char;
         Value = value;
     }
@@ -159,24 +176,23 @@ struct Char: public Int {
     virtual ~Char() = default;
 
     IntType IntCast() const override {
-        char v = *reinterpret_cast<char*>(Value);
-        return v;
+        return std::get<CharType>(Value);
     }
 
     void Print(std::ostream& stream) const override {
-        stream << *reinterpret_cast<char*>(Value);
+        stream << std::get<CharType>(Value);
     }
 };
 
 struct Double: public BaseType {
-    Double(double* value)
+    Double(const DoubleType& value)
         : BaseType(TypeIndex::Double, value) {
     }
 
     virtual ~Double() = default;
 
     DoubleType DoubleCast() const override {
-        return *reinterpret_cast<DoubleType*>(Value);
+        return std::get<DoubleType>(Value);
     }
 
     IntType IntCast() const override {
@@ -209,7 +225,7 @@ struct Double: public BaseType {
     DefInvalidOperator(%, BaseType);
 
     std::shared_ptr<BaseType> operator-() const override {
-        return std::make_shared<Double>(new DoubleType(-DoubleCast()));
+        return std::make_shared<Double>(-DoubleCast());
     }
 
     std::shared_ptr<Bool> CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const;
@@ -218,14 +234,14 @@ struct Double: public BaseType {
         if (auto res = CompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) < EPS; })) {
             return res;
         }
-        return std::make_shared<Bool>(new BoolType(false));
+        return FALSE;
     }
 
     std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
         if (auto res = CompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) >= EPS; })) {
             return res;
         }
-        return std::make_shared<Bool>(new BoolType(true));
+        return TRUE;
     }
 
 #define DefDoubleCompareOperator(op)                                                                                      \
@@ -246,15 +262,15 @@ struct Struct: public BaseType {
     using ValueType = std::map<std::string, std::shared_ptr<BaseType>>;
 
     Struct()
-        : BaseType(TypeIndex::Struct, new ValueType()) {
+        : BaseType(TypeIndex::Struct, ValueType()) {
     }
 
     const ValueType& GetMap() const {
-        return *reinterpret_cast<ValueType*>(Value);
+        return std::get<StructType>(Value);
     }
 
     ValueType& GetMap() {
-        return *reinterpret_cast<ValueType*>(Value);
+        return std::get<StructType>(Value);
     }
 
     virtual ~Struct() = default;
@@ -301,13 +317,13 @@ struct Struct: public BaseType {
 
     std::shared_ptr<Bool> operator==(const BaseType& other) const override {
         if (other.Type != TypeIndex::Struct) {
-            return std::make_shared<Bool>(new BoolType(false));
+            return FALSE;
         }
         const Struct& arr = static_cast<const Struct&>(other);
         const ValueType& l = GetMap();
         const ValueType& r = arr.GetMap();
         if (l != r) {
-            return std::make_shared<Bool>(new BoolType(false));
+            return FALSE;
         }
         // bool typesEqual = std::all_of(
         //     l.begin(),
@@ -315,7 +331,7 @@ struct Struct: public BaseType {
         //     [&r](const std::pair<std::string, BaseType*>& pair1, const std::pair<std::string, BaseType*>& pair2) {
         //         pair1.second->Type == r.at(pair1.first)->Type;
         //     });
-        return std::make_shared<Bool>(new BoolType(true));
+        return TRUE;
     }
 
     std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
@@ -327,15 +343,15 @@ struct Struct: public BaseType {
 struct Array: public BaseType {
     using ValueType = std::vector<std::shared_ptr<BaseType>>;
     Array()
-        : BaseType(TypeIndex::Array, new ValueType()) {
+        : BaseType(TypeIndex::Array, ValueType()) {
     }
 
     Array(ValueType&& value)
-        : BaseType(TypeIndex::Array, new ValueType(std::move(value))) {
+        : BaseType(TypeIndex::Array, std::move(value)) {
     }
 
     Array(const ValueType& value)
-        : BaseType(TypeIndex::Array, new ValueType(value)) {
+        : BaseType(TypeIndex::Array, value) {
     }
 
     virtual ~Array() = default;
@@ -349,15 +365,15 @@ struct Array: public BaseType {
     }
 
     BoolType BoolCast() const override {
-        return reinterpret_cast<ValueType*>(Value)->size() > 0;
+        return GetArray().size() > 0;
     }
 
     const ValueType& GetArray() const {
-        return *reinterpret_cast<ValueType*>(Value);
+        return std::get<ArrayType>(Value);
     }
 
     ValueType& GetArray() {
-        return *reinterpret_cast<ValueType*>(Value);
+        return std::get<ArrayType>(Value);
     }
 
     void Print(std::ostream& stream) const override {
@@ -393,7 +409,7 @@ struct Array: public BaseType {
         if (auto res = CompareOperatorTemplate(other, op)) {
             return res;
         }
-        return std::make_shared<Bool>(new BoolType(false));
+        return FALSE;
     };
 
     std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
@@ -402,7 +418,7 @@ struct Array: public BaseType {
         if (auto res = CompareOperatorTemplate(other, op)) {
             return res;
         }
-        return std::make_shared<Bool>(new BoolType(true));
+        return TRUE;
     }
 
     const std::shared_ptr<BaseType>& operator[](const IntType& idx) const {
@@ -427,6 +443,13 @@ struct Array: public BaseType {
 
     void Append(const std::shared_ptr<BaseType>& element) {
         GetArray().push_back(element);
+    }
+
+    std::shared_ptr<BaseType> Pop() {
+        auto& arr = GetArray();
+        auto ret = std::move(arr.back());
+        arr.pop_back();
+        return ret;
     }
 
     size_t Size() const {

@@ -1,7 +1,10 @@
-bool[] isPrime;
-append(isPrime, true);
-int p = 0;
-if (isPrime[p]) {
-    print(1);
+func void f() {
+    int x = 123;
+    int y = 2;
+    int[] c = {1, 4, 5};
+
+    c[y] = x;
+    print(c);
 }
 
+f();

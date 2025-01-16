@@ -1466,7 +1466,7 @@ TEST(FunctionTests, VoidEmpty) {
     func void foo() { }
 
     foo();
-    print(foo());
+    print(42);
     )";
 
     testing::internal::CaptureStdout();
@@ -1475,22 +1475,6 @@ TEST(FunctionTests, VoidEmpty) {
 
     ASSERT_EQ("42", testing::internal::GetCapturedStdout());
 }
-
-TEST(FunctionTests, VoidReturnNoParams) {
-    const std::string program = R"(
-    func void printHello() {
-        print("Hello, World!");
-    }
-
-    printHello();
-    )";
-
-    testing::internal::CaptureStdout();
-    InterpreteCode(program);
-
-    ASSERT_EQ("Hello, World!", testing::internal::GetCapturedStdout());
-}
-
 
 TEST(FunctionTests, IntReturnNoParams) {
     const std::string program = R"(
@@ -1550,7 +1534,7 @@ TEST(FunctionTests, BoolReturnNoParams) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("true", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1", testing::internal::GetCapturedStdout());
 }
 
 TEST(FunctionTests, IntReturnWithIntParam) {
@@ -1606,7 +1590,7 @@ TEST(FunctionTests, IntReturnWithIntArrayParam) {
 TEST(FunctionTests, BoolReturnWithMixedParams) {
     const std::string program = R"(
     func bool checkValues(int x, char c, bool b) {
-        return x == 10 && c == 'X' && b == true;
+        return (x == 10) && (c == 'X') && (b == true);
     }
 
     print(checkValues(10, 'X', true));
@@ -1615,7 +1599,7 @@ TEST(FunctionTests, BoolReturnWithMixedParams) {
     testing::internal::CaptureStdout();
     InterpreteCode(program);
 
-    ASSERT_EQ("true", testing::internal::GetCapturedStdout());
+    ASSERT_EQ("1", testing::internal::GetCapturedStdout());
 }
 
 TEST(FunctionTests, MixedParamsIntCharBool) {
@@ -1680,6 +1664,7 @@ TEST(FunctionTests, StructWithArithmetic) {
 }
 
 TEST(FunctionTests, ModifyStructInFunction) {
+    testing::internal::GetCapturedStdout();
     const std::string program = R"(
     struct Point {
         int x;

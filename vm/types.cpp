@@ -1,23 +1,27 @@
 #include "types.h"
 
+std::shared_ptr<Bool> BaseType::FALSE = std::make_shared<Bool>(false);
+std::shared_ptr<Bool> BaseType::TRUE = std::make_shared<Bool>(true);
+
+
 /// Int
 
-std::shared_ptr<BaseType> Int::IntOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const {
+std::shared_ptr<BaseType> Int::IntOperatorTemplate(const BaseType& other, IntType (*op)(const IntType&, const IntType&)) const {
     if (other.Type == TypeIndex::Bool ||
         other.Type == TypeIndex::Char ||
         other.Type == TypeIndex::Int) {
         IntType l = IntCast();
         IntType r = other.IntCast();
-        return std::make_shared<Int>(new IntType(op(l, r)));
+        return std::make_shared<Int>(op(l, r));
     }
     return {};
 }
 
-std::shared_ptr<BaseType> Int::BoolOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const {
+std::shared_ptr<BaseType> Int::BoolOperatorTemplate(const BaseType& other, IntType (*op)(const IntType&, const IntType&)) const {
     if (other.Type != TypeIndex::Struct) { // struct is the only type not castable to bool
         BoolType l = BoolCast();
         BoolType r = other.BoolCast();
-        return std::make_shared<Bool>(new BoolType(op(l, r)));
+        return std::make_shared<Int>(op(l, r));
     }
     return {};
 }
@@ -26,7 +30,7 @@ std::shared_ptr<BaseType> Int::DoubleOperatorTemplate(const BaseType& other, Dou
     if (other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
-        return std::make_shared<Double>(new DoubleType(op(l, r)));
+        return std::make_shared<Double>(op(l, r));
     }
     return nullptr;
 }
@@ -60,7 +64,7 @@ std::shared_ptr<Bool> Int::IntCompareOperatorTemplate(const BaseType& other, Boo
         other.Type == TypeIndex::Int) {
         IntType l = IntCast();
         IntType r = other.IntCast();
-        return std::make_shared<Bool>(new BoolType(op(l, r)));
+        return op(l, r) ? TRUE : FALSE;
     }
     return nullptr;
 }
@@ -69,7 +73,7 @@ std::shared_ptr<Bool> Int::DoubleCompareOperatorTemplate(const BaseType& other, 
     if (other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
-        return std::make_shared<Bool>(new BoolType(op(l, r)));
+        return op(l, r) ? TRUE : FALSE;
     }
     return nullptr;
 }
@@ -81,7 +85,7 @@ std::shared_ptr<Bool> Int::operator==(const BaseType& other) const {
     if (auto res = DoubleCompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) < EPS; })) {
         return res;
     }
-    return std::make_shared<Bool>(new BoolType(false));
+    return FALSE;
 }
 
 std::shared_ptr<Bool> Int::operator!=(const BaseType& other) const {
@@ -91,7 +95,7 @@ std::shared_ptr<Bool> Int::operator!=(const BaseType& other) const {
     if (auto res = DoubleCompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) >= EPS; })) {
         return res;
     }
-    return std::make_shared<Bool>(new BoolType(true));
+    return TRUE;
 }
 
 #define DefIntCompareOperator(op)                                                                                               \
@@ -119,7 +123,7 @@ std::shared_ptr<Bool> Double::CompareOperatorTemplate(const BaseType& other, Boo
         other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
-        return std::make_shared<Bool>(new BoolType(op(l, r)));
+        return op(l, r) ? TRUE : FALSE;
     }
     return nullptr;
 }
@@ -131,7 +135,7 @@ std::shared_ptr<BaseType> Double::OperatorTemplate(const BaseType& other, Double
         other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
-        return std::make_shared<Double>(new DoubleType(op(l, r)));
+        return std::make_shared<Double>(op(l, r));
     }
     return nullptr;
 }
@@ -143,7 +147,7 @@ std::shared_ptr<Bool> Array::CompareOperatorTemplate(
     BoolType (*op)(const std::shared_ptr<BaseType>&, const std::shared_ptr<BaseType>&)) const {
     const Array& arr = static_cast<const Array&>(other);
     if (other.Type != TypeIndex::Array || Size() != arr.Size()) {
-        return std::make_shared<Bool>(new BoolType(false));
+        return FALSE;
     }
     const ValueType& l = GetArray();
     const ValueType& r = arr.GetArray();
@@ -151,11 +155,11 @@ std::shared_ptr<Bool> Array::CompareOperatorTemplate(
     auto it2 = r.begin();
     while (it1 != l.end()) {
         if (!op(*it1, *it2)) {
-            return std::make_shared<Bool>(new BoolType(false));
+            return FALSE;
         }
     }
 
-    return std::make_shared<Bool>(new BoolType(true));
+    return TRUE;
 }
 
 std::shared_ptr<BaseType> Array::operator+(const BaseType& other) const {

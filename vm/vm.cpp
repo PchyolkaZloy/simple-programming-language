@@ -16,15 +16,19 @@ void Frame::ReadFunction(int& cur_instruction) {
 
 std::shared_ptr<BaseType> Frame::Run() {
     int cur_instruction = 0;
-    while (cur_instruction < Instructions.size()) {
+    auto& instructions = Jit && JitInstructions.size() > 0 ? JitInstructions : Instructions;
+    while (cur_instruction < instructions.size()) {
         if (ReadingFunction) {
             ReadFunction(cur_instruction);
         } else {
-            BytecodeOpBase& instruction = *Instructions[cur_instruction].get();
+            BytecodeOpBase& instruction = *instructions[cur_instruction].get();
             if (Verbose) {
                 std::cout << instruction.Str() << std::endl;
             }
             instruction(*this);
+            if (instruction.GetByteCode() == ByteCodes::LoadVarByIndex || instruction.GetByteCode() == ByteCodes::StoreVarByIndex) {
+                ++cur_instruction;
+            }
         }
         if (ShouldReturn) {
             return ReturnValue;
@@ -36,7 +40,7 @@ std::shared_ptr<BaseType> Frame::Run() {
             cur_instruction += 1;
         }
     }
-    if (Verbose) {
+    if (Verbose && ParentFrame == nullptr) {
         std::cout << "\n----------------------------------------" << std::endl;
         std::cout << "Program output:" << std::endl;
         std::cout << Output.str() << std::endl;
@@ -80,19 +84,19 @@ void Frame::Push(TypeIndex* value) {
     DataStack.emplace_back(value);
 }
 
-void Frame::LoadInt(BaseType::IntType* num) {
+void Frame::LoadInt(const BaseType::IntType& num) {
     Push(std::make_shared<Int>(num));
 }
 
-void Frame::LoadChar(char* arg) {
+void Frame::LoadChar(const BaseType::CharType& arg) {
     Push(std::make_shared<Char>(arg));
 }
 
-void Frame::LoadBool(bool* arg) {
+void Frame::LoadBool(const BaseType::BoolType& arg) {
     Push(std::make_shared<Bool>(arg));
 }
 
-void Frame::LoadDouble(double* arg) {
+void Frame::LoadDouble(const BaseType::DoubleType& arg) {
     Push(std::make_shared<Double>(arg));
 }
 
@@ -116,7 +120,7 @@ void Frame::LoadName() {
 }
 
 void Frame::LoadVarByIndex(int idx) {
-    Push(JitIndexToVariable[idx]);
+    Push(JitLocals[idx]);
 }
 
 void Frame::LoadSubscr() {
@@ -152,7 +156,7 @@ void Frame::StoreMember() {
 }
 
 void Frame::StoreVarByIndex(int idx) {
-    JitIndexToVariable[idx] = Pop();
+    JitLocals[idx] = Pop();
 }
 
 void Frame::MakeFunction(int argc) {
@@ -175,8 +179,25 @@ std::map<std::string, void (*)(Frame&)> BuiltinFunctions = {
      }},
     {"len", [](Frame& frame) {
          std::shared_ptr<Array> arr = frame.Pop<Array>();
-         frame.Push(std::make_shared<Int>(new BaseType::IntType(arr->Size())));
+         frame.Push(std::make_shared<Int>(BaseType::IntType(arr->Size())));
      }},
+    {"rand", [](Frame& frame) {
+         double r = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
+         frame.Push(std::make_shared<Double>(BaseType::DoubleType(r)));
+     }},
+    {"randint", [](Frame& frame) {
+         auto right_ptr = frame.Pop<Int>();
+         auto left_ptr = frame.Pop<Int>();
+         auto& right = std::get<BaseType::IntType>(right_ptr->Value);
+         auto& left = std::get<BaseType::IntType>(left_ptr->Value);
+         auto r = std::rand() * (right - left) / RAND_MAX + left;
+         frame.Push(std::make_shared<Int>(BaseType::IntType(r)));
+     }},
+    {"pop", [](Frame& frame) {
+         std::shared_ptr<Array> arr = frame.Pop<Array>();
+         frame.Push(arr->Pop());
+     }},
+
 };
 
 void Frame::Call() {
@@ -191,18 +212,19 @@ void Frame::Call() {
     if (Jit && f.JitCompiled.empty()) {
         JitCompile(f);
     }
-    std::vector<std::shared_ptr<BaseType>> jutLocals{};
     std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
 
     if (Jit) {
-        args.resize(JitIndexToName.size());
+        args.resize(f.JitIndexToName.size());
     } else {
         for (auto&& [name, value] : std::views::zip(f.Params, args)) {
             locals[*name] = std::move(value);
         }
     }
+    auto jitInstructions = std::span(f.JitCompiled.begin(), f.JitCompiled.end());
     auto frame = Frame{
         .Instructions = f.Code,
+        .JitInstructions = jitInstructions,
         .Builtins = Builtins,
         .Locals = locals,
         .JitLocals = args,
@@ -214,10 +236,15 @@ void Frame::Call() {
     if (auto res = frame.Run()) {
         Push(res);
     }
+    if (Verbose) {
+        Output << frame.Output.str() << std::endl;
+    }
 }
 
 void Frame::Return() {
-    ReturnValue = Pop();
+    if (!DataStack.empty()) {
+        ReturnValue = Pop();
+    }
     ShouldReturn = true;
 }
 
@@ -273,12 +300,10 @@ void JitCompile(Function& func) {
     }
     auto& code = func.Code;
 
-    for (int i = 1; i < code.size(); ++i) {
-        if (code[i - 1]->GetByteCode() != ByteCodes::LoadString) {
+    for (int i = 1; i <= code.size(); ++i) {
+        if (code[i - 1]->GetByteCode() != ByteCodes::LoadString ||
+            code[i]->GetByteCode() != ByteCodes::StoreName && code[i]->GetByteCode() != ByteCodes::LoadName) {
             func.JitCompiled.push_back(code[i - 1]);
-            continue;
-        }
-        if (code[i]->GetByteCode() != ByteCodes::StoreName && code[i]->GetByteCode() != ByteCodes::LoadName) {
             continue;
         }
         std::shared_ptr<LoadString>& op = reinterpret_cast<std::shared_ptr<LoadString>&>(code[i - 1]);
@@ -289,7 +314,13 @@ void JitCompile(Function& func) {
         if (code[i]->GetByteCode() == ByteCodes::StoreName) {
             func.JitCompiled.emplace_back(std::make_shared<StoreVarByIndex>(it->second));
         } else if (code[i]->GetByteCode() == ByteCodes::LoadName) {
-            func.JitCompiled.emplace_back(std::make_shared<StoreVarByIndex>(it->second));
+            func.JitCompiled.emplace_back(std::make_shared<LoadVarByIndex>(it->second));
         }
+        func.JitCompiled.emplace_back(std::make_shared<NullOp>());
+        ++i;
+    }
+    func.JitIndexToName.resize(nameToJitIndex.size());
+    for (const auto& [k, v] : nameToJitIndex) {
+        func.JitIndexToName[v] = k;
     }
 }

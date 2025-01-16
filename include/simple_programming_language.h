@@ -13,7 +13,10 @@
 std::vector<bytecode::Operation> GenerateByteCode(std::istream& input) {
     static std::unordered_set<std::string> builtinFunctions = {
         "print",
-        "append"};
+        "append",
+        "len",
+        "rand",
+        "randint"};
 
     static std::array<std::string, 2> voidFunctions = {
         "print",
@@ -45,7 +48,7 @@ void InterpreteCode(std::ifstream& input, bool jit = false, bool verbose = false
     vm.Run(code, jit, verbose);
 }
 
-void InterpreteCode(const std::string& input, bool jit = false, bool verbose = false) {
+void InterpreteCode(const std::string& input, bool jit = true, bool verbose = false) {
     std::stringstream ss(input);
     auto code = GenerateByteCode(ss);
     VirtualMachine vm;

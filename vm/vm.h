@@ -73,10 +73,10 @@ struct Frame {
     void Push(const std::shared_ptr<BaseType>& value);
     void Push(std::string* value);
     void Push(TypeIndex* value);
-    void LoadInt(BaseType::IntType* num);
-    void LoadChar(char* arg);
-    void LoadBool(bool* arg);
-    void LoadDouble(double* arg);
+    void LoadInt(const BaseType::IntType& num);
+    void LoadChar(const BaseType::CharType& arg);
+    void LoadBool(const BaseType::BoolType& arg);
+    void LoadDouble(const BaseType::DoubleType& arg);
     void LoadString(std::string* s);
     void LoadType(TypeIndex* type);
     void LoadName();
@@ -115,6 +115,7 @@ struct Frame {
     }
 
     std::span<std::shared_ptr<BytecodeOpBase>>& Instructions;
+    std::span<std::shared_ptr<BytecodeOpBase>>& JitInstructions;
     std::unordered_map<std::string, std::shared_ptr<BaseType>> Builtins;
     std::unordered_map<std::string, std::shared_ptr<BaseType>> Locals;
     std::vector<std::shared_ptr<BaseType>> JitLocals;
@@ -130,7 +131,6 @@ struct Frame {
     std::stringstream Output;
     std::unordered_map<std::string, std::vector<std::string*>> StructInfo;
     std::vector<std::string>& JitIndexToName;
-    std::vector<std::shared_ptr<BaseType>> JitIndexToVariable;
 };
 
 struct NullOp: public BytecodeOpBase {
@@ -169,7 +169,7 @@ struct LoadInt: public BytecodeOpBase {
         }
     }
     void operator()(Frame& frame) override {
-        frame.LoadInt(&num);
+        frame.LoadInt(num);
     }
     std::string Str() const override {
         return std::format("LoadInt {} {}", size, num.str());
@@ -190,7 +190,7 @@ struct LoadChar: public BytecodeOpBase {
         c = op.value_bytes[0];
     }
     void operator()(Frame& frame) override {
-        frame.LoadChar(&c);
+        frame.LoadChar(c);
     }
     std::string Str() const override {
         std::string out = {c};
@@ -214,7 +214,7 @@ struct LoadBool: public BytecodeOpBase {
         b = op.value_bytes[0];
     }
     void operator()(Frame& frame) override {
-        frame.LoadBool(&b);
+        frame.LoadBool(b);
     }
     std::string Str() const override {
         return std::format("LoadBool {}", b);
@@ -234,7 +234,7 @@ struct LoadDouble: public BytecodeOpBase {
         d = *reinterpret_cast<const double*>(op.value_bytes.data());
     }
     void operator()(Frame& frame) override {
-        frame.LoadDouble(&d);
+        frame.LoadDouble(d);
     }
     std::string Str() const override {
         return std::format("LoadDouble {}", d);
@@ -353,7 +353,7 @@ struct MakeFunction: public BytecodeOpBase {
         frame.MakeFunction(argc);
     }
     std::string Str() const override {
-        return std::format("MakeFunction");
+        return std::format("MakeFunction {}", argc);
     }
     ByteCodes GetByteCode() override {
         return ByteCodes::MakeFunction;
@@ -519,9 +519,9 @@ struct VirtualMachine {
         BytecodeOpFactoryIfstream<::LoadString>,
         BytecodeOpFactoryIfstream<LoadType>,
         BytecodeOpFactoryIfstream<LoadName>,
-        BytecodeOpFactoryIfstream<LoadVarByIndex>,
         BytecodeOpFactoryIfstream<LoadSubscr>,
         BytecodeOpFactoryIfstream<LoadMember>,
+        BytecodeOpFactoryIfstream<LoadVarByIndex>,
         BytecodeOpFactoryIfstream<StoreName>,
         BytecodeOpFactoryIfstream<StoreSubscr>,
         BytecodeOpFactoryIfstream<StoreMember>,
@@ -548,11 +548,11 @@ struct VirtualMachine {
         BytecodeOpFactoryCompiler<LoadBool>,
         BytecodeOpFactoryCompiler<::LoadDouble>,
         BytecodeOpFactoryCompiler<::LoadString>,
-        BytecodeOpFactoryCompiler<LoadVarByIndex>,
-        BytecodeOpFactoryCompiler<LoadName>,
         BytecodeOpFactoryCompiler<LoadType>,
+        BytecodeOpFactoryCompiler<LoadName>,
         BytecodeOpFactoryCompiler<LoadSubscr>,
         BytecodeOpFactoryCompiler<LoadMember>,
+        BytecodeOpFactoryCompiler<LoadVarByIndex>,
         BytecodeOpFactoryCompiler<StoreName>,
         BytecodeOpFactoryCompiler<StoreSubscr>,
         BytecodeOpFactoryCompiler<StoreMember>,
@@ -584,10 +584,14 @@ struct VirtualMachine {
 
     void Run(std::ifstream& code, bool jit = false, bool verbose = false) {
         ByteCodes bytecode;
-        std::cout << "Bytecode:" << std::endl;
+        if (verbose) {
+            std::cout << "Bytecode:" << std::endl;
+        }
         while (code.read(reinterpret_cast<char*>(&bytecode), 1)) {
             Code.push_back(IfstreamBasedOpFactories[static_cast<char>(bytecode)](code));
-            std::cout << Code.back()->Str() << std::endl;
+            if (verbose) {
+                std::cout << Code.back()->Str() << std::endl;
+            }
         }
         IfVerbose(verbose);
 
@@ -595,23 +599,29 @@ struct VirtualMachine {
         std::unordered_map<std::string, std::shared_ptr<BaseType>> builtins{};
         std::span<std::shared_ptr<BytecodeOpBase>> instructions(Code.begin(), Code.end());
         std::unordered_map<std::string, Function> functions{};
-        std::vector<std::string> jitIndexToName{};
+        std::span<std::shared_ptr<BytecodeOpBase>> empty0{};
+        std::vector<std::string> empty1{};
         auto frame = Frame{
             .Instructions = instructions,
+            .JitInstructions = empty0,
             .Builtins = builtins,
             .Locals = locals,
             .Functions = functions,
             .Jit = jit,
             .Verbose = verbose,
-            .JitIndexToName = jitIndexToName};
+            .JitIndexToName = empty1};
         frame.Run();
     }
 
     void Run(const std::vector<bytecode::Operation>& code, bool jit = false, bool verbose = false) {
-        std::cout << "Bytecode:" << std::endl;
+        if (verbose) {
+            std::cout << "Bytecode:" << std::endl;
+        }
         for (const auto& c : code) {
             Code.push_back(CompilerBasedOpFactories[static_cast<char>(c.code)](c));
-            std::cout << Code.back()->Str() << std::endl;
+            if (verbose) {
+                std::cout << Code.back()->Str() << std::endl;
+            }
         }
         IfVerbose(verbose);
 
@@ -619,15 +629,17 @@ struct VirtualMachine {
         std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
         std::span<std::shared_ptr<BytecodeOpBase>> instructions(Code.begin(), Code.end());
         std::unordered_map<std::string, Function> functions{};
-        std::vector<std::string> jitIndexToName{};
+        std::span<std::shared_ptr<BytecodeOpBase>> empty0{};
+        std::vector<std::string> empty1{};
         auto frame = Frame{
             .Instructions = instructions,
+            .JitInstructions = empty0,
             .Builtins = builtins,
             .Locals = locals,
             .Functions = functions,
             .Jit = jit,
             .Verbose = verbose,
-            .JitIndexToName = jitIndexToName};
+            .JitIndexToName = empty1};
         frame.Run();
     }
 
