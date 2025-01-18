@@ -1,5 +1,6 @@
 #include "types.h"
 
+gc::GarbageCollector gc::gc;
 gc::Ref<Bool> BaseType::FALSE = gc::gc.create(new Bool(false));
 gc::Ref<Bool> BaseType::TRUE = gc::gc.create(new Bool(true));
 

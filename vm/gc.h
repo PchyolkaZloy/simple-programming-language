@@ -93,7 +93,7 @@ public:
 
     template<typename T>
     Ref<T> create(T* obj) {
-        _objects.insert(obj);
+        _objects.insert(reinterpret_cast<BaseObject*>(obj));
 
         return Ref<T>(_root, obj);
     }

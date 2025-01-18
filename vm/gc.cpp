@@ -1,13 +1,12 @@
 #include "gc.h"
 
-gc::GarbageCollector gc::gc;
-
-
 std::vector<gc::Ref<gc::BaseObject>> gc::BaseObject::getChildren() {
     return {};
 }
 
-gc::GarbageCollector::GarbageCollector() = default;
+gc::GarbageCollector::GarbageCollector() {
+    std::cout << "654678" << std::endl;
+};
 
 gc::GarbageCollector::~GarbageCollector() {
     for (BaseObject* obj : *_root) {
@@ -32,6 +31,8 @@ void gc::GarbageCollector::mark(gc::BaseObject* obj) {
     _marked.insert(obj);
 
     // auto temp = *obj;
+
+    std::cout << obj->getChildren().size() << std::endl;
 
     for (const auto& child : obj->getChildren()) {
         mark(child._object);
