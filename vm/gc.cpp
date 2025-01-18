@@ -1,5 +1,7 @@
 #include "gc.h"
 
+gc::GarbageCollector gc::gc;
+
 
 std::vector<gc::Ref<gc::BaseObject>> gc::BaseObject::getChildren() {
     return {};

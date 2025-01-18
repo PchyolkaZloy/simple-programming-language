@@ -1,1 +1,2 @@
-add_library(gc gc.cpp)
+add_library(gc ../../vm/gc.h)
+target_sources(gc PRIVATE ../../vm/gc.cpp)

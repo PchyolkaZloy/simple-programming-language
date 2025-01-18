@@ -12,23 +12,25 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "gc.h"
+
 using cpp_int = boost::multiprecision::cpp_int;
 
 constexpr double EPS = 1e-13;
 
 struct Bool;
 
-struct BaseType {
+struct BaseType : public virtual gc::BaseObject {
     using IntType = cpp_int;
     using DoubleType = double;
     using BoolType = bool;
     using CharType = char;
-    using ArrayType = std::vector<std::shared_ptr<BaseType>>;
-    using StructType = std::map<std::string, std::shared_ptr<BaseType>>;
+    using ArrayType = std::vector<gc::Ref<BaseType>>;
+    using StructType = std::map<std::string, gc::Ref<BaseType>>;
 
     // optimize heap allocations
-    static std::shared_ptr<Bool> FALSE;
-    static std::shared_ptr<Bool> TRUE;
+    static gc::Ref<Bool> FALSE;
+    static gc::Ref<Bool> TRUE;
 
     template <typename T>
     BaseType(TypeIndex type, const T& value)
@@ -50,14 +52,14 @@ struct BaseType {
 
     virtual void Print(std::ostream& stream) const = 0;
 
-    virtual std::shared_ptr<BaseType> operator+(const BaseType& other) const = 0;
-    virtual std::shared_ptr<BaseType> operator-(const BaseType& other) const = 0;
-    virtual std::shared_ptr<BaseType> operator*(const BaseType& other) const = 0;
-    virtual std::shared_ptr<BaseType> operator/(const BaseType& other) const = 0;
-    virtual std::shared_ptr<BaseType> operator%(const BaseType& other) const = 0;
+    virtual gc::Ref<BaseType> operator+(const BaseType& other) const = 0;
+    virtual gc::Ref<BaseType> operator-(const BaseType& other) const = 0;
+    virtual gc::Ref<BaseType> operator*(const BaseType& other) const = 0;
+    virtual gc::Ref<BaseType> operator/(const BaseType& other) const = 0;
+    virtual gc::Ref<BaseType> operator%(const BaseType& other) const = 0;
 
 #define DefBoolOperator(op)                                                   \
-    virtual std::shared_ptr<Bool> operator op(const BaseType & other) const { \
+    virtual gc::Ref<Bool> operator op(const BaseType & other) const {         \
         BoolType l = BoolCast();                                              \
         BoolType r = other.BoolCast();                                        \
         return l op r ? TRUE : FALSE;                                         \
@@ -66,28 +68,33 @@ struct BaseType {
     DefBoolOperator(&&);
     DefBoolOperator(||);
 
-    virtual std::shared_ptr<Bool> operator!() const {
+    virtual gc::Ref<Bool> operator!() const {
         return !BoolCast() ? TRUE : FALSE;
     }
-    virtual std::shared_ptr<BaseType> operator-() const = 0;
+    virtual gc::Ref<BaseType> operator-() const = 0;
 
-    virtual std::shared_ptr<Bool> operator==(const BaseType& other) const = 0;
-    virtual std::shared_ptr<Bool> operator!=(const BaseType& other) const = 0;
-    virtual std::shared_ptr<Bool> operator>(const BaseType& other) const = 0;
-    virtual std::shared_ptr<Bool> operator<(const BaseType& other) const = 0;
-    virtual std::shared_ptr<Bool> operator>=(const BaseType& other) const = 0;
-    virtual std::shared_ptr<Bool> operator<=(const BaseType& other) const = 0;
+    virtual gc::Ref<Bool> operator==(const BaseType& other) const = 0;
+    virtual gc::Ref<Bool> operator!=(const BaseType& other) const = 0;
+    virtual gc::Ref<Bool> operator>(const BaseType& other) const = 0;
+    virtual gc::Ref<Bool> operator<(const BaseType& other) const = 0;
+    virtual gc::Ref<Bool> operator>=(const BaseType& other) const = 0;
+    virtual gc::Ref<Bool> operator<=(const BaseType& other) const = 0;
+
+    // GC
+    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+        return {};
+    }
 
     TypeIndex Type = TypeIndex::Null;
     std::variant<IntType, BoolType, CharType, DoubleType, StructType, ArrayType> Value;
 };
 
 #define DefInvalidOperator(op, ret)                                                 \
-    std::shared_ptr<ret> operator op(const BaseType & other) const override {       \
+    gc::Ref<ret> operator op(const BaseType & other) const override {               \
         throw std::invalid_argument(std::string("invalid operator ") + #op + "\n"); \
     }
 
-struct Int: public BaseType {
+struct Int: public BaseType, public gc::LeafObject<Int> {
     Int()
         : BaseType(TypeIndex::Int, 0) {
     }
@@ -118,29 +125,34 @@ struct Int: public BaseType {
         stream << IntCast();
     }
 
-    std::shared_ptr<BaseType> IntOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const;
-    std::shared_ptr<BaseType> DoubleOperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const;
-    std::shared_ptr<BaseType> BoolOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const;
+    gc::Ref<BaseType> IntOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const;
+    gc::Ref<BaseType> DoubleOperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const;
+    gc::Ref<BaseType> BoolOperatorTemplate(const BaseType& other, cpp_int (*op)(const cpp_int&, const cpp_int&)) const;
 
-    std::shared_ptr<BaseType> operator+(const BaseType& other) const override;
-    std::shared_ptr<BaseType> operator-(const BaseType& other) const override;
-    std::shared_ptr<BaseType> operator*(const BaseType& other) const override;
-    std::shared_ptr<BaseType> operator/(const BaseType& other) const override;
-    std::shared_ptr<BaseType> operator%(const BaseType& other) const override;
+    gc::Ref<BaseType> operator+(const BaseType& other) const override;
+    gc::Ref<BaseType> operator-(const BaseType& other) const override;
+    gc::Ref<BaseType> operator*(const BaseType& other) const override;
+    gc::Ref<BaseType> operator/(const BaseType& other) const override;
+    gc::Ref<BaseType> operator%(const BaseType& other) const override;
 
-    std::shared_ptr<BaseType> operator-() const override {
-        return std::make_shared<Int>(-IntCast());
+    gc::Ref<BaseType> operator-() const override {
+        return gc::gc.createLeafObject(-IntCast());
     }
 
-    std::shared_ptr<Bool> IntCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const IntType&, const IntType&)) const;
-    std::shared_ptr<Bool> DoubleCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const;
+    gc::Ref<Bool> IntCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const IntType&, const IntType&)) const;
+    gc::Ref<Bool> DoubleCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const;
 
-    std::shared_ptr<Bool> operator==(const BaseType& other) const override;
-    std::shared_ptr<Bool> operator!=(const BaseType& other) const override;
-    std::shared_ptr<Bool> operator>(const BaseType& other) const override;
-    std::shared_ptr<Bool> operator<(const BaseType& other) const override;
-    std::shared_ptr<Bool> operator>=(const BaseType& other) const override;
-    std::shared_ptr<Bool> operator<=(const BaseType& other) const override;
+    gc::Ref<Bool> operator==(const BaseType& other) const override;
+    gc::Ref<Bool> operator!=(const BaseType& other) const override;
+    gc::Ref<Bool> operator>(const BaseType& other) const override;
+    gc::Ref<Bool> operator<(const BaseType& other) const override;
+    gc::Ref<Bool> operator>=(const BaseType& other) const override;
+    gc::Ref<Bool> operator<=(const BaseType& other) const override;
+
+    // GC
+    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+        return {};
+    }
 };
 
 struct Bool: public Int {
@@ -163,7 +175,7 @@ struct Bool: public Int {
         stream << BoolCast();
     }
 
-    std::shared_ptr<Bool> operator!() {
+    gc::Ref<Bool> operator!() {
         return !BoolCast() ? TRUE : FALSE;
     }
 };
@@ -185,7 +197,7 @@ struct Char: public Int {
     }
 };
 
-struct Double: public BaseType {
+struct Double: public BaseType, public virtual gc::LeafObject<Double> {
     Double(const DoubleType& value)
         : BaseType(TypeIndex::Double, value) {
     }
@@ -208,10 +220,10 @@ struct Double: public BaseType {
         stream << DoubleCast();
     }
 
-    std::shared_ptr<BaseType> OperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const;
+    gc::Ref<BaseType> OperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const;
 
 #define DefDoubleOperator(op)                                                                                      \
-    std::shared_ptr<BaseType> operator op(const BaseType & other) const override {                                 \
+    gc::Ref<BaseType> operator op(const BaseType & other) const override {                                         \
         if (auto res = OperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return l op r; })) { \
             return res;                                                                                            \
         }                                                                                                          \
@@ -225,20 +237,20 @@ struct Double: public BaseType {
 
     DefInvalidOperator(%, BaseType);
 
-    std::shared_ptr<BaseType> operator-() const override {
-        return std::make_shared<Double>(-DoubleCast());
+    gc::Ref<BaseType> operator-() const override {
+        return gc::gc.createLeafObject(-DoubleCast());
     }
 
-    std::shared_ptr<Bool> CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const;
+    gc::Ref<Bool> CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const;
 
-    std::shared_ptr<Bool> operator==(const BaseType& other) const override {
+    gc::Ref<Bool> operator==(const BaseType& other) const override {
         if (auto res = CompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) < EPS; })) {
             return res;
         }
         return FALSE;
     }
 
-    std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
+    gc::Ref<Bool> operator!=(const BaseType& other) const override {
         if (auto res = CompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return abs(l - r) >= EPS; })) {
             return res;
         }
@@ -246,7 +258,7 @@ struct Double: public BaseType {
     }
 
 #define DefDoubleCompareOperator(op)                                                                                      \
-    std::shared_ptr<Bool> operator op(const BaseType & other) const override {                                            \
+    gc::Ref<Bool> operator op(const BaseType & other) const override {                                                    \
         if (auto res = CompareOperatorTemplate(other, [](const DoubleType& l, const DoubleType& r) { return l op r; })) { \
             return res;                                                                                                   \
         }                                                                                                                 \
@@ -257,13 +269,19 @@ struct Double: public BaseType {
     DefDoubleCompareOperator(<);
     DefDoubleCompareOperator(>=);
     DefDoubleCompareOperator(<=);
+
+    // GC
+    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+        return {};
+    }
 };
 
-struct Struct: public BaseType {
-    using ValueType = std::map<std::string, std::shared_ptr<BaseType>>;
+struct Struct: public BaseType, public virtual gc::Struct {
+    using ValueType = std::map<std::string, gc::Ref<BaseType>>;
 
     Struct()
-        : BaseType(TypeIndex::Struct, ValueType()) {
+        : BaseType(TypeIndex::Struct, ValueType())
+        , gc::Struct({}) {
     }
 
     const ValueType& GetMap() const {
@@ -294,7 +312,7 @@ struct Struct: public BaseType {
         for (const auto& [k, v] : GetMap()) {
             stream << sep;
             stream << k << ": ";
-            v->Print(stream);
+            v.object().Print(stream);
             sep = ", ";
         }
         stream << "}";
@@ -312,11 +330,11 @@ struct Struct: public BaseType {
     DefInvalidOperator(>=, Bool);
     DefInvalidOperator(<=, Bool);
 
-    std::shared_ptr<BaseType> operator-() const override {
+    gc::Ref<BaseType> operator-() const override {
         throw std::invalid_argument("unary minus can be applied only to numeric types");
     }
 
-    std::shared_ptr<Bool> operator==(const BaseType& other) const override {
+    gc::Ref<Bool> operator==(const BaseType& other) const override {
         if (other.Type != TypeIndex::Struct) {
             return FALSE;
         }
@@ -335,24 +353,39 @@ struct Struct: public BaseType {
         return TRUE;
     }
 
-    std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
+    gc::Ref<Bool> operator!=(const BaseType& other) const override {
         Bool& equal = *(*this == other);
         return !equal;
     }
+
+    // GC
+    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+        std::vector<gc::Ref<gc::BaseObject>> keys;
+        for (auto it : _data) {
+            if (_is_present[it.first]) {
+                keys.push_back(it.second);
+            }
+        }
+
+        return keys;
+    }
 };
 
-struct Array: public BaseType {
-    using ValueType = std::vector<std::shared_ptr<BaseType>>;
+struct Array: public BaseType, public virtual gc::Array<BaseType> {
+    using ValueType = std::vector<gc::Ref<BaseType>>;
     Array()
-        : BaseType(TypeIndex::Array, ValueType()) {
+        : BaseType(TypeIndex::Array, ValueType())
+        , gc::Array<BaseType>(0) {
     }
 
     Array(ValueType&& value)
-        : BaseType(TypeIndex::Array, std::move(value)) {
+        : BaseType(TypeIndex::Array, std::move(value))
+        , gc::Array<BaseType>(0) {
     }
 
     Array(const ValueType& value)
-        : BaseType(TypeIndex::Array, value) {
+        : BaseType(TypeIndex::Array, value)
+        , gc::Array<BaseType>(0) {
     }
 
     virtual ~Array() = default;
@@ -382,13 +415,13 @@ struct Array: public BaseType {
         std::string_view sep = "";
         for (const auto& i : GetArray()) {
             stream << sep;
-            i->Print(stream);
+            i.object().Print(stream);
             sep = ", ";
         }
         stream << "}";
     }
 
-    std::shared_ptr<BaseType> operator+(const BaseType& other) const override;
+    gc::Ref<BaseType> operator+(const BaseType& other) const override;
 
     DefInvalidOperator(-, BaseType);
     DefInvalidOperator(*, BaseType);
@@ -399,54 +432,54 @@ struct Array: public BaseType {
     DefInvalidOperator(>=, Bool);
     DefInvalidOperator(<=, Bool);
 
-    std::shared_ptr<BaseType> operator-() const override {
+    gc::Ref<BaseType> operator-() const override {
         throw std::invalid_argument("unary minus can be applied only to numeric types");
     }
 
-    std::shared_ptr<Bool> CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const std::shared_ptr<BaseType>&, const std::shared_ptr<BaseType>&)) const;
+    gc::Ref<Bool> CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const gc::Ref<BaseType>&, const gc::Ref<BaseType>&)) const;
 
-    std::shared_ptr<Bool> operator==(const BaseType& other) const override {
-        auto op = [](const std::shared_ptr<BaseType>& l, const std::shared_ptr<BaseType>& r) { return (*l == *r)->BoolCast(); };
+    gc::Ref<Bool> operator==(const BaseType& other) const override {
+        auto op = [](const gc::Ref<BaseType>& l, const gc::Ref<BaseType>& r) { return (l.object() == r.object()).object().BoolCast(); };
         if (auto res = CompareOperatorTemplate(other, op)) {
             return res;
         }
         return FALSE;
     };
 
-    std::shared_ptr<Bool> operator!=(const BaseType& other) const override {
+    gc::Ref<Bool> operator!=(const BaseType& other) const override {
         // TODO BUG HERE
-        auto op = [](const std::shared_ptr<BaseType>& l, const std::shared_ptr<BaseType>& r) { return (*l != *r)->BoolCast(); };
+        auto op = [](const gc::Ref<BaseType>& l, const gc::Ref<BaseType>& r) { return (l.object() != r.object()).object().BoolCast(); };
         if (auto res = CompareOperatorTemplate(other, op)) {
             return res;
         }
         return TRUE;
     }
 
-    const std::shared_ptr<BaseType>& operator[](const IntType& idx) const {
+    const gc::Ref<BaseType>& operator[](const IntType& idx) const {
         return GetArray()[static_cast<size_t>(idx)];
     }
 
-    std::shared_ptr<BaseType>& operator[](const IntType& idx) {
+    gc::Ref<BaseType>& operator[](const IntType& idx) {
         return GetArray()[static_cast<size_t>(idx)];
     }
 
-    const std::shared_ptr<BaseType>& operator[](const Int& idx) const {
+    const gc::Ref<BaseType>& operator[](const Int& idx) const {
         return GetArray()[static_cast<size_t>(idx.IntCast())];
     }
 
-    std::shared_ptr<BaseType>& operator[](const Int& idx) {
+    gc::Ref<BaseType>& operator[](const Int& idx) {
         return GetArray()[static_cast<size_t>(idx.IntCast())];
     }
 
-    void Append(std::shared_ptr<BaseType>&& element) {
+    void Append(gc::Ref<BaseType>&& element) {
         GetArray().push_back(std::move(element));
     }
 
-    void Append(const std::shared_ptr<BaseType>& element) {
+    void Append(const gc::Ref<BaseType>& element) {
         GetArray().push_back(element);
     }
 
-    std::shared_ptr<BaseType> Pop() {
+    gc::Ref<BaseType> Pop() {
         auto& arr = GetArray();
         auto ret = std::move(arr.back());
         arr.pop_back();
@@ -455,5 +488,15 @@ struct Array: public BaseType {
 
     size_t Size() const {
         return GetArray().size();
+    }
+
+    // GC
+    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+        std::vector<gc::Ref<BaseObject>> result;
+        for (const auto& field : _fields) {
+            result.push_back(static_cast<gc::Ref<BaseObject>>(field));
+        }
+
+        return result;
     }
 };

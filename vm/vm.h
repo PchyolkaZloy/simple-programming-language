@@ -45,32 +45,32 @@ struct Function {
 void JitCompile(Function& func);
 
 struct Frame {
-    static constexpr std::array<std::shared_ptr<BaseType> (*)(const BaseType&, const BaseType&), 13> BINARY_OPS = {
+    static constexpr std::array<gc::Ref<BaseType> (*)(const BaseType&, const BaseType&), 13> BINARY_OPS = {
         [](const BaseType& x, const BaseType& y) { return x + y; },
         [](const BaseType& x, const BaseType& y) { return x - y; },
         [](const BaseType& x, const BaseType& y) { return x * y; },
         [](const BaseType& x, const BaseType& y) { return x / y; },
         [](const BaseType& x, const BaseType& y) { return x % y; },
-        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x && y); },
-        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x || y); },
-        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x == y); },
-        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x != y); },
-        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x < y); },
-        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x > y); },
-        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x <= y); },
-        [](const BaseType& x, const BaseType& y) { return std::static_pointer_cast<BaseType>(x >= y); }};
+        [](const BaseType& x, const BaseType& y) { return static_cast<gc::Ref<BaseType>>(x && y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<gc::Ref<BaseType>>(x || y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<gc::Ref<BaseType>>(x == y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<gc::Ref<BaseType>>(x != y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<gc::Ref<BaseType>>(x < y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<gc::Ref<BaseType>>(x > y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<gc::Ref<BaseType>>(x <= y); },
+        [](const BaseType& x, const BaseType& y) { return static_cast<gc::Ref<BaseType>>(x >= y); }};
 
-    static constexpr std::array<std::shared_ptr<BaseType> (*)(const BaseType&), 2> UNARY_OPS = {
+    static constexpr std::array<gc::Ref<BaseType> (*)(const BaseType&), 2> UNARY_OPS = {
         [](const BaseType& x) { return -x; },
-        [](const BaseType& x) { return static_cast<std::shared_ptr<BaseType>>(!x); }};
+        [](const BaseType& x) { return static_cast<gc::Ref<BaseType>>(!x); }};
 
     void ReadFunction(int& cur_instruction);
-    std::shared_ptr<BaseType> Run();
-    std::shared_ptr<BaseType>& Top();
-    std::vector<std::shared_ptr<BaseType>> Popn(size_t n);
+    gc::Ref<BaseType> Run();
+    gc::Ref<BaseType>& Top();
+    std::vector<gc::Ref<BaseType>> Popn(size_t n);
     std::vector<std::string*> PopnStrings(size_t n);
-    void Push(std::shared_ptr<BaseType>&& value);
-    void Push(const std::shared_ptr<BaseType>& value);
+    void Push(gc::Ref<BaseType>&& value);
+    void Push(const gc::Ref<BaseType>& value);
     void Push(std::string* value);
     void Push(TypeIndex* value);
     void LoadInt(const BaseType::IntType& num);
@@ -101,8 +101,8 @@ struct Frame {
     void Copy();
 
     template <std::derived_from<BaseType> T = BaseType>
-    std::shared_ptr<T> Pop() {
-        std::shared_ptr<T> ret = std::move(std::static_pointer_cast<T>(Top()));
+    gc::Ref<T> Pop() {
+        gc::Ref<T> ret = std::move(static_cast<gc::Ref<T>>(Top()));
         DataStack.pop_back();
         return ret;
     }
@@ -116,15 +116,15 @@ struct Frame {
 
     std::span<std::shared_ptr<BytecodeOpBase>>& Instructions;
     std::span<std::shared_ptr<BytecodeOpBase>>& JitInstructions;
-    std::unordered_map<std::string, std::shared_ptr<BaseType>> Builtins;
-    std::unordered_map<std::string, std::shared_ptr<BaseType>> Locals;
-    std::vector<std::shared_ptr<BaseType>> JitLocals;
+    std::unordered_map<std::string, gc::Ref<BaseType>> Builtins;
+    std::unordered_map<std::string, gc::Ref<BaseType>> Locals;
+    std::vector<gc::Ref<BaseType>> JitLocals;
     std::unordered_map<std::string, Function>& Functions;
     bool Jit;
     bool Verbose;
     Frame* ParentFrame = nullptr;
-    std::vector<std::variant<std::shared_ptr<BaseType>, std::string*, TypeIndex*>> DataStack;
-    std::shared_ptr<BaseType> ReturnValue;
+    std::vector<std::variant<gc::Ref<BaseType>, std::string*, TypeIndex*>> DataStack;
+    gc::Ref<BaseType> ReturnValue;
     bool ShouldReturn;
     std::optional<int> Offset;
     Function* ReadingFunction = nullptr;
@@ -595,8 +595,8 @@ struct VirtualMachine {
         }
         IfVerbose(verbose);
 
-        std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
-        std::unordered_map<std::string, std::shared_ptr<BaseType>> builtins{};
+        std::unordered_map<std::string, gc::Ref<BaseType>> locals{};
+        std::unordered_map<std::string, gc::Ref<BaseType>> builtins{};
         std::span<std::shared_ptr<BytecodeOpBase>> instructions(Code.begin(), Code.end());
         std::unordered_map<std::string, Function> functions{};
         std::span<std::shared_ptr<BytecodeOpBase>> empty0{};
@@ -625,8 +625,8 @@ struct VirtualMachine {
         }
         IfVerbose(verbose);
 
-        std::unordered_map<std::string, std::shared_ptr<BaseType>> builtins{};
-        std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
+        std::unordered_map<std::string, gc::Ref<BaseType>> builtins{};
+        std::unordered_map<std::string, gc::Ref<BaseType>> locals{};
         std::span<std::shared_ptr<BytecodeOpBase>> instructions(Code.begin(), Code.end());
         std::unordered_map<std::string, Function> functions{};
         std::span<std::shared_ptr<BytecodeOpBase>> empty0{};

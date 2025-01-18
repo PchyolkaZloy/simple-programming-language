@@ -14,7 +14,7 @@ void Frame::ReadFunction(int& cur_instruction) {
     ReadingFunction = nullptr;
 }
 
-std::shared_ptr<BaseType> Frame::Run() {
+gc::Ref<BaseType> Frame::Run() {
     int cur_instruction = 0;
     auto& instructions = Jit && JitInstructions.size() > 0 ? JitInstructions : Instructions;
     while (cur_instruction < instructions.size()) {
@@ -48,12 +48,12 @@ std::shared_ptr<BaseType> Frame::Run() {
     return ReturnValue;
 }
 
-std::shared_ptr<BaseType>& Frame::Top() {
-    return std::get<std::shared_ptr<BaseType>>(DataStack.back());
+gc::Ref<BaseType>& Frame::Top() {
+    return std::get<gc::Ref<BaseType>>(DataStack.back());
 }
 
-std::vector<std::shared_ptr<BaseType>> Frame::Popn(size_t n) {
-    std::vector<std::shared_ptr<BaseType>> ret(n);
+std::vector<gc::Ref<BaseType>> Frame::Popn(size_t n) {
+    std::vector<gc::Ref<BaseType>> ret(n);
     for (int i = n - 1; i >= 0; --i) {
         ret[i] = Pop();
     }
@@ -68,11 +68,11 @@ std::vector<std::string*> Frame::PopnStrings(size_t n) {
     return ret;
 }
 
-void Frame::Push(std::shared_ptr<BaseType>&& value) {
+void Frame::Push(gc::Ref<BaseType>&& value) {
     DataStack.emplace_back(std::move(value));
 }
 
-void Frame::Push(const std::shared_ptr<BaseType>& value) {
+void Frame::Push(const gc::Ref<BaseType>& value) {
     DataStack.emplace_back(value);
 }
 
@@ -85,19 +85,19 @@ void Frame::Push(TypeIndex* value) {
 }
 
 void Frame::LoadInt(const BaseType::IntType& num) {
-    Push(std::make_shared<Int>(num));
+    Push(gc::gc.createLeafObject(num));
 }
 
 void Frame::LoadChar(const BaseType::CharType& arg) {
-    Push(std::make_shared<Char>(arg));
+    Push(gc::gc.createLeafObject(arg));
 }
 
 void Frame::LoadBool(const BaseType::BoolType& arg) {
-    Push(std::make_shared<Bool>(arg));
+    Push(gc::gc.createLeafObject(arg));
 }
 
 void Frame::LoadDouble(const BaseType::DoubleType& arg) {
-    Push(std::make_shared<Double>(arg));
+    Push(gc::gc.createLeafObject(arg));
 }
 
 void Frame::LoadString(std::string* s) {
@@ -124,35 +124,35 @@ void Frame::LoadVarByIndex(int idx) {
 }
 
 void Frame::LoadSubscr() {
-    std::shared_ptr<Int> key = Pop<Int>();
-    std::shared_ptr<Array> container = Pop<Array>();
-    Push((*container)[*key.get()]);
+    gc::Ref<Int> key = Pop<Int>();
+    gc::Ref<Array> container = Pop<Array>();
+    Push((*container)[key.object()]);
 }
 
 void Frame::LoadMember() {
     std::string& name = Pop<std::string>();
-    std::shared_ptr<Struct> obj = Pop<Struct>();
-    Push(obj->GetMap()[name]);
+    gc::Ref<Struct> obj = Pop<Struct>();
+    Push(obj.object().GetMap()[name]);
 }
 
 void Frame::StoreName() {
     std::string& name = Pop<std::string>();
-    std::shared_ptr<BaseType> value = Pop();
+    gc::Ref<BaseType> value = Pop();
     Locals[name] = std::move(value);
 }
 
 void Frame::StoreSubscr() {
-    std::shared_ptr<Int> key = Pop<Int>();
-    std::shared_ptr<Array> container = Pop<Array>();
-    std::shared_ptr<BaseType> value = Pop();
-    (*container)[*key.get()] = std::move(value);
+    gc::Ref<Int> key = Pop<Int>();
+    gc::Ref<Array> container = Pop<Array>();
+    gc::Ref<BaseType> value = Pop();
+    (*container)[key.object()] = std::move(value);
 }
 
 void Frame::StoreMember() {
     std::string& name = Pop<std::string>();
-    std::shared_ptr<Struct> obj = Pop<Struct>();
-    std::shared_ptr<BaseType> value = Pop();
-    obj->GetMap()[name] = value;
+    gc::Ref<Struct> obj = Pop<Struct>();
+    gc::Ref<BaseType> value = Pop();
+    obj.object().GetMap()[name] = value;
 }
 
 void Frame::StoreVarByIndex(int idx) {
@@ -169,33 +169,33 @@ void Frame::MakeFunction(int argc) {
 
 std::map<std::string, void (*)(Frame&)> BuiltinFunctions = {
     {"print", [](Frame& frame) {
-         std::shared_ptr<BaseType> arg = frame.Pop();
-         arg->Print(frame.Verbose ? frame.Output : std::cout);
+         gc::Ref<BaseType> arg = frame.Pop();
+         arg.object().Print(frame.Verbose ? frame.Output : std::cout);
      }},
     {"append", [](Frame& frame) {
-         std::shared_ptr<BaseType> arg = frame.Pop();
-         std::shared_ptr<Array> arr = frame.Pop<Array>();
-         arr->Append(arg);
+         gc::Ref<BaseType> arg = frame.Pop();
+         gc::Ref<Array> arr = frame.Pop<Array>();
+         arr.object().Append(arg);
      }},
     {"len", [](Frame& frame) {
-         std::shared_ptr<Array> arr = frame.Pop<Array>();
-         frame.Push(std::make_shared<Int>(BaseType::IntType(arr->Size())));
+         gc::Ref<Array> arr = frame.Pop<Array>();
+         frame.Push(gc::gc.createLeafObject(BaseType::IntType(arr.object().Size())));
      }},
     {"rand", [](Frame& frame) {
          double r = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
-         frame.Push(std::make_shared<Double>(BaseType::DoubleType(r)));
+         frame.Push(gc::gc.createLeafObject(BaseType::DoubleType(r)));
      }},
     {"randint", [](Frame& frame) {
          auto right_ptr = frame.Pop<Int>();
          auto left_ptr = frame.Pop<Int>();
-         auto& right = std::get<BaseType::IntType>(right_ptr->Value);
-         auto& left = std::get<BaseType::IntType>(left_ptr->Value);
+         auto& right = std::get<BaseType::IntType>(right_ptr.object().Value);
+         auto& left = std::get<BaseType::IntType>(left_ptr.object().Value);
          auto r = std::rand() * (right - left) / RAND_MAX + left;
-         frame.Push(std::make_shared<Int>(BaseType::IntType(r)));
+         frame.Push(gc::gc.createLeafObject(BaseType::IntType(r)));
      }},
     {"pop", [](Frame& frame) {
-         std::shared_ptr<Array> arr = frame.Pop<Array>();
-         frame.Push(arr->Pop());
+         gc::Ref<Array> arr = frame.Pop<Array>();
+         frame.Push(arr.object().Pop());
      }},
 
 };
@@ -208,11 +208,11 @@ void Frame::Call() {
     }
     Function& f = Functions[fName];
     int argc = f.Params.size();
-    std::vector<std::shared_ptr<BaseType>> args = Popn(argc);
+    std::vector<gc::Ref<BaseType>> args = Popn(argc);
     if (Jit && f.JitCompiled.empty()) {
         JitCompile(f);
     }
-    std::unordered_map<std::string, std::shared_ptr<BaseType>> locals{};
+    std::unordered_map<std::string, gc::Ref<BaseType>> locals{};
 
     if (Jit) {
         args.resize(f.JitIndexToName.size());
@@ -259,13 +259,18 @@ void Frame::BinaryOp(BinaryOps opCode) {
 }
 
 void Frame::BuildArray(int count) {
-    std::shared_ptr<Array> arr = std::make_shared<Array>(Popn(count));
+    gc::Ref<Array> arr = gc::gc.createArray<BaseType>(count);
+    auto elements = std::make_shared<Array>(Popn(count));
+    for (size_t i = 0; i < count; i++) {
+        arr.object().set(i, elements->operator[](i));
+    }
     Push(std::move(arr));
 }
 
 void Frame::BuildStruct() {
+    // TODO: don't work, gc consume names of fields
     std::string& name = Pop<std::string>();
-    Push(std::make_shared<Struct>());
+    Push(gc::gc.createStruct({}));
 }
 
 void Frame::DefineStruct(int fieldc) {
@@ -278,13 +283,13 @@ void Frame::Jump(int offset) {
 }
 
 void Frame::JumpIfTrue(int offset) {
-    if (Pop()->BoolCast()) {
+    if (Pop().object().BoolCast()) {
         Offset = offset;
     }
 }
 
 void Frame::JumpIfFalse(int offset) {
-    if (!Pop()->BoolCast()) {
+    if (!Pop().object().BoolCast()) {
         Offset = offset;
     }
 }

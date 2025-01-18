@@ -1,41 +1,41 @@
 #include "types.h"
 
-std::shared_ptr<Bool> BaseType::FALSE = std::make_shared<Bool>(false);
-std::shared_ptr<Bool> BaseType::TRUE = std::make_shared<Bool>(true);
+gc::Ref<Bool> BaseType::FALSE = gc::gc.createLeafObject<Bool>(Bool(false));
+gc::Ref<Bool> BaseType::TRUE = gc::gc.createLeafObject<Bool>(Bool(true));
 
 
 /// Int
 
-std::shared_ptr<BaseType> Int::IntOperatorTemplate(const BaseType& other, IntType (*op)(const IntType&, const IntType&)) const {
+gc::Ref<BaseType> Int::IntOperatorTemplate(const BaseType& other, IntType (*op)(const IntType&, const IntType&)) const {
     if (other.Type == TypeIndex::Bool ||
         other.Type == TypeIndex::Char ||
         other.Type == TypeIndex::Int) {
         IntType l = IntCast();
         IntType r = other.IntCast();
-        return std::make_shared<Int>(op(l, r));
+        return gc::gc.createLeafObject(op(l, r));
     }
     return {};
 }
 
-std::shared_ptr<BaseType> Int::BoolOperatorTemplate(const BaseType& other, IntType (*op)(const IntType&, const IntType&)) const {
+gc::Ref<BaseType> Int::BoolOperatorTemplate(const BaseType& other, IntType (*op)(const IntType&, const IntType&)) const {
     if (other.Type != TypeIndex::Struct) { // struct is the only type not castable to bool
         BoolType l = BoolCast();
         BoolType r = other.BoolCast();
-        return std::make_shared<Int>(op(l, r));
+        return gc::gc.createLeafObject(op(l, r));
     }
     return {};
 }
 
-std::shared_ptr<BaseType> Int::DoubleOperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const {
+gc::Ref<BaseType> Int::DoubleOperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const {
     if (other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
-        return std::make_shared<Double>(op(l, r));
+        return gc::gc.createLeafObject(op(l, r));
     }
     return nullptr;
 }
 
-std::shared_ptr<BaseType> Int::operator%(const BaseType& other) const {
+gc::Ref<BaseType> Int::operator%(const BaseType& other) const {
     if (auto res = IntOperatorTemplate(other, [](const IntType& l, const IntType& r) { return IntType(l % r); })) {
         return res;
     }
@@ -43,7 +43,7 @@ std::shared_ptr<BaseType> Int::operator%(const BaseType& other) const {
 }
 
 #define DefIntOperator(op)                                                                                                             \
-    std::shared_ptr<BaseType> Int::operator op(const BaseType & other) const {                                                         \
+    gc::Ref<BaseType> Int::operator op(const BaseType & other) const {                                                 \
         if (auto res = IntOperatorTemplate(other, [](const IntType& l, const IntType& r) -> IntType { return l op r; })) {             \
             return res;                                                                                                                \
         }                                                                                                                              \
@@ -58,7 +58,7 @@ DefIntOperator(-);
 DefIntOperator(*);
 DefIntOperator(/);
 
-std::shared_ptr<Bool> Int::IntCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const IntType&, const IntType&)) const {
+gc::Ref<Bool> Int::IntCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const IntType&, const IntType&)) const {
     if (other.Type == TypeIndex::Bool ||
         other.Type == TypeIndex::Char ||
         other.Type == TypeIndex::Int) {
@@ -69,7 +69,7 @@ std::shared_ptr<Bool> Int::IntCompareOperatorTemplate(const BaseType& other, Boo
     return nullptr;
 }
 
-std::shared_ptr<Bool> Int::DoubleCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const {
+gc::Ref<Bool> Int::DoubleCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const {
     if (other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
@@ -78,7 +78,7 @@ std::shared_ptr<Bool> Int::DoubleCompareOperatorTemplate(const BaseType& other, 
     return nullptr;
 }
 
-std::shared_ptr<Bool> Int::operator==(const BaseType& other) const {
+gc::Ref<Bool> Int::operator==(const BaseType& other) const {
     if (auto res = IntCompareOperatorTemplate(other, [](const IntType& l, const IntType& r) { return l == r; })) {
         return res;
     }
@@ -88,7 +88,7 @@ std::shared_ptr<Bool> Int::operator==(const BaseType& other) const {
     return FALSE;
 }
 
-std::shared_ptr<Bool> Int::operator!=(const BaseType& other) const {
+gc::Ref<Bool> Int::operator!=(const BaseType& other) const {
     if (auto res = IntCompareOperatorTemplate(other, [](const IntType& l, const IntType& r) { return l != r; })) {
         return res;
     }
@@ -99,7 +99,7 @@ std::shared_ptr<Bool> Int::operator!=(const BaseType& other) const {
 }
 
 #define DefIntCompareOperator(op)                                                                                               \
-    std::shared_ptr<Bool> Int::operator op(const BaseType & other) const {                                                      \
+    gc::Ref<Bool> Int::operator op(const BaseType & other) const {                                                      \
         if (auto res = IntCompareOperatorTemplate(other, [](const IntType& l, const IntType& r) { return l op r; })) {          \
             return res;                                                                                                         \
         }                                                                                                                       \
@@ -116,7 +116,7 @@ DefIntCompareOperator(<=);
 
 /// Double
 
-std::shared_ptr<Bool> Double::CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const {
+gc::Ref<Bool> Double::CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const {
     if (other.Type == TypeIndex::Bool ||
         other.Type == TypeIndex::Char ||
         other.Type == TypeIndex::Int ||
@@ -128,23 +128,23 @@ std::shared_ptr<Bool> Double::CompareOperatorTemplate(const BaseType& other, Boo
     return nullptr;
 }
 
-std::shared_ptr<BaseType> Double::OperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const {
+gc::Ref<BaseType> Double::OperatorTemplate(const BaseType& other, DoubleType (*op)(const DoubleType&, const DoubleType&)) const {
     if (other.Type == TypeIndex::Bool ||
         other.Type == TypeIndex::Char ||
         other.Type == TypeIndex::Int ||
         other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
-        return std::make_shared<Double>(op(l, r));
+        return gc::gc.createLeafObject(op(l, r));
     }
     return nullptr;
 }
 
 /// Array
 
-std::shared_ptr<Bool> Array::CompareOperatorTemplate(
+gc::Ref<Bool> Array::CompareOperatorTemplate(
     const BaseType& other,
-    BoolType (*op)(const std::shared_ptr<BaseType>&, const std::shared_ptr<BaseType>&)) const {
+    BoolType (*op)(const gc::Ref<BaseType>&, const gc::Ref<BaseType>&)) const {
     const Array& arr = static_cast<const Array&>(other);
     if (other.Type != TypeIndex::Array || Size() != arr.Size()) {
         return FALSE;
@@ -162,15 +162,15 @@ std::shared_ptr<Bool> Array::CompareOperatorTemplate(
     return TRUE;
 }
 
-std::shared_ptr<BaseType> Array::operator+(const BaseType& other) const {
+gc::Ref<BaseType> Array::operator+(const BaseType& other) const {
     const Array& arr = static_cast<const Array&>(other);
     if (other.Type != TypeIndex::Array) {
         throw std::invalid_argument("array can be added only with another array of the same type\n");
     }
     const ValueType& l = GetArray();
     const ValueType& r = arr.GetArray();
-    std::shared_ptr<Array> res = std::make_shared<Array>();
-    std::copy(l.begin(), l.end(), std::back_inserter(res->GetArray()));
-    std::copy(r.begin(), r.end(), std::back_inserter(res->GetArray()));
+    gc::Ref<Array> res;
+    std::copy(l.begin(), l.end(), std::back_inserter(res.object().GetArray()));
+    std::copy(r.begin(), r.end(), std::back_inserter(res.object().GetArray()));
     return res;
 }

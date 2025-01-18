@@ -33,6 +33,7 @@
 
 .idea
 cmake-build-debug
+cmake-build-debug-visual-studio
 
 # Default ignored files
 /shelf/

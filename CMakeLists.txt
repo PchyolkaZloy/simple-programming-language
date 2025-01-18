@@ -24,7 +24,7 @@ add_subdirectory(tests)
 
 add_subdirectory(bytecode)
 #add_subdirectory(compiler)
-add_subdirectory(gc)
+#add_subdirectory(vm/gc)
 add_subdirectory(vm)
 
 add_executable(main main.cpp)

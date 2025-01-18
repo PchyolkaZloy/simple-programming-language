@@ -113,24 +113,24 @@ std::vector<bytecode::Operation> bytecode::foldConstants(const std::vector<Opera
 bytecode::Operation bytecode::foldUnop(const bytecode::Operation& load_op, const bytecode::Operation& unop) {
     auto unop_value = parseFromBytes<UnaryOps>(unop.value_bytes);
     std::shared_ptr<BaseType> initial_value = getValue(load_op);
-    std::shared_ptr<BaseType> result = nullptr;
+    gc::Ref<BaseType> result = nullptr;
     Operation result_op;
     result = Frame::UNARY_OPS[static_cast<char>(unop_value)](*initial_value);
     if (!initial_value || !result) {
         throw ConstantFoldingException("unexpected type");
     }
-    if (result->Type == TypeIndex::Double) {
+    if (result.object().Type == TypeIndex::Double) {
         result_op.code = ByteCodes::LoadDouble;
-        appendToCharVector<double>(result_op.value_bytes, std::get<double>(result->Value));
-    } else if (result->Type == TypeIndex::Int) {
+        appendToCharVector<double>(result_op.value_bytes, std::get<double>(result.object().Value));
+    } else if (result.object().Type == TypeIndex::Int) {
         result_op.code = ByteCodes::LoadInt;
-        appendIntToCharVector(result_op.value_bytes, std::get<cpp_int>(result->Value));
-    } else if (result->Type == TypeIndex::Bool) {
+        appendIntToCharVector(result_op.value_bytes, std::get<cpp_int>(result.object().Value));
+    } else if (result.object().Type == TypeIndex::Bool) {
         result_op.code = ByteCodes::LoadBool;
-        appendToCharVector<bool>(result_op.value_bytes, std::get<bool>(result->Value));
-    } else if (result->Type == TypeIndex::Char) {
+        appendToCharVector<bool>(result_op.value_bytes, std::get<bool>(result.object().Value));
+    } else if (result.object().Type == TypeIndex::Char) {
         result_op.code = ByteCodes::LoadChar;
-        appendToCharVector<char>(result_op.value_bytes, std::get<char>(result->Value));
+        appendToCharVector<char>(result_op.value_bytes, std::get<char>(result.object().Value));
     } else {
         throw ConstantFoldingException("unknown result primitive type");
     }
@@ -142,24 +142,24 @@ bytecode::Operation bytecode::foldBinop(const bytecode::Operation& load_op_first
     auto binop_value = parseFromBytes<BinaryOps>(binop.value_bytes);
     std::shared_ptr<BaseType> first_value = getValue(load_op_first);
     std::shared_ptr<BaseType> second_value = getValue(load_op_second);
-    std::shared_ptr<BaseType> result = nullptr;
+    gc::Ref<BaseType> result = nullptr;
     Operation result_op;
     if (!first_value || !second_value) {
         throw ConstantFoldingException("unexpected type");
     }
     result = Frame::BINARY_OPS[static_cast<char>(binop_value)](*first_value, *second_value);
-    if (result->Type == TypeIndex::Double) {
+    if (result.object().Type == TypeIndex::Double) {
         result_op.code = ByteCodes::LoadDouble;
-        appendToCharVector<double>(result_op.value_bytes, std::get<double>(result->Value));
-    } else if (result->Type == TypeIndex::Int) {
+        appendToCharVector<double>(result_op.value_bytes, std::get<double>(result.object().Value));
+    } else if (result.object().Type == TypeIndex::Int) {
         result_op.code = ByteCodes::LoadInt;
-        appendIntToCharVector(result_op.value_bytes, std::get<cpp_int>(result->Value));
-    } else if (result->Type == TypeIndex::Bool) {
+        appendIntToCharVector(result_op.value_bytes, std::get<cpp_int>(result.object().Value));
+    } else if (result.object().Type == TypeIndex::Bool) {
         result_op.code = ByteCodes::LoadBool;
-        appendToCharVector<bool>(result_op.value_bytes, std::get<bool>(result->Value));
-    } else if (result->Type == TypeIndex::Char) {
+        appendToCharVector<bool>(result_op.value_bytes, std::get<bool>(result.object().Value));
+    } else if (result.object().Type == TypeIndex::Char) {
         result_op.code = ByteCodes::LoadChar;
-        appendToCharVector<char>(result_op.value_bytes, std::get<char>(result->Value));
+        appendToCharVector<char>(result_op.value_bytes, std::get<char>(result.object().Value));
     } else {
         throw ConstantFoldingException("unknown result primitive type");
     }

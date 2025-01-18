@@ -14,7 +14,7 @@ public:
     Ref(std::unordered_set<BaseObject*>* root = nullptr, T* obj = nullptr)
         : _object(obj)
         , _root(root) {
-        if (_root != nullptr && _root->find(_object) == _root->end()) {
+        if (_root != nullptr && _object != nullptr && _root->find(_object) == _root->end()) {
             _root->insert(_object);
             _is_rooted = true;
         }
@@ -23,7 +23,7 @@ public:
     Ref(const gc::Ref<T>& obj)
         : _object(obj._object)
         , _root(obj._root) {
-        if (_root != nullptr && _root->find(_object) == _root->end()) {
+        if (_root != nullptr && _object != nullptr && _root->find(_object) == _root->end()) {
             _root->insert(_object);
             _is_rooted = true;
         }
@@ -33,7 +33,7 @@ public:
     Ref(const Ref<U>& other)
         : _object(reinterpret_cast<T*>(&other.object()))
         , _root(other.scope()) {
-        if (_root != nullptr && _root->find(_object) == _root->end()) {
+        if (_root != nullptr && _object != nullptr && _root->find(_object) == _root->end()) {
             _root->insert(_object);
             _is_rooted = true;
         }
@@ -42,7 +42,7 @@ public:
     Ref& operator=(const Ref<T>& obj) {
         _object = obj._object;
         _root = obj._root;
-        if (_root != nullptr && _root->find(_object) == _root->end()) {
+        if (_root != nullptr && _object != nullptr && _root->find(_object) == _root->end()) {
             _root->insert(_object);
             _is_rooted = true;
         }
@@ -51,7 +51,7 @@ public:
     }
 
     ~Ref() {
-        if (_root != nullptr && _is_rooted) {
+        if (_root != nullptr && _is_rooted && _object != nullptr) {
             _root->erase(_object);
         }
     }
@@ -62,6 +62,14 @@ public:
 
     std::unordered_set<BaseObject*>* scope() const {
         return _root;
+    }
+
+    operator bool() const {
+        return _object;
+    }
+
+    T& operator*() {
+        return *_object;
     }
 private:
     T* _object = nullptr;
@@ -75,17 +83,17 @@ public:
 };
 
 template<typename T>
-class LeafObject : public BaseObject {
+class LeafObject : public virtual BaseObject {
 public:
-    LeafObject(const T& value = nullptr) : _value(value) {}
+    LeafObject(T* value = nullptr) : _value(value) {}
 
     LeafObject(LeafObject<T>& obj) : _value(obj.get()) {}
 
-    T get() {
+    T* get() {
         return _value;
     }
 
-    void set(T value) {
+    void set(T* value) {
         _value = value;
     }
 
@@ -93,12 +101,12 @@ public:
         return {};
     }
 private:
-    T _value;
+    T* _value;
 };
 
 
 template<typename T>
-class Array : public BaseObject {
+class Array : public virtual BaseObject {
 public:
     Array(size_t size)
             : _size(size)
@@ -135,13 +143,13 @@ public:
         }
         std::cout << "-------------\n";
     }
-private:
+
     size_t _size;
     std::vector<Ref<T>> _fields;
     std::vector<bool> _is_present;
 };
 
-class Struct : public BaseObject {
+class Struct : public virtual BaseObject {
 public:
     Struct(const std::vector<std::string>& names);
 
@@ -152,7 +160,7 @@ public:
     Ref<T> get(const std::string& name) {
         return *reinterpret_cast<Ref<T>*>(&_data[name]);
     }
-private:
+
     std::unordered_map<std::string, bool> _is_present;
     std::unordered_map<std::string, Ref<BaseObject>> _data;
 };
@@ -163,8 +171,16 @@ public:
     ~GarbageCollector();
 
     template<typename T>
-    Ref<LeafObject<T>> createLeafObject(const T& value) {
-        auto obj = new LeafObject<T>(value);
+    Ref<LeafObject<T>> createLeafObject(T&& value) {
+        auto obj = new LeafObject<T>(&value);
+        _objects.insert(obj);
+
+        return gc::Ref(&_root, obj);
+    }
+
+    template<typename T>
+    Ref<LeafObject<T>> createLeafObject(T& value) {
+        auto obj = new LeafObject<T>(&value);
         _objects.insert(obj);
 
         return gc::Ref(&_root, obj);
@@ -191,5 +207,7 @@ private:
     std::unordered_set<BaseObject*> _marked;
     std::unordered_set<BaseObject*> _objects;
 };
+
+extern GarbageCollector gc;
 
 }
