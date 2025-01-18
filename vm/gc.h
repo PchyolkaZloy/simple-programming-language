@@ -68,10 +68,14 @@ public:
         return _object;
     }
 
-    T& operator*() {
+    T& operator*() const {
         return *_object;
     }
-private:
+
+    T* operator->() const {
+        return _object;
+    }
+
     T* _object = nullptr;
     bool _is_rooted = false;
     std::unordered_set<BaseObject*>* _root;
@@ -79,90 +83,7 @@ private:
 
 class BaseObject {
 public:
-    virtual std::vector<Ref<BaseObject>> getChildren();
-};
-
-template<typename T>
-class LeafObject : public virtual BaseObject {
-public:
-    LeafObject(T* value = nullptr) : _value(value) {}
-
-    LeafObject(LeafObject<T>& obj) : _value(obj.get()) {}
-
-    T* get() {
-        return _value;
-    }
-
-    void set(T* value) {
-        _value = value;
-    }
-
-    std::vector<Ref<BaseObject>> getChildren() override {
-        return {};
-    }
-private:
-    T* _value;
-};
-
-
-template<typename T>
-class Array : public virtual BaseObject {
-public:
-    Array(size_t size)
-            : _size(size)
-            , _fields(size)
-            , _is_present(size, false) {}
-
-    T get(size_t index) {
-        return _fields[index].object();
-    }
-
-    void set(size_t index, Ref<T> ref) {
-        _fields[index] = ref;
-        _is_present[index] = true;
-    }
-
-    size_t size() {
-        return _size;
-    }
-
-    std::vector<Ref<BaseObject>> getChildren() override {
-        std::vector<Ref<BaseObject>> result;
-        for (const auto& field : _fields) {
-            result.push_back(static_cast<Ref<BaseObject>>(field));
-        }
-
-        return result;
-    }
-
-    //DEBUG
-    void showArray() {
-        std::cout << "Objects in Array\n";
-        for (size_t i = 0; i < _size; i++) {
-            std::cout << i << " " << _fields[i]->counter() << std::endl;
-        }
-        std::cout << "-------------\n";
-    }
-
-    size_t _size;
-    std::vector<Ref<T>> _fields;
-    std::vector<bool> _is_present;
-};
-
-class Struct : public virtual BaseObject {
-public:
-    Struct(const std::vector<std::string>& names);
-
-    void set(const std::string& name, const Ref<BaseObject>& value);
-    std::vector<Ref<BaseObject>> getChildren() override;
-
-    template<typename T>
-    Ref<T> get(const std::string& name) {
-        return *reinterpret_cast<Ref<T>*>(&_data[name]);
-    }
-
-    std::unordered_map<std::string, bool> _is_present;
-    std::unordered_map<std::string, Ref<BaseObject>> _data;
+    virtual std::vector<Ref<BaseObject>> getChildren() = 0;
 };
 
 class GarbageCollector {
@@ -171,39 +92,21 @@ public:
     ~GarbageCollector();
 
     template<typename T>
-    Ref<LeafObject<T>> createLeafObject(T&& value) {
-        auto obj = new LeafObject<T>(&value);
+    Ref<T> create(T* obj) {
         _objects.insert(obj);
 
-        return gc::Ref(&_root, obj);
+        return Ref<T>(_root, obj);
     }
 
-    template<typename T>
-    Ref<LeafObject<T>> createLeafObject(T& value) {
-        auto obj = new LeafObject<T>(&value);
-        _objects.insert(obj);
-
-        return gc::Ref(&_root, obj);
-    }
-
-    template<typename T>
-    Ref<Array<T>> createArray(size_t size) {
-        auto obj = new gc::Array<T>(size);
-        _objects.insert(obj);
-
-        return gc::Ref(&_root, obj);
-    }
-
-    Ref<Struct> createStruct(const std::vector<std::string>& names);
     void collect();
 
     //DEBUG
     void showObjects();
 private:
-    void mark(BaseObject& obj);
+    void mark(BaseObject* obj);
     void sweep();
 
-    std::unordered_set<BaseObject*> _root;
+    std::unordered_set<BaseObject*>* _root = new std::unordered_set<BaseObject*>({});
     std::unordered_set<BaseObject*> _marked;
     std::unordered_set<BaseObject*> _objects;
 };

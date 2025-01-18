@@ -20,7 +20,7 @@ constexpr double EPS = 1e-13;
 
 struct Bool;
 
-struct BaseType : public virtual gc::BaseObject {
+struct BaseType : public gc::BaseObject {
     using IntType = cpp_int;
     using DoubleType = double;
     using BoolType = bool;
@@ -94,7 +94,7 @@ struct BaseType : public virtual gc::BaseObject {
         throw std::invalid_argument(std::string("invalid operator ") + #op + "\n"); \
     }
 
-struct Int: public BaseType, public gc::LeafObject<Int> {
+struct Int: public BaseType {
     Int()
         : BaseType(TypeIndex::Int, 0) {
     }
@@ -136,7 +136,7 @@ struct Int: public BaseType, public gc::LeafObject<Int> {
     gc::Ref<BaseType> operator%(const BaseType& other) const override;
 
     gc::Ref<BaseType> operator-() const override {
-        return gc::gc.createLeafObject(-IntCast());
+        return gc::gc.create<Int>(new Int(-IntCast()));
     }
 
     gc::Ref<Bool> IntCompareOperatorTemplate(const BaseType& other, BoolType (*op)(const IntType&, const IntType&)) const;
@@ -178,6 +178,11 @@ struct Bool: public Int {
     gc::Ref<Bool> operator!() {
         return !BoolCast() ? TRUE : FALSE;
     }
+
+    // GC
+    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+        return {};
+    }
 };
 
 struct Char: public Int {
@@ -195,9 +200,14 @@ struct Char: public Int {
     void Print(std::ostream& stream) const override {
         stream << std::get<CharType>(Value);
     }
+
+    // GC
+    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+        return {};
+    }
 };
 
-struct Double: public BaseType, public virtual gc::LeafObject<Double> {
+struct Double: public BaseType {
     Double(const DoubleType& value)
         : BaseType(TypeIndex::Double, value) {
     }
@@ -238,7 +248,8 @@ struct Double: public BaseType, public virtual gc::LeafObject<Double> {
     DefInvalidOperator(%, BaseType);
 
     gc::Ref<BaseType> operator-() const override {
-        return gc::gc.createLeafObject(-DoubleCast());
+        Double temp = Double(-DoubleCast());
+        return gc::gc.create(&temp);
     }
 
     gc::Ref<Bool> CompareOperatorTemplate(const BaseType& other, BoolType (*op)(const DoubleType&, const DoubleType&)) const;
@@ -276,12 +287,11 @@ struct Double: public BaseType, public virtual gc::LeafObject<Double> {
     }
 };
 
-struct Struct: public BaseType, public virtual gc::Struct {
+struct Struct: public BaseType {
     using ValueType = std::map<std::string, gc::Ref<BaseType>>;
 
     Struct()
-        : BaseType(TypeIndex::Struct, ValueType())
-        , gc::Struct({}) {
+        : BaseType(TypeIndex::Struct, ValueType()) {
     }
 
     const ValueType& GetMap() const {
@@ -360,32 +370,23 @@ struct Struct: public BaseType, public virtual gc::Struct {
 
     // GC
     std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
-        std::vector<gc::Ref<gc::BaseObject>> keys;
-        for (auto it : _data) {
-            if (_is_present[it.first]) {
-                keys.push_back(it.second);
-            }
-        }
-
-        return keys;
+        // TODO: Implement
+        return {};
     }
 };
 
-struct Array: public BaseType, public virtual gc::Array<BaseType> {
+struct Array: public BaseType {
     using ValueType = std::vector<gc::Ref<BaseType>>;
     Array()
-        : BaseType(TypeIndex::Array, ValueType())
-        , gc::Array<BaseType>(0) {
+        : BaseType(TypeIndex::Array, ValueType()) {
     }
 
     Array(ValueType&& value)
-        : BaseType(TypeIndex::Array, std::move(value))
-        , gc::Array<BaseType>(0) {
+        : BaseType(TypeIndex::Array, std::move(value)) {
     }
 
     Array(const ValueType& value)
-        : BaseType(TypeIndex::Array, value)
-        , gc::Array<BaseType>(0) {
+        : BaseType(TypeIndex::Array, value) {
     }
 
     virtual ~Array() = default;
@@ -492,11 +493,7 @@ struct Array: public BaseType, public virtual gc::Array<BaseType> {
 
     // GC
     std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
-        std::vector<gc::Ref<BaseObject>> result;
-        for (const auto& field : _fields) {
-            result.push_back(static_cast<gc::Ref<BaseObject>>(field));
-        }
-
-        return result;
+        // TODO: implement
+        return {};
     }
 };

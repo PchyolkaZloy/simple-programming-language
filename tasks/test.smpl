@@ -1,10 +1,2 @@
-func void f() {
-    int x = 123;
-    int y = 2;
-    int[] c = {1, 4, 5};
-
-    c[y] = x;
-    print(c);
-}
-
-f();
+int n = 2000;
+print(n);

@@ -29,6 +29,7 @@ gc::Ref<BaseType> Frame::Run() {
             if (instruction.GetByteCode() == ByteCodes::LoadVarByIndex || instruction.GetByteCode() == ByteCodes::StoreVarByIndex) {
                 ++cur_instruction;
             }
+            gc::gc.collect();
         }
         if (ShouldReturn) {
             return ReturnValue;
@@ -85,19 +86,19 @@ void Frame::Push(TypeIndex* value) {
 }
 
 void Frame::LoadInt(const BaseType::IntType& num) {
-    Push(gc::gc.createLeafObject(num));
+    Push(gc::gc.create(new Int(num)));
 }
 
 void Frame::LoadChar(const BaseType::CharType& arg) {
-    Push(gc::gc.createLeafObject(arg));
+    Push(gc::gc.create(new Char(arg)));
 }
 
 void Frame::LoadBool(const BaseType::BoolType& arg) {
-    Push(gc::gc.createLeafObject(arg));
+    Push(gc::gc.create(new Bool(arg)));
 }
 
 void Frame::LoadDouble(const BaseType::DoubleType& arg) {
-    Push(gc::gc.createLeafObject(arg));
+    Push(gc::gc.create(new Double(arg)));
 }
 
 void Frame::LoadString(std::string* s) {
@@ -179,11 +180,11 @@ std::map<std::string, void (*)(Frame&)> BuiltinFunctions = {
      }},
     {"len", [](Frame& frame) {
          gc::Ref<Array> arr = frame.Pop<Array>();
-         frame.Push(gc::gc.createLeafObject(BaseType::IntType(arr.object().Size())));
+         frame.Push(gc::gc.create(new Int(BaseType::IntType(arr.object().Size()))));
      }},
     {"rand", [](Frame& frame) {
          double r = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
-         frame.Push(gc::gc.createLeafObject(BaseType::DoubleType(r)));
+         frame.Push(gc::gc.create(new Double(BaseType::DoubleType(r))));
      }},
     {"randint", [](Frame& frame) {
          auto right_ptr = frame.Pop<Int>();
@@ -191,7 +192,7 @@ std::map<std::string, void (*)(Frame&)> BuiltinFunctions = {
          auto& right = std::get<BaseType::IntType>(right_ptr.object().Value);
          auto& left = std::get<BaseType::IntType>(left_ptr.object().Value);
          auto r = std::rand() * (right - left) / RAND_MAX + left;
-         frame.Push(gc::gc.createLeafObject(BaseType::IntType(r)));
+         frame.Push(gc::gc.create(new Int(BaseType::IntType(r))));
      }},
     {"pop", [](Frame& frame) {
          gc::Ref<Array> arr = frame.Pop<Array>();
@@ -259,18 +260,19 @@ void Frame::BinaryOp(BinaryOps opCode) {
 }
 
 void Frame::BuildArray(int count) {
-    gc::Ref<Array> arr = gc::gc.createArray<BaseType>(count);
+    // TODO: test
+    gc::Ref<Array> arr = gc::gc.create(new Array());
     auto elements = std::make_shared<Array>(Popn(count));
     for (size_t i = 0; i < count; i++) {
-        arr.object().set(i, elements->operator[](i));
+        arr.object()[i] = (*elements)[i];
     }
-    Push(std::move(arr));
+    Push(arr);
 }
 
 void Frame::BuildStruct() {
     // TODO: don't work, gc consume names of fields
     std::string& name = Pop<std::string>();
-    Push(gc::gc.createStruct({}));
+    Push(gc::gc.create(new Struct()));
 }
 
 void Frame::DefineStruct(int fieldc) {

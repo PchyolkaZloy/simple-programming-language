@@ -11,7 +11,7 @@ int main(int argc, const char** argv) {
         std::cerr << "File doesn't exist" << std::endl;
         return 1;
     }
-    InterpreteCode(input, true, false, true);
+    InterpreteCode(input, true, true, true);
 
     return 0;
 }

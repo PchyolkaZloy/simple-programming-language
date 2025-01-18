@@ -1,7 +1,7 @@
 #include "types.h"
 
-gc::Ref<Bool> BaseType::FALSE = gc::gc.createLeafObject<Bool>(Bool(false));
-gc::Ref<Bool> BaseType::TRUE = gc::gc.createLeafObject<Bool>(Bool(true));
+gc::Ref<Bool> BaseType::FALSE = gc::gc.create(new Bool(false));
+gc::Ref<Bool> BaseType::TRUE = gc::gc.create(new Bool(true));
 
 
 /// Int
@@ -12,7 +12,7 @@ gc::Ref<BaseType> Int::IntOperatorTemplate(const BaseType& other, IntType (*op)(
         other.Type == TypeIndex::Int) {
         IntType l = IntCast();
         IntType r = other.IntCast();
-        return gc::gc.createLeafObject(op(l, r));
+        return gc::gc.create(new Int(op(l, r)));
     }
     return {};
 }
@@ -21,7 +21,7 @@ gc::Ref<BaseType> Int::BoolOperatorTemplate(const BaseType& other, IntType (*op)
     if (other.Type != TypeIndex::Struct) { // struct is the only type not castable to bool
         BoolType l = BoolCast();
         BoolType r = other.BoolCast();
-        return gc::gc.createLeafObject(op(l, r));
+        return gc::gc.create(new Int(op(l, r)));
     }
     return {};
 }
@@ -30,7 +30,7 @@ gc::Ref<BaseType> Int::DoubleOperatorTemplate(const BaseType& other, DoubleType 
     if (other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
-        return gc::gc.createLeafObject(op(l, r));
+        return gc::gc.create(new Double(op(l, r)));
     }
     return nullptr;
 }
@@ -135,7 +135,7 @@ gc::Ref<BaseType> Double::OperatorTemplate(const BaseType& other, DoubleType (*o
         other.Type == TypeIndex::Double) {
         DoubleType l = DoubleCast();
         DoubleType r = other.DoubleCast();
-        return gc::gc.createLeafObject(op(l, r));
+        return gc::gc.create(new Double(op(l, r)));
     }
     return nullptr;
 }
