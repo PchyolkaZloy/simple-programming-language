@@ -154,7 +154,10 @@ public:
         size_t operator()(const Ref<T>& obj) const
         {
             // TODO: better hash function, now there is many collisions
-            return std::hash<T*>()(obj._object);
+            size_t hash_object = std::hash<T*>()(obj._object);
+            size_t hash_parent = std::hash<BaseObject*>()(obj._parent);
+
+            return hash_object ^ (hash_parent << 1);
         }
     };
 
