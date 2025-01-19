@@ -1,57 +1,77 @@
 #include "gc.h"
 
-std::vector<gc::Ref<gc::BaseObject>> gc::BaseObject::getChildren() {
+std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> gc::BaseObject::getChildren() {
     return {};
 }
 
-gc::GarbageCollector::GarbageCollector() {
-    std::cout << "654678" << std::endl;
-};
+gc::GarbageCollector::GarbageCollector(bool verbose) {
+    _verbose = verbose;
+}
 
 gc::GarbageCollector::~GarbageCollector() {
-    for (BaseObject* obj : *_root) {
+    if (_verbose) {
+        std::cout << "----------Left objects in gc------------" << std::endl;
+        showObjects();
+        _statistic = SIZE_MAX;
+        std::cout << "----------Left objects after extra collect------------" << std::endl;
+        gc::gc.collect();
+        showObjects();
+    }
+    for (BaseObject* obj : _objects) {
         delete obj;
     }
-    delete _root;
 }
 
 void gc::GarbageCollector::collect() {
-    _marked.clear();
-    for (auto obj : *_root) {
-        mark(obj);
+    if (_statistic < _limit) {
+        return;
     }
+    if (_verbose) {
+        std::cout << "----------Begin collection------------" << std::endl;
+        showObjects();
+    }
+    _statistic = 0;
+    _marked.clear();
+    mark(_root);
     sweep();
 }
 
 void gc::GarbageCollector::mark(gc::BaseObject* obj) {
-    if (_marked.find(obj) != _marked.end()) {
+    if (_marked.contains(obj)) {
         return;
     }
 
     _marked.insert(obj);
 
-    // auto temp = *obj;
-
-    std::cout << obj->getChildren().size() << std::endl;
-
-    for (const auto& child : obj->getChildren()) {
-        mark(child._object);
+    for (auto it = (*_ref_data)[obj].begin(); it != (*_ref_data)[obj].end();) {
+        if (it->second != 0) {
+            mark(it->first);
+            it++;
+        } else {
+            it = (*_ref_data)[obj].erase(it);
+        }
     }
 }
 
 void gc::GarbageCollector::sweep() {
+    size_t counter = 0;
     for (auto it = _objects.begin(); it != _objects.end();) {
         if (_marked.find(*it) == _marked.end()) {
+            counter++;
+            _ref_data->erase(*it);
             delete *it;
             it = _objects.erase(it);
         } else {
             it++;
         }
     }
+    if (_verbose) {
+        std::cout << "deleted obj count " << counter << std::endl;
+    }
 }
 
 void gc::GarbageCollector::showObjects() {
-    std::cout << "Objects in gc, root\n";
-    std::cout << _objects.size() << " " << _root->size() << "\n";
+    std::cout << "Objects in gc, in root\n";
+    std::cout << _objects.size() << " " << (*_ref_data)[_root].size() << "\n";
     std::cout << "-------------" << std::endl;
 }

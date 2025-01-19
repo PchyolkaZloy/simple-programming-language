@@ -81,7 +81,7 @@ struct BaseType : public gc::BaseObject {
     virtual gc::Ref<Bool> operator<=(const BaseType& other) const = 0;
 
     // GC
-    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+    std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> getChildren() override {
         return {};
     }
 
@@ -150,7 +150,7 @@ struct Int: public BaseType {
     gc::Ref<Bool> operator<=(const BaseType& other) const override;
 
     // GC
-    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+    std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> getChildren() override {
         return {};
     }
 };
@@ -180,7 +180,7 @@ struct Bool: public Int {
     }
 
     // GC
-    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+    std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> getChildren() override {
         return {};
     }
 };
@@ -202,7 +202,7 @@ struct Char: public Int {
     }
 
     // GC
-    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+    std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> getChildren() override {
         return {};
     }
 };
@@ -282,7 +282,7 @@ struct Double: public BaseType {
     DefDoubleCompareOperator(<=);
 
     // GC
-    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+    std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> getChildren() override {
         return {};
     }
 };
@@ -369,7 +369,7 @@ struct Struct: public BaseType {
     }
 
     // GC
-    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
+    std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> getChildren() override {
         // TODO: Implement
         return {};
     }
@@ -476,7 +476,7 @@ struct Array: public BaseType {
         GetArray().push_back(std::move(element));
     }
 
-    void Append(const gc::Ref<BaseType>& element) {
+    void Append(gc::Ref<BaseType>& element) {
         GetArray().push_back(element);
     }
 
@@ -492,8 +492,13 @@ struct Array: public BaseType {
     }
 
     // GC
-    std::vector<gc::Ref<gc::BaseObject>> getChildren() override {
-        // TODO: implement
-        return {};
+    std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> getChildren() override {
+        auto arr = std::get<ArrayType>(Value);
+        std::unordered_set<gc::Ref<gc::BaseObject>, gc::Ref<gc::BaseObject>::HashFunction> set;
+        for (auto elem : arr) {
+            set.insert(elem);
+        }
+
+        return set;
     }
 };

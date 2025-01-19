@@ -147,9 +147,11 @@ void Frame::StoreSubscr() {
     gc::Ref<Array> container = Pop<Array>();
     gc::Ref<BaseType> value = Pop();
     (*container)[key.object()] = std::move(value);
+    value.setParent(container._object);
 }
 
 void Frame::StoreMember() {
+    // TODO implement for gc
     std::string& name = Pop<std::string>();
     gc::Ref<Struct> obj = Pop<Struct>();
     gc::Ref<BaseType> value = Pop();
@@ -176,6 +178,7 @@ std::map<std::string, void (*)(Frame&)> BuiltinFunctions = {
     {"append", [](Frame& frame) {
          gc::Ref<BaseType> arg = frame.Pop();
          gc::Ref<Array> arr = frame.Pop<Array>();
+         arg.setParent(arr._object);
          arr.object().Append(arg);
      }},
     {"len", [](Frame& frame) {
