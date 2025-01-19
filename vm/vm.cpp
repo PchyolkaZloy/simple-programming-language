@@ -263,10 +263,10 @@ void Frame::BinaryOp(BinaryOps opCode) {
 }
 
 void Frame::BuildArray(int count) {
-    // TODO: test
     gc::Ref<Array> arr = gc::gc.create(new Array());
     auto elements = std::make_shared<Array>(Popn(count));
     for (size_t i = 0; i < count; i++) {
+        (*elements)[i].setParent(arr._object);
         arr.object()[i] = (*elements)[i];
     }
     Push(arr);
