@@ -27,7 +27,7 @@ func int itemCheck(TreeNode node) {
         return node.item;
     }
 
-    return node.item + itemCheck(node.left) + itemCheck(node.right);
+    return node.item + itemCheck(node.left) - itemCheck(node.right);
 }
 
 func TreeNode bottomUpTree(int item, int depth) {
