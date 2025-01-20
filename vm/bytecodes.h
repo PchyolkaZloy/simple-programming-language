@@ -2,6 +2,7 @@
 
 enum class ByteCodes : char {
     NullOp,
+    LoadNull,
     LoadInt,
     LoadChar,
     LoadBool,

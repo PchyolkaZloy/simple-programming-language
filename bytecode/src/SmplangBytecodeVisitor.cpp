@@ -415,6 +415,9 @@ std::any bytecode::SmplangBytecodeVisitor::visitExpression(SmplangParser::Expres
 }
 
 std::any bytecode::SmplangBytecodeVisitor::visitPrimaryExpression(SmplangParser::PrimaryExpressionContext* ctx) {
+    if (ctx->NULL_VALUE()) {
+        return std::any{std::vector(1, Operation(ByteCodes::LoadNull))};
+    }
     if (ctx->INT()) {
         cpp_int value(ctx->INT()->getText());
         return std::any{std::vector(1, loadInt(value))};

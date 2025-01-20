@@ -61,6 +61,7 @@ primaryExpression:
     | DOUBLE
     | CHAR
     | BOOL
+    | NULL_VALUE
     | LPAREN expression RPAREN
     | arrayInit;
 //    | structInit;
@@ -80,6 +81,7 @@ assignablePrefix:
 // Lexer
 FUNC: 'func';
 VOID: 'void';
+NULL_VALUE: 'null';
 RETURN: 'return';
 FOR: 'for';
 //PRINT: 'print';
